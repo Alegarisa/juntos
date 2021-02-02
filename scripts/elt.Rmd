@@ -1,0 +1,34 @@
+---
+title: "elt"
+author: "Alejandra Garcia Isaza"
+date: "2/2/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(rio)
+library(here)
+library(tidyverse)
+library(haven)
+
+library(surveytoolbox)
+library(sjPlot)
+```
+
+```{r}
+w1_raw <- haven::read_sav(here("data", "ELT W1 ERC 11.11.2020.sav"))
+
+here()
+```
+
+create repo
+add folder called "nopublish"
+make sure it is empty
+push everything (not your data)
+at top of .gitignore file, write: nopublish/*
+push again
+add your data files to the nopublish folder
+before you push, make sure the nopublish folder is not available on githug
+github
