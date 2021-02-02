@@ -24,4 +24,120 @@ w1_raw <- haven::read_sav(here("nopublish", "ELT W1 ERC 11.11.2020.sav"))
 
 w1_raw
 ```
+```{r}
 
+elt_w1_clean <- w1_raw %>% 
+  janitor::clean_names() %>%
+  select(-1:-9, -13:-17, -202) %>% # deleting columns with metadata
+  arrange(pj) # ordering participants ids
+
+elt_w1_clean
+```
+
+```{r}
+
+# fixing duplicates ids
+duplicated(elt_w1_clean$pj) # pj_number: 257 is dupplicated and there is no 254
+
+elt_w1_clean <- elt_w1_clean %>%
+  mutate(pj = case_when(recipient_first_name == "Beth" ~ "254",
+                        TRUE ~ as.character(pj))) %>%
+  arrange(pj)
+
+duplicated(elt_w1_clean$pj) # testing that there are no more id duplicates == No duplicates!
+
+elt_w1_clean
+```
+
+```{r}
+
+# fixing wrong assignment
+elt_w1_clean_2 <- elt_w1_clean %>%
+  mutate(school_id = str_sub(pj, 1, 1),
+         condition = case_when(
+           school_id == "1" | school_id == "3" | school_id == "5" ~ "1",
+           school_id == "2" | school_id == "4" | school_id == "6" ~ "2"
+         )) %>%
+  select(school_id, condition, everything()) %>%
+  add_column(wave = 1, .before = 10) %>%
+  select(- school)
+
+elt_w1_clean_2
+```
+
+```{r}
+
+# making variables numeric and adding labels  
+elt_w1_clean_3 <- elt_w1_clean_2 %>%
+  mutate(condition = as.numeric(condition),
+         condition = set_vall(condition, c("control" = 1, "intervention" = 2)),
+         school_id = as.numeric(school_id),
+         school_id = set_vall(school_id, c("cascade" = 1, "prairie_mountain" = 2, "kelly" = 3, "ata" = 4, "briggs" = 5, "agnes_stewart" = 6))) # this worked!!!
+
+elt_w1_clean_3
+
+view_df(elt_w1_clean_3) # nice plot that serves as codebook
+```
+
+```{r}
+
+# exporting to .sav to check proper coding of condition and labels
+elt_w1_clean_3 %>%
+  haven::write_sav(here("nopublish", "elt_w1_clean_3.sav"))
+```
+
+Results:
+- school_id matchs assigned condition properly!
+- Labels were properly exported (both variable labels and level labels on .sav file)
+
+```{r}
+
+# collapsing variable english_comfort q132_1_<<choice>>
+
+d <- elt_w1_clean_3 %>% 
+    select(pj, starts_with("q132_1")) %>% 
+    pivot_longer(
+      cols = starts_with("q132_1"),
+      names_to = "item",
+      values_to = "english_comfort",
+      values_drop_na = TRUE) %>% 
+   filter(english_comfort == 1) %>%
+  mutate(english_comfort = case_when(item == "q132_1_4" ~ "4",
+                                     item == "q132_1_3" ~ "3",
+                        TRUE ~ as.character(english_comfort))) %>%
+  select(-item)
+
+x <- left_join(elt_w1_clean_3, d)
+
+x_2 <- x %>%
+  mutate(english_comfort = as.numeric(english_comfort),
+         english_comfort = set_vall(english_comfort, c("not at all comfortable" = 1, "somewhat comfortable" = 2, "comfortable" = 3, "very comfortable" = 4, "no response" = 99)))
+
+
+view_df(x_2)
+
+x_2 %>%
+  haven::write_sav(here("nopublish", "x_2.sav")) # it worked, the .sav file has all 43 participants with the proper scale and the proper level labels. 
+```
+
+# to do next
+- review what other demo variables need to be collapsed. Consider creating a function. 
+- start descriptive stats analyses
+- create timeline to add in week 6 report
+
+# Notes on w1 dataset
+
+- Participant 257 was duplicated and 254 was missing. This was fixed.
+- participant 153 didn't complete survey, after q50 it's empty. 
+- Total participants in wave 1 n = 43
+
+# Notes on Missing values
+
+88 = "not applicable"
+99 = "no response"
+-99 = seen but unanswered questions -- (e.g questions that ask participants to respond if they have knowledge about classroom)
+NA = unseen question, either because participant didn't complete survey (e.g. pj 153) or because of skip logic (they were not teachers or had classroom knowledge)
+  --> NA appear in SPSS as a dot (.)
+blank spaces =  not sure, but maybe irrelevant
+
+* consider creating a function to recode these options so they are labelled with set_vall() that applies to all variables. 
