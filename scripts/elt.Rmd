@@ -17,27 +17,11 @@ library(surveytoolbox)
 library(sjPlot)
 ```
 
-```{r}
-# test
-d <- haven::read_sav(here("nopublish", "survey.sav"))
-
-d
-
-```
-
 
 ```{r}
-w1_raw <- haven::read_sav(here("data", "ELT W1 ERC 11.11.2020.sav"))
 
-here()
+w1_raw <- haven::read_sav(here("nopublish", "ELT W1 ERC 11.11.2020.sav"))
+
+w1_raw
 ```
 
-create repo
-add folder called "nopublish"
-make sure it is empty
-push everything (not your data)
-at top of .gitignore file, write: nopublish/*
-push again
-add your data files to the nopublish folder
-before you push, make sure the nopublish folder is not available on githug
-github
