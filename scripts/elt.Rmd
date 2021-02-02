@@ -18,6 +18,15 @@ library(sjPlot)
 ```
 
 ```{r}
+# test
+d <- haven::read_sav(here("nopublish", "survey.sav"))
+
+d
+
+```
+
+
+```{r}
 w1_raw <- haven::read_sav(here("data", "ELT W1 ERC 11.11.2020.sav"))
 
 here()
