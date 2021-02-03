@@ -82,8 +82,8 @@ view_df(elt_w1_clean_3) # nice plot that serves as codebook
 ```{r}
 
 # exporting to .sav to check proper coding of condition and labels
-elt_w1_clean_3 %>%
-  haven::write_sav(here("nopublish", "elt_w1_clean_3.sav"))
+# elt_w1_clean_3 %>%
+#   haven::write_sav(here("nopublish", "elt_w1_clean_3.sav"))
 ```
 
 Results:
@@ -116,9 +116,136 @@ x_2 <- x %>%
 
 view_df(x_2)
 
-x_2 %>%
-  haven::write_sav(here("nopublish", "x_2.sav")) # it worked, the .sav file has all 43 participants with the proper scale and the proper level labels. 
+# x_2 %>%
+#   haven::write_sav(here("nopublish", "x_2.sav")) # it worked, the .sav file has all 43 participants with the proper scale and the proper level labels. 
 ```
+
+```{r}
+# collapsing language variables q132_<<language>>_<<choice>> 
+
+eng <- elt_w1_clean_3 %>% 
+  select(pj, starts_with("q132_1")) %>% 
+    pivot_longer(
+      cols = starts_with("q132_1"),
+      names_to = "item_1",
+      values_to = "english_comfort",
+      values_drop_na = TRUE) %>% 
+   filter(english_comfort == 1) %>%
+  mutate(english_comfort = case_when(item_1 == "q132_1_1" ~ "1",
+                                     item_1 == "q132_1_2" ~ "2",
+                                     item_1 == "q132_1_3" ~ "3",
+                                     item_1 == "q132_1_4" ~ "4",
+                                     item_1 == "q132_1_99" ~ "99",
+                        TRUE ~ as.character(english_comfort)))  %>%
+  select(-item_1)
+
+duplicated(eng$pj) # no duplicates
+
+spa <- elt_w1_clean_3 %>%
+  select(pj, starts_with("q132_2")) %>% 
+    pivot_longer(
+      cols = starts_with("q132_2"),
+      names_to = "item_2",
+      values_to = "spanish_comfort",
+      values_drop_na = TRUE) %>% 
+   filter(spanish_comfort == 1) %>%
+  mutate(spanish_comfort = case_when(item_2 == "q132_2_1" ~ "1",
+                                     item_2 == "q132_2_2" ~ "2",
+                                     item_2 == "q132_2_3" ~ "3",
+                                     item_2 == "q132_2_4" ~ "4",
+                                     item_2 == "q132_2_99" ~ "99",
+                        TRUE ~ as.character(spanish_comfort))) %>%
+  select(-item_2) 
+
+duplicated(spa$pj) # pj 454 is duplicated. In w1_raw it shows that this participant chose options 1 and 2 (not sure if they could choose more than one option in Qulatrics). 
+
+spa_2 <- spa %>% 
+  distinct(pj, .keep_all = TRUE) # Option 1, not at all comfortable was chosen because was first option.  
+
+duplicated(spa_2$pj) # no duplicates
+
+
+other_1 <- elt_w1_clean_3 %>% 
+  select(pj, starts_with("q132_3"), -q132_3_text) %>% 
+    pivot_longer(
+      cols = starts_with("q132_3"),
+      names_to = "item_3",
+      values_to = "other1_lang_comfort",
+      values_drop_na = TRUE) %>% 
+   filter(other1_lang_comfort == 1) %>%
+  mutate(other1_lang_comfort = case_when(item_3 == "q132_3_1" ~ "1",
+                                    item_3 == "q132_3_2" ~ "2",
+                                    item_3 == "q132_3_3" ~ "3",
+                                    item_3 == "q132_3_4" ~ "4",
+                                    item_3 == "q132_3_99" ~ "99",
+                        TRUE ~ as.character(other1_lang_comfort)))  %>%
+  select(-item_3)
+
+langs <- left_join(eng, spa_2)
+
+duplicated(other_1$pj) # no duplicates
+
+other_2 <- elt_w1_clean_3 %>% 
+  select(pj, starts_with("q132_4"), -q132_4_text) %>% 
+    pivot_longer(
+      cols = starts_with("q132_4"),
+      names_to = "item_4",
+      values_to = "other2_lang_comfort",
+      values_drop_na = TRUE) %>% 
+   filter(other2_lang_comfort == 1) %>%
+  mutate(other2_lang_comfort = case_when(item_4 == "q132_4_1" ~ "1",
+                                    item_4 == "q132_4_2" ~ "2",
+                                    item_4 == "q132_4_3" ~ "3",
+                                    item_4 == "q132_4_4" ~ "4",
+                                    item_4 == "q132_4_99" ~ "99",
+                        TRUE ~ as.character(other2_lang_comfort)))  %>%
+  select(-item_4)
+
+
+duplicated(other_2$pj) # no duplicates
+
+
+others <- left_join(other_1, other_2)
+
+# joining dataframes with language variables
+lang_vars <- left_join(langs, others)
+
+duplicated(lang_vars$pj) # no duplicates
+
+lang_inputs <- elt_w1_clean_3 %>%
+  select(pj, q132_3_text, q132_4_text) %>%
+  rename(c("other1_lang" = "q132_3_text"), c("other2_lang" = "q132_4_text"))
+
+duplicated(lang_inputs$pj) # no duplicates
+
+all_lang_vars <- left_join(lang_inputs, lang_vars)
+
+duplicated(all_lang_vars$pj) # no duplicates
+
+all_lang_vars <- all_lang_vars %>%
+  select(pj, english_comfort, spanish_comfort, other1_lang, other1_lang_comfort, other2_lang, everything())
+
+elt_w1_clean_4 <- left_join(elt_w1_clean_3, all_lang_vars)
+
+duplicated(elt_w1_clean_4$pj) # no duplicates
+
+elt_w1_clean_4 <- elt_w1_clean_4 %>%
+  select(-starts_with("q132_")) # deleting all previous language variables that were included in new variables
+
+duplicated(elt_w1_clean_4$pj)
+
+```
+
+```{r}
+# meaningful renaming of vars
+
+elt_w1_clean_4 %>%
+  rename(c("age" = "q127_1_text"), 
+         c("other2_lang" = "q132_4_text"))
+
+# delete: q127, 
+```
+
 
 # to do next
 - review what other demo variables need to be collapsed. Consider creating a function. 
