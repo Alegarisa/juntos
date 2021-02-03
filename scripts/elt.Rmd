@@ -239,11 +239,40 @@ duplicated(elt_w1_clean_4$pj)
 ```{r}
 # meaningful renaming of vars
 
-elt_w1_clean_4 %>%
+test <- elt_w1_clean_4 %>%
   rename(c("age" = "q127_1_text"), 
-         c("other2_lang" = "q132_4_text"))
+         c("birth_country" = "q128"),
+         c("another_birth_country_text" = "q128_2_text"),
+         c("age_first_moved_us" = "q129_1_text"),
+         c("white" = "q130_1"),
+         c("hispanic_latino_spanish " = "q130_2"),
+         c("black_african_american" = "q130_3"),
+         c("asian" = "q130_4"),
+         c("american_indian_alaska_native" = "q130_5"),
+         c("indigenous_americas" = "q130_6"),
+         c("middle_eastern_north_african" = "q130_7"),
+         c("native_hawaiian_pacific_islander" = "q130_8"),
+         c("race_ethnicity_other" = "q130_9"),
+         c("race_ethnicity_no_response" = "q130_99"),
+         c("indigenous_americas_text" = "q130_6_text"),
+         c("race_ethnicity_other_text" = "q130_9_text"),
+         c("gender_id" = "q131"),
+         c("years_in_position" = "q133"),
+         c("years_in_school" = "q134"),
+         c("equity_leadership" = "q135_1"),
+         c("cultural_responsiveness" = "q135_2"),
+         c("restorative_practices" = "q135_3"),
+         c("diversity" = "q135_4"),
+         c("ell" = "q135_5"),
+         c("cont_ed_other" = "q135_6"),
+         c("cont_ed_na" = "q135_88"),
+         c("cont_ed_no_response" = "q135_99"),
+         c("cont_ed_other_text" = "q135_6_text")) %>%
+  select(-q127, -q129, -q131_3_text)
 
-# delete: q127, 
+# deleted: q127, q129, q131_3_text because they did not have meaningful info
+
+# next step: export to SPSS to see how it looks and if labels get exported.
 ```
 
 
