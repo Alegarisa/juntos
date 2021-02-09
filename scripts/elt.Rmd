@@ -24,6 +24,7 @@ w1_raw <- haven::read_sav(here("nopublish", "ELT W1 ERC 11.11.2020.sav"))
 
 w1_raw
 ```
+
 ```{r}
 
 elt_w1_clean <- w1_raw %>% 
@@ -87,6 +88,7 @@ view_df(elt_w1_clean_3) # nice plot that serves as codebook
 ```
 
 Results:
+- This would be the master dataset
 - school_id matchs assigned condition properly!
 - Labels were properly exported (both variable labels and level labels on .sav file)
 
@@ -120,9 +122,11 @@ view_df(x_2)
 #   haven::write_sav(here("nopublish", "x_2.sav")) # it worked, the .sav file has all 43 participants with the proper scale and the proper level labels. 
 ```
 
+
 ```{r}
 # collapsing language variables q132_<<language>>_<<choice>> 
 
+# collapsing english variables
 eng <- elt_w1_clean_3 %>% 
   select(pj, starts_with("q132_1")) %>% 
     pivot_longer(
@@ -141,6 +145,7 @@ eng <- elt_w1_clean_3 %>%
 
 duplicated(eng$pj) # no duplicates
 
+# collapsing spanish variables
 spa <- elt_w1_clean_3 %>%
   select(pj, starts_with("q132_2")) %>% 
     pivot_longer(
@@ -159,12 +164,16 @@ spa <- elt_w1_clean_3 %>%
 
 duplicated(spa$pj) # pj 454 is duplicated. In w1_raw it shows that this participant chose options 1 and 2 (not sure if they could choose more than one option in Qulatrics). 
 
+# fising duplicate
 spa_2 <- spa %>% 
-  distinct(pj, .keep_all = TRUE) # Option 1, not at all comfortable was chosen because was first option.  
+  distinct(pj, .keep_all = TRUE) # Option 1, "not at all comfortable" was chosen because the duplicate was the second option.  
 
 duplicated(spa_2$pj) # no duplicates
 
+# joining english and spanish variables
+langs <- left_join(eng, spa_2) 
 
+# collapsing other language 1 variables
 other_1 <- elt_w1_clean_3 %>% 
   select(pj, starts_with("q132_3"), -q132_3_text) %>% 
     pivot_longer(
@@ -181,10 +190,10 @@ other_1 <- elt_w1_clean_3 %>%
                         TRUE ~ as.character(other1_lang_comfort)))  %>%
   select(-item_3)
 
-langs <- left_join(eng, spa_2)
 
 duplicated(other_1$pj) # no duplicates
 
+# collapsing other language 2 variables
 other_2 <- elt_w1_clean_3 %>% 
   select(pj, starts_with("q132_4"), -q132_4_text) %>% 
     pivot_longer(
@@ -204,48 +213,63 @@ other_2 <- elt_w1_clean_3 %>%
 
 duplicated(other_2$pj) # no duplicates
 
+# joining other 1 and 2 language variables
+others <- left_join(other_1, other_2) 
 
-others <- left_join(other_1, other_2)
 
-# joining dataframes with language variables
+# joining dataframes with all language variables
 lang_vars <- left_join(langs, others)
 
 duplicated(lang_vars$pj) # no duplicates
 
+# renaming variables with text input in master dataset (n = 43)
 lang_inputs <- elt_w1_clean_3 %>%
   select(pj, q132_3_text, q132_4_text) %>%
   rename(c("other1_lang" = "q132_3_text"), c("other2_lang" = "q132_4_text"))
 
 duplicated(lang_inputs$pj) # no duplicates
 
+# joining renamed master dataset with all language variables now collapsed to "recover" pj 153 data
 all_lang_vars <- left_join(lang_inputs, lang_vars)
 
 duplicated(all_lang_vars$pj) # no duplicates
 
+# recordering all language vars
 all_lang_vars <- all_lang_vars %>%
   select(pj, english_comfort, spanish_comfort, other1_lang, other1_lang_comfort, other2_lang, everything())
 
-elt_w1_clean_4 <- left_join(elt_w1_clean_3, all_lang_vars)
+# creating new dataset that joins master dataset with reordered and collapsed lang vars
+elt_w1_clean_4 <- left_join(elt_w1_clean_3, all_lang_vars) %>%
+  select(-starts_with("q132_")) # deleting all previous language variables that were included in new variables # 
 
-duplicated(elt_w1_clean_4$pj) # no duplicates
+duplicated(elt_w1_clean_4$pj) # no duplicates, n = 43
 
+# adding value labels on language vars
 elt_w1_clean_4 <- elt_w1_clean_4 %>%
-  select(-starts_with("q132_")) # deleting all previous language variables that were included in new variables
+  mutate(english_comfort = as.numeric(english_comfort),
+         english_comfort = set_vall(english_comfort, c("not at all comfortable" = 1, "somewhat comfortable" = 2, "comfortable" = 3, "very comfortable" = 4, "no response" = 99)),
+         spanish_comfort = as.numeric(spanish_comfort),
+         spanish_comfort = set_vall(spanish_comfort, c("not at all comfortable" = 1, "somewhat comfortable" = 2, "comfortable" = 3, "very comfortable" = 4, "no response" = 99)),
+         other1_lang_comfort = as.numeric(other1_lang_comfort),
+         other1_lang_comfort = set_vall(other1_lang_comfort, c("not at all comfortable" = 1, "somewhat comfortable" = 2, "comfortable" = 3, "very comfortable" = 4, "no response" = 99)),
+         other2_lang_comfort = as.numeric(other2_lang_comfort),
+         other2_lang_comfort = set_vall(other2_lang_comfort, c("not at all comfortable" = 1, "somewhat comfortable" = 2, "comfortable" = 3, "very comfortable" = 4, "no response" = 99)),
+         )
 
-duplicated(elt_w1_clean_4$pj)
+view_df(elt_w1_clean_4)
 
 ```
 
 ```{r}
-# meaningful renaming of vars
 
-test <- elt_w1_clean_4 %>%
+# renaming demo vars
+elt_w1_clean_5 <- elt_w1_clean_4 %>%
   rename(c("age" = "q127_1_text"), 
          c("birth_country" = "q128"),
          c("another_birth_country_text" = "q128_2_text"),
          c("age_first_moved_us" = "q129_1_text"),
          c("white" = "q130_1"),
-         c("hispanic_latino_spanish " = "q130_2"),
+         c("hispanic_latino_spanish" = "q130_2"),
          c("black_african_american" = "q130_3"),
          c("asian" = "q130_4"),
          c("american_indian_alaska_native" = "q130_5"),
@@ -268,16 +292,17 @@ test <- elt_w1_clean_4 %>%
          c("cont_ed_na" = "q135_88"),
          c("cont_ed_no_response" = "q135_99"),
          c("cont_ed_other_text" = "q135_6_text")) %>%
-  select(-q127, -q129, -q131_3_text)
+  select(-q127, -q129, -q131_3_text) # deleted: q127, q129, q131_3_text because they did not have meaningful info
 
-# deleted: q127, q129, q131_3_text because they did not have meaningful info
+view_df(elt_w1_clean_5)
 
-# next step: export to SPSS to see how it looks and if labels get exported.
+elt_w1_clean_5 %>%
+  haven::write_sav(here("nopublish", "elt_w1_clean_5.sav")) # it worked,  
+
 ```
 
 
 # to do next
-- review what other demo variables need to be collapsed. Consider creating a function. 
 - start descriptive stats analyses
 - create timeline to add in week 6 report
 
