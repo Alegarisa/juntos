@@ -1,0 +1,136 @@
+---
+title: "parent"
+author: "Alejandra Garcia Isaza"
+date: "2/11/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(rio)
+library(here)
+library(tidyverse)
+library(haven)
+
+library(surveytoolbox)
+library(sjPlot)
+```
+
+```{r}
+p_w1_raw <- haven::read_sav(here("nopublish", "7b. Juntos Parent W1-SPAN_February 10, 2021_10.24.sav"))
+
+p_w1_raw <- p_w1_raw %>% 
+  arrange(ID_1_TEXT) %>% # ordering participants ids
+  janitor::clean_names() %>% 
+  select(-id) %>% # cleaning names
+  rename(c("id" = "id_1_text"))
+
+p_w1_raw
+```
+
+
+```{r}
+# checking duplicated Id
+sum(duplicated(p_w1_raw$id)) # 31 duplicated ids
+
+length(unique(p_w1_raw$id)) # 97 unique values
+
+data.frame(table(p_w1_raw$id))
+
+
+sum(duplicated(p_w1_raw$response_id)) # no duplicated response_id
+
+length(unique(p_w1_raw$response_id)) # 128 unique values
+
+data.frame(table(p_w1_raw$response_id))
+
+dupes <- p_w1_raw %>%
+  select(id, response_id) %>%
+  arrange(id)
+
+```
+
+
+```{r}
+p_w1_clean <- p_w1_raw %>% 
+  select(-1:-8, -10:-17, -19, -20) %>%
+  filter(id != "999") %>% # deleting test rows
+  filter(response_id != "R_31L6rXjsdcuBaz0") %>% # deleting duplicated row with incomplete data (id 312)
+  mutate(id = case_when(response_id == "R_12ch5JnOHKHRgre" ~ "408", # id 418 (top) recoded as 408
+                               response_id == "R_uaijWwHdl8sIOmB" ~ "317", # had a pj before id #
+                        TRUE ~ as.character(id))) %>%
+  arrange(id)
+
+p_w1_clean
+```
+
+```{r}
+# checking deplicates
+sum(duplicated(p_w1_clean$id)) # 29 duplicated ids
+
+length(unique(p_w1_clean$id)) # 96 unique values
+
+data.frame(table(p_w1_clean$id)) # duplicated ids match two-parent families
+```
+
+```{r}
+# fixing wrong assignment
+p_w1_clean_2 <- p_w1_clean %>%
+  mutate(school_id = str_sub(id, 1, 1),
+         condition = case_when(
+           school_id == "1" | school_id == "3" | school_id == "5" ~ "1",
+           school_id == "2" | school_id == "4" | school_id == "6" ~ "2"
+         )) %>%
+  select(school_id, condition, everything()) %>%
+  select(- school)
+
+p_w1_clean_2
+```
+
+```{r}
+# making variables numeric and adding labels  
+p_w1_clean_3 <- p_w1_clean_2 %>%
+  mutate(condition = as.numeric(condition),
+         condition = set_vall(condition, c("control" = 1, "intervention" = 2)),
+         school_id = as.numeric(school_id),
+         school_id = set_vall(school_id, c("cascade" = 1, "prairie_mountain" = 2, "kelly" = 3, "ata" = 4, "briggs" = 5, "agnes_stewart" = 6))) # this worked!!!
+
+p_w1_clean_3
+
+view_df(p_w1_clean_3) # nice plot that serves as codebook
+```
+
+
+```{r}
+# exporting to .sav to check proper coding of condition and labels
+# p_w1_clean_3 %>%
+#   haven::write_sav(here("nopublish", "p_w1_clean_3.sav"))
+```
+
+# create new var to separate moms from dads
+- check across data waves and be consistent as who we chose to be the primary caregiver. 
+
+Options:
+- primary parent var, secondary parent var. 1 = primary, 0 = secondary. 
+- Maybe create two datafiles, one with primary parents. Create: id#_f; id#_m, id#_y
+
+```{r}
+# separating moms from dads
+
+p_w1_clean_mom <- p_w1_clean_3 %>%
+  filter(participant == 1) %>%
+  filter(response_id != "R_1ON5POXTzIXrIeb") # 415 is duplicated because bio mom and step mom
+
+duplicated(p_w1_clean_mom$id) # no duplicates! 
+
+p_w1_clean_step_mom <- p_w1_clean_3 %>%
+  filter(response_id == "R_1ON5POXTzIXrIeb")
+
+p_w1_clean_dad <- p_w1_clean_3 %>%
+  filter(participant == 2)
+
+duplicated(p_w1_clean_dad$id) # no duplicates! 
+
+```
+
