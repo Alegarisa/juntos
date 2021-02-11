@@ -297,7 +297,7 @@ elt_w1_clean_5 <- elt_w1_clean_4 %>%
 view_df(elt_w1_clean_5)
 
 elt_w1_clean_5 %>%
-  haven::write_sav(here("nopublish", "elt_w1_clean_5.sav")) # it worked,  
+  haven::write_sav(here("nopublish", "elt_w1_clean_5.sav")) # it worked, variable and value labels were succesfully exported.  
 
 ```
 
@@ -313,6 +313,8 @@ elt_w1_clean_5 %>%
 - Total participants in wave 1 n = 43
 
 # Notes on Missing values
+
+- For analysis: filter out when levels have 88, 99, and -99 values?
 
 88 = "not applicable"
 99 = "no response"
