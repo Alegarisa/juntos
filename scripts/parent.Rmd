@@ -120,17 +120,32 @@ Options:
 
 p_w1_clean_mom <- p_w1_clean_3 %>%
   filter(participant == 1) %>%
-  filter(response_id != "R_1ON5POXTzIXrIeb") # 415 is duplicated because bio mom and step mom
+  filter(response_id != "R_1ON5POXTzIXrIeb") %>% # 415 is duplicated because bio mom and step mom
+  rename(c("id_mom" = "id")) 
 
-duplicated(p_w1_clean_mom$id) # no duplicates! 
+duplicated(p_w1_clean_mom$id_mom) # no duplicates! 
 
 p_w1_clean_step_mom <- p_w1_clean_3 %>%
-  filter(response_id == "R_1ON5POXTzIXrIeb")
+  filter(response_id == "R_1ON5POXTzIXrIeb") %>%
+  rename(c("id_step_par" = "id"))
 
 p_w1_clean_dad <- p_w1_clean_3 %>%
-  filter(participant == 2)
+  filter(participant == 2) %>%
+  rename(c("id_dad" = "id"))
 
-duplicated(p_w1_clean_dad$id) # no duplicates! 
+duplicated(p_w1_clean_dad$id_dad) # no duplicates! 
 
+test <- full_join(p_w1_clean_mom, p_w1_clean_dad) # it maybe worked?
+  
+
+test_2 <- full_join(test, p_w1_clean_step_mom) %>%
+  select(school_id, condition, response_id, id_mom, id_dad, id_step_par, everything())
+
+```
+
+```{r}
+# exporting to .sav to check proper coding of condition and labels
+test_2 %>%
+  haven::write_sav(here("nopublish", "test_2.sav"))
 ```
 
