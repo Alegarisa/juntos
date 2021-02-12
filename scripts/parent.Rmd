@@ -55,8 +55,8 @@ dupes <- p_w1_raw %>%
 ```{r}
 p_w1_clean <- p_w1_raw %>% 
   select(-1:-8, -10:-17, -19, -20) %>%
-  filter(id != "999") %>% # deleting test rows
-  filter(response_id != "R_31L6rXjsdcuBaz0") %>% # deleting duplicated row with incomplete data (id 312)
+  filter(id != "999") %>% # deleting 2 test rows
+  filter(response_id != "R_31L6rXjsdcuBaz0") %>% # deleting 1 duped row "false start" (id 312)
   mutate(id = case_when(response_id == "R_12ch5JnOHKHRgre" ~ "408", # id 418 (top) recoded as 408
                                response_id == "R_uaijWwHdl8sIOmB" ~ "317", # had a pj before id #
                         TRUE ~ as.character(id))) %>%
@@ -104,8 +104,8 @@ view_df(p_w1_clean_3) # nice plot that serves as codebook
 
 ```{r}
 # exporting to .sav to check proper coding of condition and labels
-# p_w1_clean_3 %>%
-#   haven::write_sav(here("nopublish", "p_w1_clean_3.sav"))
+p_w1_clean_3 %>%
+  haven::write_sav(here("nopublish", "p_w1_clean_3.sav"))
 ```
 
 # create new var to separate moms from dads
@@ -135,17 +135,22 @@ p_w1_clean_dad <- p_w1_clean_3 %>%
 
 duplicated(p_w1_clean_dad$id_dad) # no duplicates! 
 
-test <- full_join(p_w1_clean_mom, p_w1_clean_dad) # it maybe worked?
-  
+p_w1_clean_other_cg <- p_w1_clean_3 %>%
+  filter(response_id == "R_3pa6HaKEXtJcyAF") %>%
+  rename(c("id_other_cg" = "id"))
 
-test_2 <- full_join(test, p_w1_clean_step_mom) %>%
-  select(school_id, condition, response_id, id_mom, id_dad, id_step_par, everything())
+first_join <- full_join(p_w1_clean_mom, p_w1_clean_dad) 
+
+second_join <- full_join(p_w1_clean_step_mom, p_w1_clean_other_cg)
+
+p_w1_clean_4 <- full_join(first_join, second_join) %>%
+  select(school_id, condition, response_id, id_mom, id_dad, id_step_par, id_other_cg, everything()) # 125 participants, from which 28 are families
 
 ```
 
 ```{r}
 # exporting to .sav to check proper coding of condition and labels
-test_2 %>%
-  haven::write_sav(here("nopublish", "test_2.sav"))
+p_w1_clean_4 %>%
+  haven::write_sav(here("nopublish", "p_w1_clean_4.sav"))
 ```
 
