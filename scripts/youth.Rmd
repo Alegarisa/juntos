@@ -1,0 +1,99 @@
+---
+title: "youth"
+author: "Alejandra Garcia Isaza"
+date: "2/12/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(rio)
+library(here)
+library(tidyverse)
+library(haven)
+
+library(surveytoolbox)
+library(sjPlot)
+```
+
+
+```{r}
+y_w1_raw <- haven::read_sav(here("nopublish", "Youth W1  SPAN_February 10, 2021_10.31.sav"))
+
+y_w1_raw <- y_w1_raw %>% 
+  arrange(H1_1_TEXT) %>% # ordering participants ids
+  janitor::clean_names() %>% # cleaning names
+  select(-h1) %>% 
+  rename(c("id" = "h1_1_text"))
+
+y_w1_raw
+```
+
+```{r}
+# checking duplicated Id
+sum(duplicated(y_w1_raw$id)) # 1 duplicated ids
+
+data.frame(table(y_w1_raw$id)) # id 508 is duped. One row complete, one row "false start"
+```
+
+```{r}
+y_w1_clean <- y_w1_raw %>% 
+  select(-1:-8, -10:-17, -20, -21) %>%
+  filter(response_id != "R_2wMlBAGtO7lzpRo") %>% # deleting 1 duped row "false start" (id 508)
+  arrange(id)
+
+duplicated(y_w1_clean$id)
+
+y_w1_clean
+```
+
+id 612 appears as if belonged to school 2 = prairie. Waiting for Eli's response. 
+
+```{r}
+# fixing wrong assignment
+y_w1_clean_2 <- y_w1_clean %>%
+  mutate(school_id = str_sub(id, 1, 1),
+         condition = case_when(
+           school_id == "1" | school_id == "3" | school_id == "5" ~ "1",
+           school_id == "2" | school_id == "4" | school_id == "6" ~ "2"
+         )) %>%
+  select(school_id, condition, everything()) %>%
+  select(- h8) # deleting school var that has wrong assignment
+
+y_w1_clean_2
+```
+
+```{r}
+# making variables numeric and adding labels  
+y_w1_clean_3 <- y_w1_clean_2 %>%
+  mutate(condition = as.numeric(condition),
+         condition = set_vall(condition, c("control" = 1, "intervention" = 2)),
+         school_id = as.numeric(school_id),
+         school_id = set_vall(school_id, c("cascade" = 1, "prairie_mountain" = 2, "kelly" = 3, "ata" = 4, "briggs" = 5, "agnes_stewart" = 6))) # this worked!!!
+
+y_w1_clean_3
+
+view_df(y_w1_clean_3) # nice plot that serves as codebook
+```
+
+```{r}
+# exporting to .sav to check proper coding of condition and labels
+# y_w1_clean_3 %>%
+#   haven::write_sav(here("nopublish", "y_w1_clean_3.sav")) # it worked, the .sav file has all 94 participants with the proper scale and the proper level labels.
+```
+
+
+```{r}
+# collapsing spread variables
+
+
+```
+
+
+```{r}
+# renaming demo vars
+
+
+```
+

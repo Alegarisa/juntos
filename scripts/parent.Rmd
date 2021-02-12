@@ -104,8 +104,8 @@ view_df(p_w1_clean_3) # nice plot that serves as codebook
 
 ```{r}
 # exporting to .sav to check proper coding of condition and labels
-p_w1_clean_3 %>%
-  haven::write_sav(here("nopublish", "p_w1_clean_3.sav"))
+# p_w1_clean_3 %>%
+#   haven::write_sav(here("nopublish", "p_w1_clean_3.sav")) # it worked, the .sav file has all 125 participants with the proper scale and the proper level labels. 
 ```
 
 # create new var to separate moms from dads
@@ -150,7 +150,23 @@ p_w1_clean_4 <- full_join(first_join, second_join) %>%
 
 ```{r}
 # exporting to .sav to check proper coding of condition and labels
-p_w1_clean_4 %>%
-  haven::write_sav(here("nopublish", "p_w1_clean_4.sav"))
+# p_w1_clean_4 %>%
+#   haven::write_sav(here("nopublish", "p_w1_clean_4.sav"))
+#   
+#   note: delete this one when having dataset with collapsed and renamed vars
+```
+
+
+```{r}
+# collapsing spread variables
+
+
+```
+
+
+```{r}
+# renaming demo vars
+
+
 ```
 
