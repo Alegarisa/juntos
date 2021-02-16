@@ -116,37 +116,20 @@ Options:
 - Maybe create two datafiles, one with primary parents. Create: id#_f; id#_m, id#_y
 
 ```{r}
-# separating moms from dads
+# creating individual ids for each participant
 
-p_w1_clean_mom <- p_w1_clean_3 %>%
-  filter(participant == 1) %>%
-  filter(response_id != "R_1ON5POXTzIXrIeb") %>% # 415 is duplicated because bio mom and step mom
-  rename(c("id_mom" = "id")) 
-
-duplicated(p_w1_clean_mom$id_mom) # no duplicates! 
-
-p_w1_clean_step_mom <- p_w1_clean_3 %>%
-  filter(response_id == "R_1ON5POXTzIXrIeb") %>%
-  rename(c("id_step_par" = "id"))
-
-p_w1_clean_dad <- p_w1_clean_3 %>%
-  filter(participant == 2) %>%
-  rename(c("id_dad" = "id"))
-
-duplicated(p_w1_clean_dad$id_dad) # no duplicates! 
-
-p_w1_clean_other_cg <- p_w1_clean_3 %>%
-  filter(response_id == "R_3pa6HaKEXtJcyAF") %>%
-  rename(c("id_other_cg" = "id"))
-
-first_join <- full_join(p_w1_clean_mom, p_w1_clean_dad) 
-
-second_join <- full_join(p_w1_clean_step_mom, p_w1_clean_other_cg)
-
-p_w1_clean_4 <- full_join(first_join, second_join) %>%
-  select(school_id, condition, response_id, id_mom, id_dad, id_step_par, id_other_cg, everything()) # 125 participants, from which 28 are families
+p_w1_clean_4 <- p_w1_clean_3 %>% 
+  mutate(participant = ifelse(response_id == "R_1ON5POXTzIXrIeb", 5, participant),
+         participant = as.numeric(participant),
+         participant = set_vall(participant, c("mom" = 1, "dad" = 2, "tutor legal" = 3, "other, specify" = 4, "step_mom" = 5)),
+         participant_id = paste0(id, "_", participant), .before = 5) %>%
+  rename(c("family_id" = "id")) # 125 participants, 92 moms, 32 dads, 1 grandparent. 28 families
+  
+view_df(p_w1_clean_4)
 
 ```
+
+
 
 ```{r}
 # exporting to .sav to check proper coding of condition and labels
@@ -160,13 +143,85 @@ p_w1_clean_4 <- full_join(first_join, second_join) %>%
 ```{r}
 # collapsing spread variables
 
+# number of people live at home: variable 290 (q211_2) to variable 296 (q211_6_text) the values are all 1, so need to change that, but potentially problematic because _# doesn't coincide with response choice. 
 
 ```
 
 
 ```{r}
-# renaming demo vars
+# renaming demo vars english_comfort
+
+p_w1_clean_5 <- p_w1_clean_4 %>%
+  rename(c("lang_english" = "q170_1"),
+         c("lang_spanish" = "q170_2"),
+         c("lang_indigenous" = "q170_3"),
+         c("lang_other" = "q170_4"),
+         c("lang_no_response" = "q170_99"),
+         c("lang_indigenous_text" = "q170_3_text"),
+         c("lang_other_text" = "q170_4_text"),
+         c("lang_brokering" = "q171"),
+         c("spanish_comfort_home" = "q172_1"),
+         c("spanish_comfort_school" = "q172_2"),
+         c("spanish_comfort_youth_school" = "q172_3"),
+         c("spanish_comfort_work" = "q172_4"),
+         c("spanish_comfort_friends" = "q172_5"),
+         c("spanish_comfort_general" = "q172_6"),
+         c("english_comfort_home" = "q173_1"),
+         c("english_comfort_school" = "q173_2"),
+         c("english_comfort_youth_school" = "q173_3"),
+         c("english_comfort_work" = "q173_4"),
+         c("english_comfort_friends" = "q173_5"),
+         c("english_comfort_general" = "q173_6"),
+         c("pub_assist" = "q212"),
+         c("pub_assist_snap" = "q212a_1"),
+         c("pub_assist_frpl" = "q212a_2"),
+         c("pub_assist_tanf" = "q212a_3"),
+         c("pub_assist_unemployment" = "q212a_4"),
+         c("pub_assist_disability" = "q212a_5"),
+         c("pub_assist_social_sec" = "q212a_6"),
+         c("pub_assist_health_insu" = "q212a_7"),
+         c("pub_assist_wic" = "q212a_18"),
+         c("pub_assist_food_box" = "q212a_19"),
+         c("pub_assist_other" = "q212a_10"),
+         c("pub_assist_no_response" = "q212a_99"))
+
+view_df(p_w1_clean_5) # it appears that there are no questions about age, gender id, race/ethnicity. 
 
 
 ```
 
+# Scales
+
+
+## parent-teacher relationship
+q18 frq of contact youth teacher (1-4, never - frquently) more better #maybe beh issues
+q19 frq of contact other staff (1-4, never - frquently) more better #maybe beh issues
+q20 satisfaction level of contact teacher & other staff (1-4, unsatis - satis) more better
+q31 effort to know school staff and admin (1-4, disagree - agree) more better
+q32 effort to know at least 1 teach (1-4, disagree - agree) more better
+q41 effort to make it to pta meets (1-4, disagree - agree) more better #
+q43 can convey worries, qs to school staff (1-4, disagree - agree) more better
+q62 can have open & honest talk with teach (1-4, disagree - agree) more better
+q63 can work with teach to solve youth probs (1-4, disagree - agree) more better
+q64 at least one teach care about my youth (1-4, disagree - agree) more better
+q65 at least one teach wants to know me (1-4, disagree - agree) more better
+q66 at least one teach i feel comf talking about my youth (1-4, disagree - agree) more better
+q67 at least one teach i can ask/suggest about my youth (1-4, disagree - agree) more better
+
+# questions
+- how many vars are optimal (& min and max) to include in one construct scale? min 3, the more items, more reliable. 
+- okay to combine vars that have diff answer choices but same scale (1-4)?
+- okay to combine vars that have diff answer choices but diff scale (1-4) and (1-6)? the 1-6 will have more weight, so be cautious. 
+- how to test psychometric properties in R? look for chronbach's alpha, porb. base. 
+-- first testing properties, then creating scale. cronbach if leaving one out. 
+
+```{r}
+# recode them as N/A with function. 
+
+p_w1_clean_6 <- p_w1_clean_5 %>%
+  rowwise() %>% 
+  mutate(parent_teach_rel = mean(c(q18, q19, q20, q31, q32, q41, q43, q62, q63, q64, q65, q66, q67))) 
+
+```
+
+# incorporate figues and tables 
