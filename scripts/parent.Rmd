@@ -190,17 +190,50 @@ view_df(p_w1_clean_5) # it appears that there are no questions about age, gender
 
 ```
 
+
+# missing values
+
+77 = no aplica
+88 = no se
+99 = refuse to answer
+-99
+
+```{r}
+# recode them as N/A with function
+
+# vector with missing values in dataset
+missing_vals <- c(77, 88, 99, -99)
+
+# function that returns true if values in vector are equal to missing_vals. The function takes a vector x, and specified values of missing data
+recode_missing <- function(x, missing_vals = c(77, 88, 99, -99)) {
+  test <- x %in% missing_vals
+  ifelse(test, NA, x)
+}
+
+# function that recodes missing values to NA. The function takes a dataframe with variables with missing data, and specified values of missing data
+recode_missing_df <- function(df, missing_vals = c(77, 88, 99, -99)) {
+  modify(df, ~recode_missing(.x, missing_vals)) # here uses the function created above
+}
+
+p_w1_clean_6 <- recode_missing_df(p_w1_clean_5)
+```
+
+
 # Scales
 
 
 ## parent-teacher relationship
 q18 frq of contact youth teacher (1-4, never - frquently) more better #maybe beh issues
 q19 frq of contact other staff (1-4, never - frquently) more better #maybe beh issues
+
 q20 satisfaction level of contact teacher & other staff (1-4, unsatis - satis) more better
+
 q31 effort to know school staff and admin (1-4, disagree - agree) more better
 q32 effort to know at least 1 teach (1-4, disagree - agree) more better
 q41 effort to make it to pta meets (1-4, disagree - agree) more better #
+
 q43 can convey worries, qs to school staff (1-4, disagree - agree) more better
+
 q62 can have open & honest talk with teach (1-4, disagree - agree) more better
 q63 can work with teach to solve youth probs (1-4, disagree - agree) more better
 q64 at least one teach care about my youth (1-4, disagree - agree) more better
@@ -215,13 +248,27 @@ q67 at least one teach i can ask/suggest about my youth (1-4, disagree - agree) 
 - how to test psychometric properties in R? look for chronbach's alpha, porb. base. 
 -- first testing properties, then creating scale. cronbach if leaving one out. 
 
+
+
 ```{r}
-# recode them as N/A with function. 
 
-p_w1_clean_6 <- p_w1_clean_5 %>%
+library(psych)
+
+contact_school <- data.frame(p_w1_clean_5[,34:35])
+alpha(contact_school) # alpha = .99
+
+par_teach_rel <- data.frame(p_w1_clean_5[,78:83])
+alpha(par_teach_rel) # alpha = .82
+
+p_w1_clean_scales <- p_w1_clean_6 %>%
   rowwise() %>% 
-  mutate(parent_teach_rel = mean(c(q18, q19, q20, q31, q32, q41, q43, q62, q63, q64, q65, q66, q67))) 
+  mutate(parent_teach_rel = mean(c(q62, q63, q64, q65, q66, q67, na.rm = TRUE))) # NAs are not being removed. 
 
+p_w1_clean_scales <- p_w1_clean_6 %>%
+  rowwise() %>% 
+  mutate(parent_teach_rel = mean(c(q62, q63, q64, q65, q66, q67, digits = 2), na.rm = TRUE)) # NAs are  being removed, but values are rounded to nearest unit. 
+
+# next step: figure this inconsistency out
 ```
 
 # incorporate figues and tables 
