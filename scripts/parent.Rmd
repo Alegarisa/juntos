@@ -225,14 +225,30 @@ view_df(p_w1_clean_6)# notice that applying this strips out labels
 q18 frq of contact youth teacher (1-4, never - frquently) more better #maybe beh issues
 q19 frq of contact other staff (1-4, never - frquently) more better #maybe beh issues
 
+## satisfaction 
 q20 satisfaction level of contact teacher & other staff (1-4, unsatis - satis) more better
 
+## parent efforts 
 q31 effort to know school staff and admin (1-4, disagree - agree) more better
 q32 effort to know at least 1 teach (1-4, disagree - agree) more better
-q41 effort to make it to pta meets (1-4, disagree - agree) more better #
+q33 effort to understand school rules & policies (1-4, disagree - agree) more better 
+q34 effort to know my rights (1-4, disagree - agree) more better 
+q35 effort to learn ed system (1-4, disagree - agree) more better 
+q36 effort to understand diff bet GED & others (1-4, disagree - agree) more better 
+q37 effort to be involved in school-based activities (1-4, disagree - agree) more better 
+q38 effort to talk w/other parents to get info & resources (1-4, disagree - agree) more better 
+q39 effort to talk with other parent to get support (1-4, disagree - agree) more better 
+q40 effort to understand pathway to college (1-4, disagree - agree) more better 
+q41 effort to make it to pta meets (1-4, disagree - agree) more better 
 
-q43 can convey worries, qs to school staff (1-4, disagree - agree) more better
+## parent confidence (SELF-EFFICACY)
+q42 confident how school works (1-4, disagree - agree) more better
+q43 can convey worries & qs to school staff (1-4, disagree - agree) more better
+q44 can work with school to solve youth probs (1-4, disagree - agree) more better
+q45 am helping my youth do good in school (1-4, disagree - agree) more better
+q46 am helping my youth to prepare for future (1-4, disagree - agree) more better
 
+## parent-teacher relationship
 q62 can have open & honest talk with teach (1-4, disagree - agree) more better
 q63 can work with teach to solve youth probs (1-4, disagree - agree) more better
 q64 at least one teach care about my youth (1-4, disagree - agree) more better
@@ -259,18 +275,46 @@ Common guidelines for evaluating Cronbach's Alpha
 
 library(psych)
 
-contact_school <- data.frame(p_w1_clean_6[,34:35])
+contact_school <- data.frame(p_w1_clean_6[,34:35]) #q18-q19
 alpha(contact_school) # alpha = .55 --> poor consistency
 
-par_teach_rel <- data.frame(p_w1_clean_6[,78:83])
+# [,39:46] = q23 - q30 youth support? 
+
+par_efforts <- data.frame(p_w1_clean_6[,47:57]) #q31-q41
+alpha(par_efforts) # alpha = .87 --> good consistency
+
+par_confid <- data.frame(p_w1_clean_6[,58:62]) #q42-q46
+alpha(par_confid) # alpha = .80 --> good consistency
+
+par_school_community <- data.frame(p_w1_clean_6[,63:69]) #q47-q53 
+alpha(par_school_community) # alpha = .84 --> good consistency
+
+# par_school_belong <- p_w1_clean_6 %>%
+#   select(63:65, 68, 69) %>% 
+#   data.frame() # i don't think that 66 = q50 & 67 = q51 go well construct-wise, but alpha is better. What to do? --> keep scale as is. 
+#   
+# alpha(par_school_belong) # alpha = .79 --> fair consistency  
+
+par_school_trust <- data.frame(p_w1_clean_6[,70:77]) #q54-q61
+alpha(par_school_trust) # alpha = .91 --> strong consistency, but I think it may be because the number of items. I believe there is more than one factor in this scale. 
+
+par_endorse <- p_w1_clean_6 %>%
+  select(70:73) %>%
+  data.frame() # parent endorsement scale from PTIQ scale parent endorsement of school. 
+alpha(par_endorse) # alpha = .87 --> good consistency
+
+par_teach_rel <- data.frame(p_w1_clean_6[,78:83]) #q62-q67
 alpha(par_teach_rel) # alpha = .88 --> good consistency
+
 
 ####### scales ######
 
 p_w1_clean_scales <- p_w1_clean_6 %>%
   rowwise() %>% 
-  mutate(parent_teach_rel = mean(c(q62, q63, q64, q65, q66, q67), na.rm = TRUE))
+  mutate(parent_teach_rel = mean(c(q62, q63, q64, q65, q66, q67), na.rm = TRUE),
+         parent_effort = mean(c(q31, q32, q33, q34, q35, q36, q37, q39, q40, q41), na.rm = TRUE)) #re-organize these new vars to coincide with numbered order
 
+# q42, q43, q44, q45, q46
 
 ```
 
