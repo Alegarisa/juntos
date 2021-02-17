@@ -130,16 +130,6 @@ view_df(p_w1_clean_4)
 ```
 
 
-
-```{r}
-# exporting to .sav to check proper coding of condition and labels
-# p_w1_clean_4 %>%
-#   haven::write_sav(here("nopublish", "p_w1_clean_4.sav"))
-#   
-#   note: delete this one when having dataset with collapsed and renamed vars
-```
-
-
 ```{r}
 # collapsing spread variables
 
@@ -149,7 +139,7 @@ view_df(p_w1_clean_4)
 
 
 ```{r}
-# renaming demo vars english_comfort
+# renaming demo vars
 
 p_w1_clean_5 <- p_w1_clean_4 %>%
   rename(c("lang_english" = "q170_1"),
@@ -191,15 +181,23 @@ view_df(p_w1_clean_5) # it appears that there are no questions about age, gender
 ```
 
 
+```{r}
+# exporting to .sav to check proper coding of condition and labels
+# p_w1_clean_5 %>%
+#   haven::write_sav(here("nopublish", "p_w1_clean_5.sav"))
+
+```
+
+
 # missing values
 
 77 = no aplica
 88 = no se
 99 = refuse to answer
--99
+-99 = seen but unanswered
 
 ```{r}
-# recode them as N/A with function
+# recoding missing values as N/A with function
 
 # vector with missing values in dataset
 missing_vals <- c(77, 88, 99, -99)
@@ -215,12 +213,13 @@ recode_missing_df <- function(df, missing_vals = c(77, 88, 99, -99)) {
   modify(df, ~recode_missing(.x, missing_vals)) # here uses the function created above
 }
 
-p_w1_clean_6 <- recode_missing_df(p_w1_clean_5)
+p_w1_clean_6 <- recode_missing_df(p_w1_clean_5) 
+
+view_df(p_w1_clean_6)# notice that applying this strips out labels
 ```
 
 
 # Scales
-
 
 ## parent-teacher relationship
 q18 frq of contact youth teacher (1-4, never - frquently) more better #maybe beh issues
@@ -248,27 +247,31 @@ q67 at least one teach i can ask/suggest about my youth (1-4, disagree - agree) 
 - how to test psychometric properties in R? look for chronbach's alpha, porb. base. 
 -- first testing properties, then creating scale. cronbach if leaving one out. 
 
-
+Common guidelines for evaluating Cronbach's Alpha
+.00 to .69 = Poor
+.70 to .79 = Fair 
+.80 to .89 = Good 
+.90 to .99 = Excellent/Strong
 
 ```{r}
 
+####### internal consistency ######
+
 library(psych)
 
-contact_school <- data.frame(p_w1_clean_5[,34:35])
-alpha(contact_school) # alpha = .99
+contact_school <- data.frame(p_w1_clean_6[,34:35])
+alpha(contact_school) # alpha = .55 --> poor consistency
 
-par_teach_rel <- data.frame(p_w1_clean_5[,78:83])
-alpha(par_teach_rel) # alpha = .82
+par_teach_rel <- data.frame(p_w1_clean_6[,78:83])
+alpha(par_teach_rel) # alpha = .88 --> good consistency
 
-p_w1_clean_scales <- p_w1_clean_6 %>%
-  rowwise() %>% 
-  mutate(parent_teach_rel = mean(c(q62, q63, q64, q65, q66, q67, na.rm = TRUE))) # NAs are not being removed. 
+####### scales ######
 
 p_w1_clean_scales <- p_w1_clean_6 %>%
   rowwise() %>% 
-  mutate(parent_teach_rel = mean(c(q62, q63, q64, q65, q66, q67, digits = 2), na.rm = TRUE)) # NAs are  being removed, but values are rounded to nearest unit. 
+  mutate(parent_teach_rel = mean(c(q62, q63, q64, q65, q66, q67), na.rm = TRUE))
 
-# next step: figure this inconsistency out
+
 ```
 
 # incorporate figues and tables 
