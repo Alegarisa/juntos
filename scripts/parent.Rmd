@@ -215,20 +215,23 @@ recode_missing_df <- function(df, missing_vals = c(77, 88, 99, -99)) {
 
 p_w1_clean_6 <- recode_missing_df(p_w1_clean_5) 
 
-view_df(p_w1_clean_6)# notice that applying this strips out labels
+# view_df(p_w1_clean_6) # notice that applying this strips out labels
 ```
 
 
 # Scales
 
-## parent-teacher relationship
-q18 frq of contact youth teacher (1-4, never - frquently) more better #maybe beh issues
-q19 frq of contact other staff (1-4, never - frquently) more better #maybe beh issues
+## parent-teacher contact --> NOT using these (# alpha = .55, poor consistency)
+q18 frq of contact youth teacher (1-4, never - frquently) #maybe beh issues
+q19 frq of contact other staff (1-4, never - frquently) #maybe beh issues
 
-## satisfaction 
-q20 satisfaction level of contact teacher & other staff (1-4, unsatis - satis) more better
+## satisfaction parent-teacher contact --> NOT using these.
+q20 satisfaction level of contact teacher & other staff (1-4, unsatis - satis) 
 
-## parent efforts 
+## parent-youth academic support
+q23 - q30 (1-4, disagree - agree) higher score, more support
+
+## parent involvement with school and ed system 
 q31 effort to know school staff and admin (1-4, disagree - agree) more better
 q32 effort to know at least 1 teach (1-4, disagree - agree) more better
 q33 effort to understand school rules & policies (1-4, disagree - agree) more better 
@@ -241,81 +244,110 @@ q39 effort to talk with other parent to get support (1-4, disagree - agree) more
 q40 effort to understand pathway to college (1-4, disagree - agree) more better 
 q41 effort to make it to pta meets (1-4, disagree - agree) more better 
 
-## parent confidence (SELF-EFFICACY)
+## parent self-efficacy
 q42 confident how school works (1-4, disagree - agree) more better
 q43 can convey worries & qs to school staff (1-4, disagree - agree) more better
 q44 can work with school to solve youth probs (1-4, disagree - agree) more better
 q45 am helping my youth do good in school (1-4, disagree - agree) more better
 q46 am helping my youth to prepare for future (1-4, disagree - agree) more better
 
-## parent-teacher relationship
+## parent-school relationship
+q47 - q53 (1-4, disagree - agree) higher score, better rel
+
+## parent endorsement of school (parent endorsement scale from PTIM-P measure)
+q54 - q57 (1-4, disagree - agree) higher score, more endorsement
+
+## to me these items may address several constructs --> NOT using these.
+q58 - q61 (parent self-efficacy, school climate, oportunities for PI) 
 q62 can have open & honest talk with teach (1-4, disagree - agree) more better
 q63 can work with teach to solve youth probs (1-4, disagree - agree) more better
+
+## parent-teacher relationship
 q64 at least one teach care about my youth (1-4, disagree - agree) more better
 q65 at least one teach wants to know me (1-4, disagree - agree) more better
 q66 at least one teach i feel comf talking about my youth (1-4, disagree - agree) more better
 q67 at least one teach i can ask/suggest about my youth (1-4, disagree - agree) more better
 
-# questions
-- how many vars are optimal (& min and max) to include in one construct scale? min 3, the more items, more reliable. 
-- okay to combine vars that have diff answer choices but same scale (1-4)?
-- okay to combine vars that have diff answer choices but diff scale (1-4) and (1-6)? the 1-6 will have more weight, so be cautious. 
-- how to test psychometric properties in R? look for chronbach's alpha, porb. base. 
--- first testing properties, then creating scale. cronbach if leaving one out. 
+## parent-student conversations about school --> NOT using these.
+q68 - q81
 
-Common guidelines for evaluating Cronbach's Alpha
+## homework involvement --> NOT using these.
+q82-q99
+
+## youth prep for high school and beyond (?) --> NOT using these.
+q100 - q110
+
+## social support --> NOT using these.
+q111 - q115
+
+##  parent-youth relationship 
+q116 - q121 (higher score, better relationship)
+
+## parent-youth difficult conversations --> NOT using these.
+q122 - q127
+
+## limits, consequences & reinforcement --> NOT using these.
+q128 - 136 (3 need to be reverse coded)
+
+## monitoring --> NOT using these.
+q137 - q144
+
+## SDQ (Strengths and Difficulties Questionnaire) --> NOT using these.
+q145 - q169
+
+# Common guidelines for evaluating Cronbach's Alpha
 .00 to .69 = Poor
 .70 to .79 = Fair 
 .80 to .89 = Good 
 .90 to .99 = Excellent/Strong
 
 ```{r}
-
 ####### internal consistency ######
 
 library(psych)
 
-contact_school <- data.frame(p_w1_clean_6[,34:35]) #q18-q19
-alpha(contact_school) # alpha = .55 --> poor consistency
+par_acad_supp <- data.frame(p_w1_clean_6[,39:46]) #q23 - q30
+alpha(par_acad_supp) # alpha = .82 --> good consistency
 
-# [,39:46] = q23 - q30 youth support? 
+par_inv_school <- data.frame(p_w1_clean_6[,47:57]) #q31-q41
+alpha(par_inv_school) # alpha = .87 --> good consistency
 
-par_efforts <- data.frame(p_w1_clean_6[,47:57]) #q31-q41
-alpha(par_efforts) # alpha = .87 --> good consistency
+par_self_effic <- data.frame(p_w1_clean_6[,58:62]) #q42-q46
+alpha(par_self_effic) # alpha = .80 --> good consistency
 
-par_confid <- data.frame(p_w1_clean_6[,58:62]) #q42-q46
-alpha(par_confid) # alpha = .80 --> good consistency
+par_school_rel <- data.frame(p_w1_clean_6[,63:69]) #q47-q53 
+alpha(par_school_rel) # alpha = .84 --> good consistency
 
-par_school_community <- data.frame(p_w1_clean_6[,63:69]) #q47-q53 
-alpha(par_school_community) # alpha = .84 --> good consistency
-
-# par_school_belong <- p_w1_clean_6 %>%
-#   select(63:65, 68, 69) %>% 
-#   data.frame() # i don't think that 66 = q50 & 67 = q51 go well construct-wise, but alpha is better. What to do? --> keep scale as is. 
-#   
-# alpha(par_school_belong) # alpha = .79 --> fair consistency  
-
-par_school_trust <- data.frame(p_w1_clean_6[,70:77]) #q54-q61
-alpha(par_school_trust) # alpha = .91 --> strong consistency, but I think it may be because the number of items. I believe there is more than one factor in this scale. 
-
-par_endorse <- p_w1_clean_6 %>%
-  select(70:73) %>%
-  data.frame() # parent endorsement scale from PTIQ scale parent endorsement of school. 
+par_endorse <- data.frame(p_w1_clean_6[,70:73]) #q54-q57
 alpha(par_endorse) # alpha = .87 --> good consistency
 
-par_teach_rel <- data.frame(p_w1_clean_6[,78:83]) #q62-q67
-alpha(par_teach_rel) # alpha = .88 --> good consistency
+par_teach_rel <- data.frame(p_w1_clean_6[,80:83]) #q64-q67
+alpha(par_teach_rel) # alpha = .86 --> good consistency
 
-
-####### scales ######
-
-p_w1_clean_scales <- p_w1_clean_6 %>%
-  rowwise() %>% 
-  mutate(parent_teach_rel = mean(c(q62, q63, q64, q65, q66, q67), na.rm = TRUE),
-         parent_effort = mean(c(q31, q32, q33, q34, q35, q36, q37, q39, q40, q41), na.rm = TRUE)) #re-organize these new vars to coincide with numbered order
-
-# q42, q43, q44, q45, q46
+par_youth_rel <- data.frame(p_w1_clean_6[,133:138]) #q116-q121
+alpha(par_youth_rel) # alpha = .90 --> excellent consistency
 
 ```
+
+
+```{r}
+####### scales ######
+
+p_w1_scales <- p_w1_clean_6 %>%
+  rowwise() %>% 
+  mutate(parent_academic_supp = mean(c(q23, q24, q25, q26, q27, q28, q29, q30), na.rm = TRUE),
+         parent_involv_school = mean(c(q31, q32, q33, q34, q35, q36, q37, q38, q39, q40, q41), na.rm = TRUE),
+         parent_self_efficacy = mean(c(q42, q43, q44, q45, q46), na.rm = TRUE),
+         parent_school_rel = mean(c(q47, q48, q49, q50, q51, q52, q53), na.rm = TRUE),
+         parent_endorse_school = mean(c(q54, q55, q56, q57), na.rm = TRUE),
+         parent_teach_rel = mean(c(q64, q65, q66, q67), na.rm = TRUE),
+         parent_youth_rel = mean(c(q116, q117, q118, q119, q120, q121), na.rm = TRUE)) %>%
+  select(1:6, 320:326)
+
+final_p_w1 <- left_join(p_w1_clean_5, p_w1_scales)
+
+view_df(final_p_w1)
+```
+
 
 # incorporate figues and tables 
