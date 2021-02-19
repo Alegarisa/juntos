@@ -29,8 +29,9 @@ w1_raw
 
 elt_w1_clean <- w1_raw %>% 
   janitor::clean_names() %>%
-  select(-1:-9, -13:-17, -202) %>% # deleting columns with metadata
-  arrange(pj) # ordering participants ids
+  select(-1:-8, -13:-17, -202) %>% # deleting columns with metadata
+  rename(c("id" = "pj")) %>%
+  arrange(id) # ordering participants ids
 
 elt_w1_clean
 ```
@@ -38,14 +39,14 @@ elt_w1_clean
 ```{r}
 
 # fixing duplicates ids
-duplicated(elt_w1_clean$pj) # pj_number: 257 is dupplicated and there is no 254
+duplicated(elt_w1_clean$id) # id_number: 257 is dupplicated and there is no 254
 
 elt_w1_clean <- elt_w1_clean %>%
-  mutate(pj = case_when(recipient_first_name == "Beth" ~ "254",
-                        TRUE ~ as.character(pj))) %>%
-  arrange(pj)
+  mutate(id = case_when(response_id == "R_6EELe7Uuwi9W7zX" ~ "254",
+                        TRUE ~ as.character(id))) %>%
+  arrange(id)
 
-duplicated(elt_w1_clean$pj) # testing that there are no more id duplicates == No duplicates!
+duplicated(elt_w1_clean$id) # testing that there are no more id duplicates == No duplicates!
 
 elt_w1_clean
 ```
@@ -54,7 +55,7 @@ elt_w1_clean
 
 # fixing wrong assignment
 elt_w1_clean_2 <- elt_w1_clean %>%
-  mutate(school_id = str_sub(pj, 1, 1),
+  mutate(school_id = str_sub(id, 1, 1),
          condition = case_when(
            school_id == "1" | school_id == "3" | school_id == "5" ~ "1",
            school_id == "2" | school_id == "4" | school_id == "6" ~ "2"
@@ -83,8 +84,8 @@ view_df(elt_w1_clean_3) # nice plot that serves as codebook
 ```{r}
 
 # exporting to .sav to check proper coding of condition and labels
-# elt_w1_clean_3 %>%
-#   haven::write_sav(here("nopublish", "elt_w1_clean_3.sav"))
+elt_w1_clean_3 %>%
+  haven::write_sav(here("nopublish", "elt_w1_clean_3.sav"))
 ```
 
 Results:
@@ -97,7 +98,7 @@ Results:
 # collapsing variable english_comfort q132_1_<<choice>>
 
 d <- elt_w1_clean_3 %>% 
-    select(pj, starts_with("q132_1")) %>% 
+    select(id, starts_with("q132_1")) %>% 
     pivot_longer(
       cols = starts_with("q132_1"),
       names_to = "item",
@@ -128,7 +129,7 @@ view_df(x_2)
 
 # collapsing english variables
 eng <- elt_w1_clean_3 %>% 
-  select(pj, starts_with("q132_1")) %>% 
+  select(id, starts_with("q132_1")) %>% 
     pivot_longer(
       cols = starts_with("q132_1"),
       names_to = "item_1",
@@ -143,11 +144,11 @@ eng <- elt_w1_clean_3 %>%
                         TRUE ~ as.character(english_comfort)))  %>%
   select(-item_1)
 
-duplicated(eng$pj) # no duplicates
+duplicated(eng$id) # no duplicates
 
 # collapsing spanish variables
 spa <- elt_w1_clean_3 %>%
-  select(pj, starts_with("q132_2")) %>% 
+  select(id, starts_with("q132_2")) %>% 
     pivot_longer(
       cols = starts_with("q132_2"),
       names_to = "item_2",
@@ -162,20 +163,20 @@ spa <- elt_w1_clean_3 %>%
                         TRUE ~ as.character(spanish_comfort))) %>%
   select(-item_2) 
 
-duplicated(spa$pj) # pj 454 is duplicated. In w1_raw it shows that this participant chose options 1 and 2 (not sure if they could choose more than one option in Qulatrics). 
+duplicated(spa$id) # id 454 is duplicated. In w1_raw it shows that this participant chose options 1 and 2 (not sure if they could choose more than one option in Qulatrics). 
 
 # fising duplicate
 spa_2 <- spa %>% 
-  distinct(pj, .keep_all = TRUE) # Option 1, "not at all comfortable" was chosen because the duplicate was the second option.  
+  distinct(id, .keep_all = TRUE) # Option 1, "not at all comfortable" was chosen because the duplicate was the second option.  
 
-duplicated(spa_2$pj) # no duplicates
+duplicated(spa_2$id) # no duplicates
 
 # joining english and spanish variables
 langs <- left_join(eng, spa_2) 
 
 # collapsing other language 1 variables
 other_1 <- elt_w1_clean_3 %>% 
-  select(pj, starts_with("q132_3"), -q132_3_text) %>% 
+  select(id, starts_with("q132_3"), -q132_3_text) %>% 
     pivot_longer(
       cols = starts_with("q132_3"),
       names_to = "item_3",
@@ -191,11 +192,11 @@ other_1 <- elt_w1_clean_3 %>%
   select(-item_3)
 
 
-duplicated(other_1$pj) # no duplicates
+duplicated(other_1$id) # no duplicates
 
 # collapsing other language 2 variables
 other_2 <- elt_w1_clean_3 %>% 
-  select(pj, starts_with("q132_4"), -q132_4_text) %>% 
+  select(id, starts_with("q132_4"), -q132_4_text) %>% 
     pivot_longer(
       cols = starts_with("q132_4"),
       names_to = "item_4",
@@ -211,7 +212,7 @@ other_2 <- elt_w1_clean_3 %>%
   select(-item_4)
 
 
-duplicated(other_2$pj) # no duplicates
+duplicated(other_2$id) # no duplicates
 
 # joining other 1 and 2 language variables
 others <- left_join(other_1, other_2) 
@@ -220,29 +221,29 @@ others <- left_join(other_1, other_2)
 # joining dataframes with all language variables
 lang_vars <- left_join(langs, others)
 
-duplicated(lang_vars$pj) # no duplicates
+duplicated(lang_vars$id) # no duplicates
 
 # renaming variables with text input in master dataset (n = 43)
 lang_inputs <- elt_w1_clean_3 %>%
-  select(pj, q132_3_text, q132_4_text) %>%
+  select(id, q132_3_text, q132_4_text) %>%
   rename(c("other1_lang" = "q132_3_text"), c("other2_lang" = "q132_4_text"))
 
-duplicated(lang_inputs$pj) # no duplicates
+duplicated(lang_inputs$id) # no duplicates
 
-# joining renamed master dataset with all language variables now collapsed to "recover" pj 153 data
+# joining renamed master dataset with all language variables now collapsed to "recover" id 153 data
 all_lang_vars <- left_join(lang_inputs, lang_vars)
 
-duplicated(all_lang_vars$pj) # no duplicates
+duplicated(all_lang_vars$id) # no duplicates
 
 # recordering all language vars
 all_lang_vars <- all_lang_vars %>%
-  select(pj, english_comfort, spanish_comfort, other1_lang, other1_lang_comfort, other2_lang, everything())
+  select(id, english_comfort, spanish_comfort, other1_lang, other1_lang_comfort, other2_lang, everything())
 
 # creating new dataset that joins master dataset with reordered and collapsed lang vars
 elt_w1_clean_4 <- left_join(elt_w1_clean_3, all_lang_vars) %>%
   select(-starts_with("q132_")) # deleting all previous language variables that were included in new variables # 
 
-duplicated(elt_w1_clean_4$pj) # no duplicates, n = 43
+duplicated(elt_w1_clean_4$id) # no duplicates, n = 43
 
 # adding value labels on language vars
 elt_w1_clean_4 <- elt_w1_clean_4 %>%
@@ -296,15 +297,7 @@ elt_w1_clean_5 <- elt_w1_clean_4 %>%
 
 view_df(elt_w1_clean_5)
 
-elt_w1_clean_5 %>%
-  haven::write_sav(here("nopublish", "elt_w1_clean_5.sav")) # it worked, variable and value labels were succesfully exported.  
-
 ```
-
-
-# to do next
-- start descriptive stats analyses
-- create timeline to add in week 6 report
 
 # Notes on w1 dataset
 
@@ -312,15 +305,100 @@ elt_w1_clean_5 %>%
 - participant 153 didn't complete survey, after q50 it's empty. 
 - Total participants in wave 1 n = 43
 
-# Notes on Missing values
+```{r}
+# exporting to .sav to check proper coding of condition and labels
+# elt_w1_clean_5 %>%
+#   haven::write_sav(here("nopublish", "elt_w1_clean_5.sav")) # it worked, variable and value labels were succesfully exported.
+```
 
-- For analysis: filter out when levels have 88, 99, and -99 values?
+# Notes on Missing values
 
 88 = "not applicable"
 99 = "no response"
 -99 = seen but unanswered questions -- (e.g questions that ask participants to respond if they have knowledge about classroom)
-NA = unseen question, either because participant didn't complete survey (e.g. pj 153) or because of skip logic (they were not teachers or had classroom knowledge)
-  --> NA appear in SPSS as a dot (.)
-blank spaces =  not sure, but maybe irrelevant
+NA = unseen question, either because participant didn't complete survey (e.g. id 153) or because of skip logic (they were not teachers or had classroom knowledge) --> NA appear in SPSS as (.)
+blank spaces = not sure, but prob. irrelevant
 
-* consider creating a function to recode these options so they are labelled with set_vall() that applies to all variables. 
+```{r}
+# recoding missing values as N/A with function
+
+# vector with missing values in dataset
+missing_vals <- c(88, 99, -99)
+
+# function that returns true if values in vector are equal to missing_vals. The function takes a vector x, and specified values of missing data
+recode_missing <- function(x, missing_vals = c(88, 99, -99)) {
+  test <- x %in% missing_vals
+  ifelse(test, NA, x)
+}
+
+# function that recodes missing values to NA. The function takes a dataframe with variables with missing data, and specified values of missing data
+recode_missing_df <- function(df, missing_vals = c(88, 99, -99)) {
+  modify(df, ~recode_missing(.x, missing_vals)) # here uses the function created above
+}
+
+elt_w1_clean_6 <- recode_missing_df(elt_w1_clean_5) 
+
+view_df(elt_w1_clean_6) # notice that applying this strips out labels
+```
+
+# Scales
+
+
+
+
+# Common guidelines for evaluating Cronbach's Alpha
+.00 to .69 = Poor
+.70 to .79 = Fair 
+.80 to .89 = Good 
+.90 to .99 = Excellent/Strong
+
+```{r}
+####### internal consistency ######
+
+library(psych)
+
+climate_gen <- data.frame(elt_w1_clean_6[,12:35]) # q1 - q14
+alpha(climate_gen) # alpha = .92 -->  excellent consistency. Porbably just because the sheer number of items in scale (26)
+
+# these are trying to follow the scales of the Kettering measure
+respect <- elt_w1_clean_6 %>%
+  select(q1, q10, q11, q21, q24) %>%
+  data.frame()
+alpha(respect) # alpha = .78 -->  fair consistency
+
+trust <- elt_w1_clean_6 %>%
+  select(q5, q6, q7, q8) %>%
+  data.frame()
+alpha(trust) # alpha = .61 -->  poor consistency
+
+# it's too hard to find ways to make them hang together. Ask Heather. 
+
+equity_self_eff <- data.frame(elt_w1_clean_6[,61:66]) # q50 - q55
+alpha(equity_self_eff) # alpha = .89 -->  good consistency
+
+scho_lat_fam_rel <- data.frame(elt_w1_clean_6[,67:75]) # q56 - q64
+alpha(scho_lat_fam_rel) # alpha = . --> .84 good consistency
+
+teach_lat_fam_rel <- elt_w1_clean_6 %>%
+  select(q65, q66, q67, q68, q69, q73, q74, q75, q76) %>%
+  data.frame()
+alpha(teach_lat_fam_rel) # q73 needs to be reverse coded!!
+
+teach_self_eff <- data.frame(elt_w1_clean_6[,119:128]) # q108 - q117
+alpha(teach_self_eff) # several need to be reverse coded!!
+```
+
+
+
+
+
+
+
+
+
+
+
+
+q1, q2, q3, q4, q5, q6, q7, q8, q9, q10, q11,  q12, q13, q14, q15, q16, q17, q18, q19, q20, q21, q22, q23, q24, q25, q26, q27, q28, q29, q30, q31, q32, q33, q34, q35, q36, q37, q38, q39, q40, q41, q42, q43, q44, q45, q46, q47, q48, q49, q50, q51, q52, q53, q54, q55, q56, q57, q58, q59, q60, q61, q62, q63, q64, q65, q66, q67, q68, q69, q70, q71, q72, q73, q74, q75, q76, q78, q79, q80, q81, q82, q83, q84, q85, q86, q87, q88, q89, q90, q91, q92, q93, q94, q95, q96, q97, q98, q99, q100, q101, q102, q103, q104, q105, q106
+q108, q109, q110, q111, q112, q113, q114, q115, q116, q117
+q118, q119, q120, q121, q122, q123, q124
