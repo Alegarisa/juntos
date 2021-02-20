@@ -74,9 +74,11 @@ elt_w1_clean_3 <- elt_w1_clean_2 %>%
   mutate(condition = as.numeric(condition),
          condition = set_vall(condition, c("control" = 1, "intervention" = 2)),
          school_id = as.numeric(school_id),
-         school_id = set_vall(school_id, c("cascade" = 1, "prairie_mountain" = 2, "kelly" = 3, "ata" = 4, "briggs" = 5, "agnes_stewart" = 6))) # this worked!!!
+         school_id = set_vall(school_id, c("cascade" = 1, "prairie_mountain" = 2, "kelly" = 3, "ata" = 4, "briggs" = 5, "agnes_stewart" = 6)),
+         q68 = set_vall(q68, c("Strongly Disagree" = 1, "Disagree" = 2, "Agree" = 3, "Strongly Agree" = 4, "No response" = 99))) # recoding values bec. no response was 5, not 99. 
 
 elt_w1_clean_3
+
 
 view_df(elt_w1_clean_3) # nice plot that serves as codebook
 ```
@@ -340,19 +342,6 @@ elt_w1_clean_6 <- recode_missing_df(elt_w1_clean_5)
 # view_df(elt_w1_clean_6) # notice that applying this strips out labels
 ```
 
-# Reverse coding of items
-
-```{r}
-elt_w1_clean_6$q25
-likert_reverse(elt_w1_clean_6$q25, top = 4, bottom = 1)
-
-elt_w1_clean_6$q73
-likert_reverse(elt_w1_clean_6$q73, top = 4, bottom = 1)
-
-
-elt_w1_clean_6$q110
-likert_reverse(elt_w1_clean_6$q110, top = 6, bottom = 1)
-```
 
 ```{r}
 elt_w1_clean_6_rev_code <- elt_w1_clean_6 %>%
@@ -368,14 +357,35 @@ elt_w1_clean_6_rev_code <- elt_w1_clean_6 %>%
 
 ```
 
-```{r}
-
-
-```
 
 # Scales
 
+## climate general 
+q1 - q24 (1-4, disagree - agree) higher score, better school climate
 
+## School conflict & behavior management --> NOT using these.
+q25 - q35 (1-4, disagree - agree)
+
+## School engagement of diversity 
+q36 - q49 (1-4, disagree - agree) higher score, more engagement of diversity
+
+## Self-efficacy in promoting equity
+q50 - q55 (1-4, disagree - agree) higher score, more self-efficacy to promote equity
+
+## School-Latino fams relations
+q56 - q64 and q70 - q72 (1-4, disagree - agree) higher scores better relation
+
+## Teacher-Latino fams relations
+q65 - q69 and q74 - q76 (1-4, disagree - agree) higher scores better relation
+
+## Teacher bias Latino students --> NOT using this one.
+q73 
+
+## General Teaching efficacy 
+q108, q109, q111, q112, q117 (1-6, s. agree - s. disagree) higher scores more general teaching efficacy as they disagree with the statements
+
+## Personal Teaching efficacy 
+q110, q113, q114, q115, q116 (1-6, s. disagree - s. agree (Rev coded)) higher scores more personal teaching efficacy as they agree with the statements
 
 
 # Common guidelines for evaluating Cronbach's Alpha
@@ -390,19 +400,19 @@ elt_w1_clean_6_rev_code <- elt_w1_clean_6 %>%
 library(psych)
 
 ################
-climate_gen <- data.frame(elt_w1_clean_6_rev_code[,12:35]) # q1 - q14
+climate_gen <- data.frame(elt_w1_clean_6_rev_code[,12:35]) # q1 - q24
 alpha(climate_gen) # alpha = .92 -->  excellent consistency. Probably because the sheer number of items in scale (26)
 
 # with these i'm trying to follow the scales of the Kettering measure, but not great consistency
-respect <- elt_w1_clean_6_rev_code %>%
-  select(q1, q10, q11, q21, q24) %>%
-  data.frame()
-alpha(respect) # alpha = .78 -->  fair consistency
+# respect <- elt_w1_clean_6_rev_code %>%
+#   select(q1, q10, q11, q21, q24) %>%
+#   data.frame()
+# alpha(respect) # alpha = .78 -->  fair consistency
 
-trust <- elt_w1_clean_6_rev_code %>%
-  select(q5, q6, q7, q8) %>%
-  data.frame()
-alpha(trust) # alpha = .61 -->  poor consistency
+# trust <- elt_w1_clean_6_rev_code %>%
+#   select(q5, q6, q7, q8) %>%
+#   data.frame()
+# alpha(trust) # alpha = .61 -->  poor consistency
 
 # conclusion: it's too hard to find ways to make them hang together. Ask Heather, describe in report that it is advised to conduct an exploratory and confirmatory factro analysis for this important construct.  
 #######################
@@ -414,40 +424,38 @@ equity_self_eff <- data.frame(elt_w1_clean_6_rev_code[,61:66]) # q50 - q55
 alpha(equity_self_eff) # alpha = .89 -->  good consistency
 
 #######################
-scho_lat_fam_rel <- data.frame(elt_w1_clean_6_rev_code[,67:75]) # q56 - q64
-alpha(scho_lat_fam_rel) # alpha = . --> .84 good consistency
+# scho_lat_fam_rel <- data.frame(elt_w1_clean_6_rev_code[,67:75]) # q56 - q64
+# alpha(scho_lat_fam_rel) # alpha = . --> .84 good consistency
 
 scho_lat_fam_rel_2 <- elt_w1_clean_6_rev_code %>%
   select(q56:q64, q70:q72) %>% 
   data.frame() 
-alpha(scho_lat_fam_rel_2) # alpha = 70:73 --> good consistency
+alpha(scho_lat_fam_rel_2) # alpha = .88 --> good consistency
 ##########################
 
 ##########################
-teach_lat_fam_rel <- elt_w1_clean_6_rev_code %>%
-  select(q65, q66, q67, q68, q69, q73, q74, q75, q76) %>% # q73 was reverse coded, leaving out 70:72
-  data.frame()
-alpha(teach_lat_fam_rel) # alpha = .67 --> poor consistency, better if dropping q73 (alpha = .75) 
+# teach_lat_fam_rel <- data.frame(elt_w1_clean_6_rev_code[,76:87]) # q65 - q76 (q73 was reverse coded)
+# alpha(teach_lat_fam_rel) # alpha = .70 --> fair consistency, better if dropping q73 and q75
 
 teach_lat_fam_rel_2 <- elt_w1_clean_6_rev_code %>%
-  select(q65, q66, q67, q68, q69, q74, q75, q76) %>% # leaving out 70:73
+  select(q65:q69, q74:q76) %>% # leaving out 70:73
   data.frame()
 alpha(teach_lat_fam_rel_2) # alpha = .75 --> fair consistency
 ###########################
 
 ############################
-teach_self_eff_all <- data.frame(elt_w1_clean_6_rev_code[,119:128]) # q108 - q117 (# q110, q113, q114, q115, q116 were reverse coded)
-alpha(teach_self_eff_all) # alpha = .74 --> fair consistency
+# teach_self_eff_all <- data.frame(elt_w1_clean_6_rev_code[,119:128]) # q108 - q117 (q110, q113, q114, q115, q116 were reverse coded)
+# alpha(teach_self_eff_all) # alpha = .74 --> fair consistency
 
-teach_self_eff_gen <- elt_w1_clean_6_rev_code %>%
+teach_eff_gen <- elt_w1_clean_6_rev_code %>% # general teaching efficacy dimension in original measure
   select(q108, q109, q111, q112, q117) %>% 
   data.frame()
-alpha(teach_self_eff_gen) # alpha = .73 --> fair consistency
+alpha(teach_eff_gen) # alpha = .73 --> fair consistency
 
-teach_self_eff_per <- elt_w1_clean_6_rev_code %>%
+teach_eff_per <- elt_w1_clean_6_rev_code %>% # personal teaching efficacy dimension in original measure
   select(q110, q113, q114, q115, q116) %>% 
   data.frame()
-alpha(teach_self_eff_per) # alpha = .88 --> good consistency
+alpha(teach_eff_per) # alpha = .88 --> good consistency
 #############################
 
 ```
@@ -456,11 +464,28 @@ alpha(teach_self_eff_per) # alpha = .88 --> good consistency
 
 
 ```{r}
+elt_w1_scales <- elt_w1_clean_6_rev_code %>%
+  rowwise() %>% 
+  mutate(climate_general = mean(c(q1, q2, q3, q4, q5, q6, q7, q8, q9, q10, q11,  q12, q13, q14, q15, q16, q17, q18, q19, q20, q21, q22, q23, q24), na.rm = TRUE),
+         school_engage_diversity = mean(c(q36, q37, q38, q39, q40, q41, q42, q43, q44, q45, q46, q47, q48, q49), na.rm = TRUE),
+         equity_self_efficacy = mean(c(q50, q51, q52, q53, q54, q55), na.rm = TRUE),
+         school_lat_fam_rel = mean(c(q56, q57, q58, q59, q60, q61, q62, q63, q64, q70, q71, q72), na.rm = TRUE),
+         teacher_lat_fam_rel = mean(c(q65, q66, q67, q68, q69, q74, q75, q76), na.rm = TRUE),
+         gen_teaching_efficacy = mean(c(q108, q109, q111, q112, q117), na.rm = TRUE),
+         per_teaching_efficacy = mean(c(q110, q113, q114, q115, q116), na.rm = TRUE)) %>%
+  select(1:7, 172:178)
 
+final_elt_w1 <- left_join(elt_w1_clean_5, elt_w1_scales)
+
+view_df(final_elt_w1)
 ```
 
+# Challenge
+q68 has option "no response" as a 5 and not as a 99. What I did on line 78 didn't work. The scale range still goes to: teacher_lat_fam_rel		range: 2.2-5.0. ---> This indicates that the data wasn't changed. The values were not converted to 99 and then to NA. 
 
-
+```{r}
+final_elt_w1$q68 # two people marked 5 for no response. 
+```
 
 
 # Notes
