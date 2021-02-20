@@ -22,8 +22,8 @@ p_w1_raw <- haven::read_sav(here("nopublish", "7b. Juntos Parent W1-SPAN_Februar
 
 p_w1_raw <- p_w1_raw %>% 
   arrange(ID_1_TEXT) %>% # ordering participants ids
-  janitor::clean_names() %>% 
-  select(-id) %>% # cleaning names
+  janitor::clean_names() %>% # cleaning names
+  select(-id) %>% 
   rename(c("id" = "id_1_text"))
 
 p_w1_raw
