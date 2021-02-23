@@ -75,10 +75,12 @@ elt_w1_clean_3 <- elt_w1_clean_2 %>%
          condition = set_vall(condition, c("control" = 1, "intervention" = 2)),
          school_id = as.numeric(school_id),
          school_id = set_vall(school_id, c("cascade" = 1, "prairie_mountain" = 2, "kelly" = 3, "ata" = 4, "briggs" = 5, "agnes_stewart" = 6)),
-         q68 = set_vall(q68, c("Strongly Disagree" = 1, "Disagree" = 2, "Agree" = 3, "Strongly Agree" = 4, "No response" = 99))) # recoding values bec. no response was 5, not 99. 
+         q68 = ifelse(q68 == 5, 99, q68),
+         q68 = set_varl(q68, "When I communicate with Latino families, I keep in mind that many Latino parents may not understand how to navigate the educational system in this
+country."),
+         q68 = set_vall(q68, c("Strongly Disagree" = 1, "Disagree" = 2, "Agree" = 3, "Strongly Agree" = 4, "No response" = 99)))
 
 elt_w1_clean_3
-
 
 view_df(elt_w1_clean_3) # nice plot that serves as codebook
 ```
@@ -86,7 +88,7 @@ view_df(elt_w1_clean_3) # nice plot that serves as codebook
 ```{r}
 # exporting to .sav to check proper coding of condition and labels
 # elt_w1_clean_3 %>%
-#   haven::write_sav(here("nopublish", "elt_w1_clean_3.sav")) # updated export on 02/20/21
+#   haven::write_sav(here("nopublish", "elt_w1_clean_3.sav")) # updated export on 02/23/21
 ```
 
 Results:
@@ -309,7 +311,7 @@ view_df(elt_w1_clean_5)
 ```{r}
 # exporting to .sav to check proper coding of condition and labels
 # elt_w1_clean_5 %>%
-#   haven::write_sav(here("nopublish", "elt_w1_clean_5.sav")) # it worked, variable and value labels were succesfully exported. # updated export on 02/20/21
+#   haven::write_sav(here("nopublish", "elt_w1_clean_5.sav")) # it worked, variable and value labels were succesfully exported. # updated export on 02/23/21
 ```
 
 # Notes on Missing values
@@ -480,19 +482,5 @@ final_elt_w1 <- left_join(elt_w1_clean_5, elt_w1_scales)
 view_df(final_elt_w1)
 ```
 
-# Challenge
-q68 has option "no response" as a 5 and not as a 99. What I did on line 78 didn't work. The scale range still goes to: teacher_lat_fam_rel		range: 2.2-5.0. ---> This indicates that the data wasn't changed. The values were not converted to 99 and then to NA. 
-
-```{r}
-final_elt_w1$q68 # two people marked 5 for no response. 
-```
-
-
 # Notes
 in report say that only scales have reverse coded items. In the dataset in itself, I won't reverse code because it strips out value labels. 
-
-
-
-q1, q2, q3, q4, q5, q6, q7, q8, q9, q10, q11,  q12, q13, q14, q15, q16, q17, q18, q19, q20, q21, q22, q23, q24, q25, q26, q27, q28, q29, q30, q31, q32, q33, q34, q35, q36, q37, q38, q39, q40, q41, q42, q43, q44, q45, q46, q47, q48, q49, q50, q51, q52, q53, q54, q55, q56, q57, q58, q59, q60, q61, q62, q63, q64, q65, q66, q67, q68, q69, q70, q71, q72, q73, q74, q75, q76, q78, q79, q80, q81, q82, q83, q84, q85, q86, q87, q88, q89, q90, q91, q92, q93, q94, q95, q96, q97, q98, q99, q100, q101, q102, q103, q104, q105, q106
-q108, q109, q110, q111, q112, q113, q114, q115, q116, q117
-q118, q119, q120, q121, q122, q123, q124
