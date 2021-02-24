@@ -48,7 +48,7 @@ duplicated(y_w1_clean$id)
 y_w1_clean
 ```
 
-id 612 appears as if belonged to school 2 = prairie. Waiting for Eli's response. 
+id 612 appeared as if belonged to school 2 = prairie, this was incorrect. 
 
 ```{r}
 # fixing wrong assignment
@@ -83,10 +83,21 @@ view_df(y_w1_clean_3) # nice plot that serves as codebook
 #   haven::write_sav(here("nopublish", "y_w1_clean_3.sav")) # it worked, the .sav file has all 94 participants with the proper scale and the proper level labels.
 ```
 
+q38 has option 99 as "I don't know" and there is no "no response" option. Probably an error because other items in scale (q36 - q 40) have 88 = "I don't know" and 99 = "refuse to answer". 
+
+Because code below changes the values of the data, I am leaving this item with the coding as is: 99 as "I don't know". It will anyways be converted as NA for scales. 
 
 ```{r}
-# collapsing spread variables
+# collapsing spread variables ---> no relevant variables need to be collapsed for this project. 
 
+# y_w1_clean_4 <- y_w1_clean_3 %>%
+#   mutate(q38 = as.numeric(q38),
+#          q38 = set_vall(q38, c("Never" = 1, "Rarely" = 2, "Sometimes" = 3, "Often" = 4, "I don’t know" = 88)),
+#          q38 = ifelse(q38 == 99, 88, q68))  # for some reason this completely changes the values of the data. 
+
+# y_w1_clean_3$q38
+# 
+# y_w1_clean_4$q38
 
 ```
 
@@ -94,6 +105,183 @@ view_df(y_w1_clean_3) # nice plot that serves as codebook
 ```{r}
 # renaming demo vars
 
+y_w1_clean_5 <- y_w1_clean_3 %>% # not y_w1_clean_4 for consistency w parent & educator
+  rename(c("lang_english" = "q92_1"),
+         c("lang_spanish" = "q92_2"),
+         c("lang_indigenous" = "q92_3"),
+         c("lang_other" = "q92_4"),
+         c("lang_no_response" = "q92_99"),
+         c("lang_indigenous_text" = "q92_3_text"),
+         c("lang_other_text" = "q92_4_text"),
+         c("spanish_comfort_home" = "q93"),
+         c("spanish_comfort_school" = "q94"),
+         c("spanish_comfort_friends" = "q95"),
+         c("spanish_comfort_general" = "q96"),
+         c("english_comfort_home" = "q97"),
+         c("english_comfort_school" = "q98"),
+         c("english_comfort_friends" = "q99"),
+         c("english_comfort_general" = "q100"),
+         c("gender_id" = "q231"),
+         c("white" = "q232_1"),
+         c("hispanic_latino_spanish" = "q232_2"),
+         c("indigenous_americas" = "q232_3"),
+         c("black_african_american" = "q232_4"),
+         c("asian" = "q232_5"),
+         c("american_indian_alaska_native" = "q232_6"),
+         c("middle_eastern_north_african" = "q232_7"),
+         c("native_hawaiian_pacific_islander" = "q232_8"),
+         c("race_ethnicity_other" = "q232_9"),
+         c("race_ethnicity_no_response" = "q232_99"),
+         c("indigenous_americas_text" = "q232_3_text"),
+         c("race_ethnicity_other_text" = "q232_9_text"),
+         c("age" = "q233"), 
+         c("birth_country" = "q234"),
+         c("another_birth_country_text" = "q234_2_text"),
+         c("age_first_moved_us" = "q235_1_text")) %>%
+  select(-q235) # deleted: q235 because they did not have meaningful info
 
+view_df(y_w1_clean_5)
+
+```
+
+
+```{r}
+# exporting to .sav to check proper coding of condition and labels
+# y_w1_clean_5 %>%
+#   haven::write_sav(here("nopublish", "y_w1_clean_5.sav")) # it worked, variable and value labels were succesfully exported. # export on 02/24/21
+```
+
+
+# Notes on Missing values
+
+77 = "doesn't apply"
+88 = "I don't know"
+99 = "no response"
+-99 = seen but unanswered questions -- (e.g questions that ask participants to respond if they have knowledge about classroom)
+
+```{r}
+# recoding missing values as N/A with function
+
+# vector with missing values in dataset
+missing_vals <- c(77, 88, 99, -99)
+
+# function that returns true if values in vector are equal to missing_vals. The function takes a vector x, and specified values of missing data
+recode_missing <- function(x, missing_vals = c(77, 88, 99, -99)) {
+  test <- x %in% missing_vals
+  ifelse(test, NA, x)
+}
+
+# function that recodes missing values to NA. The function takes a dataframe with variables with missing data, and specified values of missing data
+recode_missing_df <- function(df, missing_vals = c(77, 88, 99, -99)) {
+  modify(df, ~recode_missing(.x, missing_vals)) # here uses the function created above
+}
+
+y_w1_clean_6 <- recode_missing_df(y_w1_clean_5)
+```
+
+# Scales
+
+## homework involvement --> NOT using these.
+q6-q13 and q15
+
+## other parent-youth education involvement vars --> NOT using these.
+q14, q16, q17
+
+## parent support of youth with school & community involvement 
+q18-q22
+
+## parent-youth communication about school and ed --> NOT using these.
+q23-q35 #####
+
+## youth's perception of parent involvement
+q36-q40 (1-4, never - often) higher score, more PI
+
+## youth's involvement in school & community --> NOT using these.
+q41-q44
+
+## teacher-student relationship
+q45-q55 (1-4, disagree - agree) higher score, better rel.
+
+
+## youth academic self-efficacy (?) --> NOT using these.
+q57-q67 
+
+## school climate
+q68-q82 (1-4 disagree - agree, but q81 needs to be reverse coded) higher score, better climate
+
+## school engagement --> NOT using these.
+q83-q91 (several need to be reverse coded)
+
+## parent-youth relationship 
+q127-q132 (1-4, never - often) higher score, better rel
+
+## parent-youth difficult conversations --> NOT using these.
+q136-q143
+
+## monitoring --> NOT using these.
+q144-q149 
+
+## discipline --> NOT using these.
+q150-q160
+
+## youth behavior --> NOT using these.
+q161-q171
+
+## others --> NOT using these.
+SDQ, hope, peers, substance use
+
+
+# Common guidelines for evaluating Cronbach's Alpha
+.00 to .69 = Poor
+.70 to .79 = Fair 
+.80 to .89 = Good 
+.90 to .99 = Excellent/Strong
+
+
+```{r}
+y_w1_clean_6_rev_code <- y_w1_clean_6 %>%
+  mutate(q81 = likert_reverse(q81, top = 4, bottom = 1))
+```
+
+
+```{r}
+####### internal consistency ######
+
+library(psych)
+
+par_supp_scho <- data.frame(y_w1_clean_6_rev_code[,26:30]) #q18-q22
+alpha(par_supp_scho) # alpha = .72 --> fair consistency
+
+par_commun_scho <- data.frame(y_w1_clean_6_rev_code[,31:43]) #q23-q35
+alpha(par_commun_scho) # alpha = .88 --> good consistency
+
+par_inv <- data.frame(y_w1_clean_6_rev_code[,44:48]) #q36-q40
+alpha(par_inv) # alpha = .68 --> poor consistency #### not using this one. 
+
+youth_teach_rel <- data.frame(y_w1_clean_6_rev_code[,53:63]) #q45-q55
+alpha(youth_teach_rel) # alpha = .91 --> Excellent consistency
+
+climate <- data.frame(y_w1_clean_6_rev_code[,75:89]) #q68-q82
+alpha(climate) # alpha = .92 --> Excellent consistency
+
+youth_par_rel <- data.frame(y_w1_clean_6_rev_code[,179:184]) #q127-q132
+alpha(youth_par_rel) # alpha = .76 --> fair consistency
+```
+
+```{r}
+####### scales ######
+
+y_w1_scales <- y_w1_clean_6_rev_code %>%
+  rowwise() %>% 
+  mutate(parent_support_school = mean(c(q18, q19, q20, q21, q22), na.rm = TRUE),
+         parent_communic_school = mean(c(q23, q24, q25, q26, q27, q28, q29, q30, q31, q32, q33, q34, q35), na.rm = TRUE),
+         youth_teacher_rel = mean(c(q45, q46, q47, q48, q49, q50, q51, q52, q53, q54, q55), na.rm = TRUE),
+         school_climate = mean(c(q68, q69, q70, q71, q72, q73, q74, q75, q76, q77, q78, q79, q80, q81, q82), na.rm = TRUE),
+         youth_parent_rel = mean(c(q127, q128, q129, q130, q131, q132), na.rm = TRUE)) %>%
+  select(1:7, 300:304)
+
+final_y_w1 <- left_join(y_w1_clean_5, y_w1_scales)
+
+view_df(final_y_w1)
 ```
 
