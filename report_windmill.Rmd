@@ -15,6 +15,16 @@ main-color: "#65955E"
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+
+library(rio)
+library(here)
+library(tidyverse)
+library(haven)
+
+library(surveytoolbox)
+library(sjPlot)
+library(kableExtra)
+
 ```
 
 # Juntos Project Description {-}
@@ -25,11 +35,13 @@ The *Juntos* Project was a three-year study led by the University of Oregon’s 
 
 The *Conexiones* curricula was built on Latino cultural assets, addressed common challenges confronting immigrant students and families in terms of school success, and utilized effective strategies for increasing educators’ awareness of Latino cultures and the barriers that exist for Latino immigrant students and families in schools. It also focused on building effective family-school communication and partnerships with the aim of improving Latino students’ academic success. 
 
-Participating schools belonged to three different school districts in the state of Oregon and were randomly assigned to either a control group or a intervention group that received the *Conexiones* intervention program. Study participants completed assessments at three different time points (baseline, immediately post-intervention, and 12-month post-intervention). The complete dataset in the project is made of three waves of data with separate assessments for each participant type (parents, students, and educators). 
+The six participating schools belonged to three different school districts in the state of Oregon and were randomly assigned to either a control group or a intervention group that received the *Conexiones* intervention program. Study participants completed assessments at three different time points (baseline, immediately post-intervention, and 12-month post-intervention). The complete dataset in the project is made of three waves of data with separate assessments for each participant type (parents, students, and educators). 
 
 ## Report details {-}
 
 This report will be focusing only on the baseline assessment and is intended to describe the data cleaning process with the aim of helping CEQP staff replicate these procedures in subsequent waves of data and future projects. The report will also include a brief description of the sociodemographic characteristics of the study participants, the scale creation process, the average scores of participants’ responses in regards to major study constructs, and recommendations for more advanced statistical analyses that link the different types of participants in the study.
+
+This image is a placeholder:
 
 ![](C:/Users/alega/Documents/1. GRADUATE SCHOOL/Academics/Year IV/EDLD 609/juntos/ceqp_logo.PNG)
 
@@ -40,7 +52,57 @@ I spent a loooot of time cleaning!
 
 ## Educator's dataset {-}
 
-...
+```{r, include=FALSE}
+w1_raw_elt <- haven::read_sav(here("nopublish", "ELT W1 ERC 11.11.2020.sav"))
+```
+
+The raw dataset had 43 observations and 202 variables of which 17 were metadata variables created by Qualtrics, the software used to create the assessment surveys. In the following code, I removed all but one of the metadata variables, `response_id`, that is an unique identifier assigned by Qualtrics that resulted handy in dealing with duplicated ids. Other data cleaning procedures are described in the comments marked with a # sign. 
+
+```{r}
+elt_w1_clean <- w1_raw_elt %>% 
+  janitor::clean_names() %>% # function that formats variables names
+  select(-1:-8, -10:-17, -202) %>% # selecting out columns with metadata
+  rename(c("id" = "pj")) %>% # renaming id variable
+  arrange(id) # ordering participants ids in descending order
+```
+
+When evaluating if the dataset had duplicated ids, I found that `id` 257 was duplicated and there was no `id` 254. 
+
+```{r, echo=FALSE}
+d <- elt_w1_clean %>%
+  select(1:3, 7:9) %>%
+  filter(id > 250 & id < 350)
+```
+
+```{r, eval=TRUE, echo=FALSE}
+kbl(d, booktabs = T) # make this table decent looking!!
+```
+
+After checking with the CEQP data manager, I corroborated that one of the duplicated cases of the `id` 257 in fact was `id` 254. I fixed this mistake with the code below using the `response_id` variable and the [mutate](https://dplyr.tidyverse.org/reference/mutate.html) and [case_when](https://dplyr.tidyverse.org/reference/case_when.html) functions. 
+
+```{r}
+elt_w1_clean <- elt_w1_clean %>%
+  mutate(id = case_when(response_id == "R_6EELe7Uuwi9W7zX" ~ "254",
+                        TRUE ~ as.character(id))) %>%
+  arrange(id)
+```
+
+The id protocol followed in CEQP projects is very simple. They usually use three digits for each individual participant id and use the first of these three digits to indicate the school. In this system, ids in the 100’s would belong to school 1, ids in the 200’s to school 2, and so on.
+
+By visual inspection I dentified that the first digit of the indvidual ids in the `id` variable did not correspond to the ids in the school id variable `school` for schools 3, 4, 5, and 6. In the table below, I selected four variables and only the first row of data of each of the six schools to ilustrate this point. 
+
+```{r, eval=TRUE, echo=FALSE}
+
+d <- elt_w1_clean %>%
+  select(2, 3, 7:9) %>%
+  filter(id == 150 | id == 250 |id == 350 |id == 450 |id == 550 |id == 650)
+
+kbl(d, booktabs = T) # make this table decent looking!!
+```
+
+
+
+
 
 ## Parent dataset {-}
 
@@ -107,3 +169,6 @@ Say something about the average scores...
 # Recommendations  {-}
 
 I recommend...
+
+* id protocol
+  + ...
