@@ -6,9 +6,9 @@ date: "March 2021"
 output: 
   pagedreport::paged_windmill:
     front_img: "C:/Users/alega/Documents/1. GRADUATE SCHOOL/Academics/Year IV/EDLD 609/juntos/front.PNG"
-    logo: "https://mk0rfortheresto0o08q.kinstacdn.com/wp-content/uploads/2020/08/rru-logo-blue.svg"
+    logo: "C:/Users/alega/Documents/1. GRADUATE SCHOOL/Academics/Year IV/EDLD 609/juntos/ceqp_logo.svg"
     img_to_dark: TRUE
-    logo_to_white: TRUE
+    logo_to_white: FALSE
 knit: pagedown::chrome_print
 main-color: "#65955E"
 ---
@@ -19,9 +19,19 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Juntos Project Description {-}
 
-## Study and Intervention Details {-}
+## Study and intervention details {-}
 
-Say something about the project.
+The *Juntos* Project was a three-year study led by the University of Oregon’s Center for Equity Promotion [CEQP.](https://ceqp.uoregon.edu/). The project developed a culturally specific family–school partnership intervention, *Conexiones: Families and Schools United for Equity* (hereafter referred to as *Conexiones*), designed to enhance Latino parents’ and educators’ capacities to effectively support Latino student success.
+
+The *Conexiones* curricula was built on Latino cultural assets, addressed common challenges confronting immigrant students and families in terms of school success, and utilized effective strategies for increasing educators’ awareness of Latino cultures and the barriers that exist for Latino immigrant students and families in schools. It also focused on building effective family-school communication and partnerships with the aim of improving Latino students’ academic success. 
+
+Participating schools belonged to three different school districts in the state of Oregon and were randomly assigned to either a control group or a intervention group that received the *Conexiones* intervention program. Study participants completed assessments at three different time points (baseline, immediately post-intervention, and 12-month post-intervention). The complete dataset in the project is made of three waves of data with separate assessments for each participant type (parents, students, and educators). 
+
+## Report details {-}
+
+This report will be focusing only on the baseline assessment and is intended to describe the data cleaning process with the aim of helping CEQP staff replicate these procedures in subsequent waves of data and future projects. The report will also include a brief description of the sociodemographic characteristics of the study participants, the scale creation process, the average scores of participants’ responses in regards to major study constructs, and recommendations for more advanced statistical analyses that link the different types of participants in the study.
+
+![](C:/Users/alega/Documents/1. GRADUATE SCHOOL/Academics/Year IV/EDLD 609/juntos/ceqp_logo.PNG)
 
 
 # Data Cleaning procedures {-}
@@ -75,6 +85,22 @@ Say something about scales
 ...
 
 ## Youth scales {-}
+
+...
+
+# Average Scores of Major Study Constructs  {-}
+
+Say something about the average scores...
+
+## Educator's average scores {-}
+
+...
+
+## Parent average scores {-}
+
+...
+
+## Youth average scores {-}
 
 ...
 
