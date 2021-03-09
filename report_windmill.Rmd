@@ -5,8 +5,8 @@ author: "Alejandra Garcia Isaza"
 date: "March 2021"
 output: 
   pagedreport::paged_windmill:
-    front_img: "C:/Users/alega/Documents/1. GRADUATE SCHOOL/Academics/Year IV/EDLD 609/juntos/front.PNG"
-    logo: "C:/Users/alega/Documents/1. GRADUATE SCHOOL/Academics/Year IV/EDLD 609/juntos/ceqp_logo.svg"
+    front_img: "../juntos/front.PNG"
+    logo: "../juntos/ceqp_logo.svg"
     img_to_dark: TRUE
     logo_to_white: FALSE
 knit: pagedown::chrome_print
@@ -78,7 +78,7 @@ d <- elt_w1_clean %>%
 kbl(d, booktabs = T) # make this table decent looking!!
 ```
 
-After checking with the CEQP data manager, I corroborated that one of the duplicated cases of the `id` 257 in fact was `id` 254. I fixed this mistake with the code below using the `response_id` variable and the [mutate](https://dplyr.tidyverse.org/reference/mutate.html) and [case_when](https://dplyr.tidyverse.org/reference/case_when.html) functions. 
+After checking with the CEQP data manager, I corroborated that one of the duplicated cases of `id` 257 in fact was `id` 254. I fixed this mistake with the code below using the `response_id` variable and the [mutate](https://dplyr.tidyverse.org/reference/mutate.html) and [case_when](https://dplyr.tidyverse.org/reference/case_when.html) functions. 
 
 ```{r}
 elt_w1_clean <- elt_w1_clean %>%
@@ -100,6 +100,21 @@ d <- elt_w1_clean %>%
 kbl(d, booktabs = T) # make this table decent looking!!
 ```
 
+
+```{r}
+# fixing wrong assignment
+elt_w1_clean_2 <- elt_w1_clean %>%
+  mutate(school_id = str_sub(id, 1, 1),
+         condition = case_when(
+           school_id == "1" | school_id == "3" | school_id == "5" ~ "1",
+           school_id == "2" | school_id == "4" | school_id == "6" ~ "2"
+         )) %>%
+  select(school_id, condition, everything()) %>%
+  add_column(wave = 1, .before = 10) %>%
+  select(- school)
+
+elt_w1_clean_2
+```
 
 
 

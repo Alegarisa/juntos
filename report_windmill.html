@@ -19,7 +19,7 @@
 <meta name="description" content="Juntos Project Initial Report">
 
 <script id="pandoc-meta" type="application/json">
-{"newpage_html_class":"page-break-after","date":"March 2021","subtitle":"Baseline Assessment Cleaning and Recommendations","output":{"pagedreport::paged_windmill":{"img_to_dark":true,"front_img":"C:/Users/alega/Documents/1. GRADUATE SCHOOL/Academics/Year IV/EDLD 609/juntos/front.PNG","logo_to_white":false,"logo":"C:/Users/alega/Documents/1. GRADUATE SCHOOL/Academics/Year IV/EDLD 609/juntos/ceqp_logo.svg"}},"author":"Alejandra Garcia Isaza","knit":"pagedown::chrome_print","title":"Juntos Project Initial Report","main-color":"#65955E"}
+{"newpage_html_class":"page-break-after","date":"March 2021","subtitle":"Baseline Assessment Cleaning and Recommendations","output":{"pagedreport::paged_windmill":{"img_to_dark":true,"front_img":"../juntos/front.PNG","logo_to_white":false,"logo":"../juntos/ceqp_logo.svg"}},"author":"Alejandra Garcia Isaza","knit":"pagedown::chrome_print","title":"Juntos Project Initial Report","main-color":"#65955E"}
 </script>
 
 <title>Juntos Project Initial Report</title>
@@ -29054,7 +29054,7 @@ R_3IRUos8weYHpWB1
 </tr>
 </tbody>
 </table>
-<p>After checking with the CEQP data manager, I corroborated that one of the duplicated cases of the <code>id</code> 257 in fact was <code>id</code> 254. I fixed this mistake with the code below using the <code>response_id</code> variable and the <a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a> and <a href="https://dplyr.tidyverse.org/reference/case_when.html">case_when</a> functions.</p>
+<p>After checking with the CEQP data manager, I corroborated that one of the duplicated cases of <code>id</code> 257 in fact was <code>id</code> 254. I fixed this mistake with the code below using the <code>response_id</code> variable and the <a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a> and <a href="https://dplyr.tidyverse.org/reference/case_when.html">case_when</a> functions.</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" title="1">elt_w1_clean &lt;-<span class="st"> </span>elt_w1_clean <span class="op">%&gt;%</span></a>
 <a class="sourceLine" id="cb2-2" title="2"><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">id =</span> <span class="kw">case_when</span>(response_id <span class="op">==</span><span class="st"> &quot;R_6EELe7Uuwi9W7zX&quot;</span> <span class="op">~</span><span class="st"> &quot;254&quot;</span>,</a>
 <a class="sourceLine" id="cb2-3" title="3">                        <span class="ot">TRUE</span> <span class="op">~</span><span class="st"> </span><span class="kw">as.character</span>(id))) <span class="op">%&gt;%</span></a>
@@ -29186,6 +29186,52 @@ q3
 </tr>
 </tbody>
 </table>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" title="1"><span class="co"># fixing wrong assignment</span></a>
+<a class="sourceLine" id="cb3-2" title="2">elt_w1_clean_<span class="dv">2</span> &lt;-<span class="st"> </span>elt_w1_clean <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb3-3" title="3"><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">school_id =</span> <span class="kw">str_sub</span>(id, <span class="dv">1</span>, <span class="dv">1</span>),</a>
+<a class="sourceLine" id="cb3-4" title="4">         <span class="dt">condition =</span> <span class="kw">case_when</span>(</a>
+<a class="sourceLine" id="cb3-5" title="5">           school_id <span class="op">==</span><span class="st"> &quot;1&quot;</span> <span class="op">|</span><span class="st"> </span>school_id <span class="op">==</span><span class="st"> &quot;3&quot;</span> <span class="op">|</span><span class="st"> </span>school_id <span class="op">==</span><span class="st"> &quot;5&quot;</span> <span class="op">~</span><span class="st"> &quot;1&quot;</span>,</a>
+<a class="sourceLine" id="cb3-6" title="6">           school_id <span class="op">==</span><span class="st"> &quot;2&quot;</span> <span class="op">|</span><span class="st"> </span>school_id <span class="op">==</span><span class="st"> &quot;4&quot;</span> <span class="op">|</span><span class="st"> </span>school_id <span class="op">==</span><span class="st"> &quot;6&quot;</span> <span class="op">~</span><span class="st"> &quot;2&quot;</span></a>
+<a class="sourceLine" id="cb3-7" title="7">         )) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb3-8" title="8"><span class="st">  </span><span class="kw">select</span>(school_id, condition, <span class="kw">everything</span>()) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb3-9" title="9"><span class="st">  </span><span class="kw">add_column</span>(<span class="dt">wave =</span> <span class="dv">1</span>, <span class="dt">.before =</span> <span class="dv">10</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb3-10" title="10"><span class="st">  </span><span class="kw">select</span>(<span class="op">-</span><span class="st"> </span>school)</a>
+<a class="sourceLine" id="cb3-11" title="11"></a>
+<a class="sourceLine" id="cb3-12" title="12">elt_w1_clean_<span class="dv">2</span></a></code></pre></div>
+<pre><code>## # A tibble: 43 x 187
+##    school_id condition response_id id    participant_role participant_rol~
+##    &lt;chr&gt;     &lt;chr&gt;     &lt;chr&gt;       &lt;chr&gt;        &lt;dbl+lbl&gt; &lt;chr&gt;           
+##  1 1         1         R_yqmmjOBG~ 150   1 [Administrato~ -99             
+##  2 1         1         R_3G2PVfTR~ 151   5 [Other classi~ Registrar       
+##  3 1         1         R_1o12bVLp~ 152   6 [Other certif~ -99             
+##  4 1         1         R_3dFdFPhd~ 153   5 [Other classi~ Educational Ass~
+##  5 1         1         R_1fcFFRsW~ 154   4 [Aducational ~ -99             
+##  6 1         1         R_RmgfBenu~ 155   2 [Teacher]      -99             
+##  7 2         2         R_DAUMF7oR~ 250   1 [Administrato~ -99             
+##  8 2         2         R_1NsKbbg0~ 251   2 [Teacher]      -99             
+##  9 2         2         R_Xvok02kO~ 252   2 [Teacher]      -99             
+## 10 2         2         R_294kWxIg~ 253   2 [Teacher]      -99             
+## # ... with 33 more rows, and 181 more variables: participant_role_6_text &lt;chr&gt;,
+## #   q1 &lt;dbl+lbl&gt;, wave &lt;dbl&gt;, q2 &lt;dbl+lbl&gt;, q3 &lt;dbl+lbl&gt;, q4 &lt;dbl+lbl&gt;,
+## #   q5 &lt;dbl+lbl&gt;, q6 &lt;dbl+lbl&gt;, q7 &lt;dbl+lbl&gt;, q8 &lt;dbl+lbl&gt;, q9 &lt;dbl+lbl&gt;,
+## #   q10 &lt;dbl+lbl&gt;, q11 &lt;dbl+lbl&gt;, q12 &lt;dbl+lbl&gt;, q13 &lt;dbl+lbl&gt;, q14 &lt;dbl+lbl&gt;,
+## #   q15 &lt;dbl+lbl&gt;, q16 &lt;dbl+lbl&gt;, q17 &lt;dbl+lbl&gt;, q18 &lt;dbl+lbl&gt;, q19 &lt;dbl+lbl&gt;,
+## #   q20 &lt;dbl+lbl&gt;, q21 &lt;dbl+lbl&gt;, q22 &lt;dbl+lbl&gt;, q23 &lt;dbl+lbl&gt;, q24 &lt;dbl+lbl&gt;,
+## #   q25 &lt;dbl+lbl&gt;, q26 &lt;dbl+lbl&gt;, q27 &lt;dbl+lbl&gt;, q28 &lt;dbl+lbl&gt;, q29 &lt;dbl+lbl&gt;,
+## #   q30 &lt;dbl+lbl&gt;, q31 &lt;dbl+lbl&gt;, q32 &lt;dbl+lbl&gt;, q33 &lt;dbl+lbl&gt;, q34 &lt;dbl+lbl&gt;,
+## #   q35 &lt;dbl+lbl&gt;, q36 &lt;dbl+lbl&gt;, q37 &lt;dbl+lbl&gt;, q38 &lt;dbl+lbl&gt;, q39 &lt;dbl+lbl&gt;,
+## #   q40 &lt;dbl+lbl&gt;, q41 &lt;dbl+lbl&gt;, q42 &lt;dbl+lbl&gt;, q43 &lt;dbl+lbl&gt;, q44 &lt;dbl+lbl&gt;,
+## #   q45 &lt;dbl+lbl&gt;, q46 &lt;dbl+lbl&gt;, q47 &lt;dbl+lbl&gt;, q48 &lt;dbl+lbl&gt;, q49 &lt;dbl+lbl&gt;,
+## #   q50 &lt;dbl+lbl&gt;, q51 &lt;dbl+lbl&gt;, q52 &lt;dbl+lbl&gt;, q53 &lt;dbl+lbl&gt;, q54 &lt;dbl+lbl&gt;,
+## #   q55 &lt;dbl+lbl&gt;, q56 &lt;dbl+lbl&gt;, q57 &lt;dbl+lbl&gt;, q58 &lt;dbl+lbl&gt;, q59 &lt;dbl+lbl&gt;,
+## #   q60 &lt;dbl+lbl&gt;, q61 &lt;dbl+lbl&gt;, q62 &lt;dbl+lbl&gt;, q63 &lt;dbl+lbl&gt;, q64 &lt;dbl+lbl&gt;,
+## #   q65 &lt;dbl+lbl&gt;, q66 &lt;dbl+lbl&gt;, q67 &lt;dbl+lbl&gt;, q68 &lt;dbl+lbl&gt;, q69 &lt;dbl+lbl&gt;,
+## #   q70 &lt;dbl+lbl&gt;, q71 &lt;dbl+lbl&gt;, q72 &lt;dbl+lbl&gt;, q73 &lt;dbl+lbl&gt;, q74 &lt;dbl+lbl&gt;,
+## #   q75 &lt;dbl+lbl&gt;, q76 &lt;dbl+lbl&gt;, q77 &lt;dbl+lbl&gt;, q78 &lt;dbl+lbl&gt;, q79 &lt;dbl+lbl&gt;,
+## #   q80 &lt;dbl+lbl&gt;, q81 &lt;dbl+lbl&gt;, q82 &lt;dbl+lbl&gt;, q83 &lt;dbl+lbl&gt;, q84 &lt;dbl+lbl&gt;,
+## #   q85 &lt;dbl+lbl&gt;, q86 &lt;dbl+lbl&gt;, q87 &lt;dbl+lbl&gt;, q88 &lt;dbl+lbl&gt;, q89 &lt;dbl+lbl&gt;,
+## #   q90 &lt;dbl+lbl&gt;, q91 &lt;dbl+lbl&gt;, q92 &lt;dbl+lbl&gt;, q93 &lt;dbl+lbl&gt;, q94 &lt;dbl+lbl&gt;,
+## #   q95 &lt;dbl+lbl&gt;, q96 &lt;dbl+lbl&gt;, q97 &lt;dbl+lbl&gt;, q98 &lt;dbl+lbl&gt;, ...</code></pre>
 </div>
 <div id="parent-dataset" class="section level2 unnumbered">
 <h2>Parent dataset</h2>
