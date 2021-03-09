@@ -50,7 +50,7 @@ knitr::include_graphics("../juntos/ceqp_logo.PNG")
 
 # Data Cleaning procedures {-}
 
-The following section describes the data cleaning procedures performed in each of the participant's type datasets.
+The following section describes the data cleaning procedures I performed in each of the participant's type datasets. I performed data cleaning using the [R](https://www.r-project.org/) and [R Studio](https://rstudio.com/) softwares, but had in mind that end users of the cleaned datasets will likely be SPSS users. 
 
 ## Educator's dataset {-}
 
@@ -138,7 +138,7 @@ knitr::include_graphics("../juntos/val_lab_off.PNG")
 
 This survey coding error meant that both values and values labels needed to be changed. I decided instead to create a new variable called `school_id` and delete the flawed original variable `school`. In the code below, the individual participant id variable `id` was used as the reference for the new `school_id` variable. 
 
-I also created a new variable called `condition` to indicate which schools were randomly assigned to the control group (coded as 1) or to the intervention group (coded as 2). Finally, I also created a `wave` variable to indicate the wave of the data. 
+I also created a new variable called `condition` to indicate which schools were randomly assigned to the control group (coded as 1) or to the intervention group (coded as 2). The way this was coded was that schools identified with an odd number (1, 3, and 5) were the control schools and the schools identified with an even number (2, 4, and 6) were the intervention schools. Finally, I also created a `wave` variable to indicate the wave of the data. 
 
 ```{r}
 
@@ -152,8 +152,24 @@ elt_w1_clean_2 <- elt_w1_clean %>%
   select(- school) # deleting school variable
 ```
 
+The `condition` and `school_id` variables I created in the previous code were string variables. In the code below I made them numeric so they can be used in quantitative analyses. I also added value labels with the `set_vall` function so that SPSS users can use the value labels button. 
 
+In the code below I also fixed a response option coding error I identified in the variable `q68`. Throughout most of the survey, response options were coded as "Strongly Disagree" = 1, "Disagree" = 2, "Agree" = 3, "Strongly Agree" = 4, "No response" = 99; however, in variable `q68` the response option "No response" was coded with a 5. I fixed this using the `ifelse` function, specifying that if this variable had a response of 5, it should be changed to 99. Next, I set the variable and value levels with `set_varl` and `set_vall`, respectively, because sometimes operations performed with R strips out these labels. 
 
+```{r}
+
+elt_w1_clean_3 <- elt_w1_clean_2 %>%
+  mutate(condition = as.numeric(condition),
+         condition = set_vall(condition, c("control" = 1, "intervention" = 2)),
+         school_id = as.numeric(school_id),
+         school_id = set_vall(school_id, c("cascade" = 1, "prairie_mountain" = 2, "kelly" = 3, "ata" = 4, "briggs" = 5, "agnes_stewart" = 6)),
+         q68 = ifelse(q68 == 5, 99, q68),
+         q68 = set_varl(q68, "When I communicate with Latino families, I keep in mind that many Latino parents may not understand how to navigate the educational system in this
+country."),
+         q68 = set_vall(q68, c("Strongly Disagree" = 1, "Disagree" = 2, "Agree" = 3, "Strongly Agree" = 4, "No response" = 99)))
+```
+
+Continue with collapsing of variables that Qualtrics "messed up" 
 
 ## Parent dataset {-}
 
