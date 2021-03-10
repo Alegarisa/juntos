@@ -92,40 +92,9 @@ view_df(elt_w1_clean_3) # nice plot that serves as codebook
 ```
 
 Results:
-- This would be the master dataset
+- This would be the master dataset (without collapsed vars or renamed vars)
 - school_id matchs assigned condition properly!
 - Labels were properly exported (both variable labels and level labels on .sav file)
-
-```{r}
-
-# collapsing variable english_comfort q132_1_<<choice>>
-
-d <- elt_w1_clean_3 %>% 
-    select(id, starts_with("q132_1")) %>% 
-    pivot_longer(
-      cols = starts_with("q132_1"),
-      names_to = "item",
-      values_to = "english_comfort",
-      values_drop_na = TRUE) %>% 
-   filter(english_comfort == 1) %>%
-  mutate(english_comfort = case_when(item == "q132_1_4" ~ "4",
-                                     item == "q132_1_3" ~ "3",
-                        TRUE ~ as.character(english_comfort))) %>%
-  select(-item)
-
-x <- left_join(elt_w1_clean_3, d)
-
-x_2 <- x %>%
-  mutate(english_comfort = as.numeric(english_comfort),
-         english_comfort = set_vall(english_comfort, c("not at all comfortable" = 1, "somewhat comfortable" = 2, "comfortable" = 3, "very comfortable" = 4, "no response" = 99)))
-
-
-# view_df(x_2)
-
-# x_2 %>%
-#   haven::write_sav(here("nopublish", "x_2.sav")) # it worked, the .sav file has all 43 participants with the proper scale and the proper level labels. 
-```
-
 
 ```{r}
 # collapsing language variables q132_<<language>>_<<choice>> 
@@ -166,9 +135,9 @@ spa <- elt_w1_clean_3 %>%
                         TRUE ~ as.character(spanish_comfort))) %>%
   select(-item_2) 
 
-duplicated(spa$id) # id 454 is duplicated. In w1_raw it shows that this participant chose options 1 and 2 (not sure if they could choose more than one option in Qulatrics). 
+duplicated(spa$id) # id 454 is duplicated. In w1_raw it shows that this participant chose options 1 and 2 (not sure if they could choose more than one option in Qualtrics). 
 
-# fising duplicate
+# fixing duplicate
 spa_2 <- spa %>% 
   distinct(id, .keep_all = TRUE) # Option 1, "not at all comfortable" was chosen because the duplicate was the second option.  
 

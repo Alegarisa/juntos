@@ -37,11 +37,11 @@ The *Conexiones* curricula was built on Latino cultural assets, addressed common
 
 The six participating schools belonged to three different school districts in the state of Oregon and were randomly assigned to either a control group or a intervention group that received the *Conexiones* intervention program. Study participants completed assessments at three different time points (baseline, immediately post-intervention, and 12-month post-intervention). The complete dataset in the project is made of three waves of data with separate assessments for each participant type (parents, students, and educators). 
 
-\pagebreak
-
 ## Report details {-}
 
 This report will be focusing only on the baseline assessment and is intended to describe the data cleaning process with the aim of helping CEQP staff replicate these procedures in subsequent waves of data and future projects. The report will also include a brief description of the sociodemographic characteristics of the study participants, the scale creation process, the average scores of participants’ responses in regards to major study constructs, and recommendations for more advanced statistical analyses that link the different types of participants in the study.
+
+\pagebreak
 
 ```{r, echo=FALSE, out.width="50%", fig.align="center"}
 
@@ -59,18 +59,24 @@ The following section describes the data cleaning procedures I performed in each
 w1_raw_elt <- haven::read_sav(here("nopublish", "ELT W1 ERC 11.11.2020.sav"))
 ```
 
-The raw dataset had 43 observations and 202 variables of which 17 were metadata variables created by Qualtrics, the software used to create the assessment surveys. In the following code, I removed all but one of the metadata variables, `response_id`, that is an unique identifier assigned by Qualtrics that resulted handy in dealing with duplicated ids. Other data cleaning procedures are described in the comments marked with a # sign. 
+The raw dataset had 43 observations and 202 variables of which 17 were metadata variables created by Qualtrics, the software used to develop the assessment surveys. Of the 43 observations, one case, participant with `id` 153 had incomplete data. 
+
+In the following code, I removed all but one of the metadata variables, `response_id`, that is an unique identifier assigned by Qualtrics that resulted handy in dealing with duplicated ids. Other data cleaning procedures are described in the comments marked with a # sign.
 
 ```{r}
 
 elt_w1_clean <- w1_raw_elt %>% 
-  janitor::clean_names() %>% # function that formats variables names
+  janitor::clean_names() %>% # function that formats variables' names
   select(-1:-8, -10:-17, -202) %>% # selecting out columns with metadata
   rename(c("id" = "pj")) %>% # renaming id variable
   arrange(id) # ordering participants ids in descending order
 ```
 
+### Dealing with duplicated ids
+
 When evaluating if the dataset had duplicated ids, I found that `id` 257 was duplicated and there was no `id` 254. 
+
+\pagebreak
 
 ```{r, echo=FALSE}
 
@@ -88,7 +94,7 @@ d %>%
   row_spec(6, color = "black", background = "#F3E35A")
 ```
 
-After checking with the CEQP data manager, I corroborated that one of the duplicated cases of `id` 257 in fact was `id` 254. I fixed this mistake with the code below using the `response_id` variable and the [mutate](https://dplyr.tidyverse.org/reference/mutate.html) and [case_when](https://dplyr.tidyverse.org/reference/case_when.html) functions. 
+After checking with CEQP's research assistant, I corroborated that one of the duplicated cases of `id` 257 in fact was `id` 254. I fixed this mistake with the code below using the `response_id` variable and the [mutate](https://dplyr.tidyverse.org/reference/mutate.html) and [case_when](https://dplyr.tidyverse.org/reference/case_when.html) functions. 
 
 ```{r}
 
@@ -98,18 +104,19 @@ elt_w1_clean <- elt_w1_clean %>%
   arrange(id)
 ```
 
-The id protocol followed in CEQP projects is very simple. They usually use three digits for each individual participant id and use the first of these three digits to indicate the school. In this system, ids in the 100’s would belong to school 1, ids in the 200’s to school 2, and so on.
+### Dealing with survey coding errors
+
+The id protocol followed in CEQP projects is very straightforward. They usually use three digits for each individual participant id and use the first of these three digits to indicate the school id. In this system, ids in the 100’s would belong to school 1, ids in the 200’s to school 2, and so on.
 
 By visual inspection I dentified that the first digit of the indvidual ids in the `id` variable did not correspond to the ids in the school id variable `school` for schools 3, 4, 5, and 6. In the table below, I selected four variables and only the first row of data of each of the six schools to ilustrate this point. 
 
-As can be seen in the `school` variable, ids in the 300's are coded to belong to school 4 and ids in the 400's are coded to belong to school 3. I am calling this flip-flopped school ids. Schools 5 and 6 are also flip-flopped. This seemed an easy enough fix to make, but later I found an additional error that was coded in the Qualtrics survey that made it challenging to understand what was happening.
+\pagebreak
 
 ```{r, echo=FALSE}
 
 d2 <- elt_w1_clean %>%
   select(2, 3, 7:9) %>%
   filter(id == 150 | id == 250 |id == 350 |id == 450 |id == 550 |id == 650)
-
 ```
 
 ```{r, echo=FALSE}
@@ -120,25 +127,24 @@ d2 %>%
   row_spec(3:6, color = "black", background = "#F3E35A")
 ```
 
-In the images below from the raw data SPSS file it can be seen that when value labels are "on", that is, instead of showing the values it shows the labels of the values, it appears as if there was no flip-flop because the names of the schools coincided with the numbers that were assigned to them. Indeed, "Kelly" was school 3 and its participants were identified with ids in the 300's and "ATA" was school 4 and its participants were identified with ids in the 400's. 
+As can be seen in the table, ids in the 300's are coded to belong to `school` 4 and ids in the 400's are coded to belong to `school` 3. I am calling this flip-flopped school ids. Schools 5 and 6 were also flip-flopped. At the moment I thought that this could be due to an error in the data exporting process and it seemed like an easy enough fix to make; I just needed to recode the names of the levels of the `school` variable. Later I found that this fix did not solve the issue. It took me a couple of months to identify that the error was coded in the Qualtrics survey.
 
-
-```{r, echo=FALSE, out.width="75%", fig.cap="A nice image.", fig.align="center"}
+The images below are screenshots of the same raw data SPSS file downloaded directly from Qualtrics. In figure 1, it can be seen that when the *value labels* button is "on" (i.e. showing value labels and not values), it appears as if there was no flip-flop because the names of the schools coincided with the numbers that were assigned to them. Indeed, "Kelly" was school 3 and its participants were identified with ids in the 300's and "ATA" was school 4 and its participants were identified with ids in the 400's, and so on.  
+```{r, echo=FALSE, out.width="75%", fig.cap="Value labels button on.", fig.align="center"}
 
 knitr::include_graphics("../juntos/val_lab_on.PNG")
 ```
-\pagebreak
 
-This changed when value labels were "off". In the image below, the flip-flop is evident again: 
+This changed when the *value labels* button was "off". In the image below, the flip-flopped school ids is evident again: 
 
-```{r, echo=FALSE, out.width="75%", fig.cap="Another nice image.", fig.align="center"}
+```{r, echo=FALSE, out.width="75%", fig.cap="Value labels button off", fig.align="center"}
 
 knitr::include_graphics("../juntos/val_lab_off.PNG")
 ```
 
-This survey coding error meant that both values and values labels needed to be changed. I decided instead to create a new variable called `school_id` and delete the flawed original variable `school`. In the code below, the individual participant id variable `id` was used as the reference for the new `school_id` variable. 
+This survey coding error meant that the `school` variable's value labels properly corresponded to the participants' ids, but the variable's values did not. Instead of recoding the values, I decided to create a new variable called `school_id` and delete the flawed original variable `school`. 
 
-I also created a new variable called `condition` to indicate which schools were randomly assigned to the control group (coded as 1) or to the intervention group (coded as 2). The way this was coded was that schools identified with an odd number (1, 3, and 5) were the control schools and the schools identified with an even number (2, 4, and 6) were the intervention schools. Finally, I also created a `wave` variable to indicate the wave of the data. 
+In the code below, I used the first digit of the individual participant id variable `id` as the reference for the new `school_id` variable, following CEQP'S id protocol. I also created a new variable called `condition` to indicate which schools were randomly assigned to the control group (coded as 1) or to the intervention group (coded as 2). I coded schools identified with a `school_id` odd number (1, 3, and 5) as the control schools and the schools identified with an even number (2, 4, and 6) as the intervention schools, as directed by CEQP's research assistant. Finally, I also created a `wave` variable to indicate the wave of the data. 
 
 ```{r}
 
@@ -154,7 +160,9 @@ elt_w1_clean_2 <- elt_w1_clean %>%
 
 The `condition` and `school_id` variables I created in the previous code were string variables. In the code below I made them numeric so they can be used in quantitative analyses. I also added value labels with the `set_vall` function so that SPSS users can use the value labels button. 
 
-In the code below I also fixed a response option coding error I identified in the variable `q68`. Throughout most of the survey, response options were coded as "Strongly Disagree" = 1, "Disagree" = 2, "Agree" = 3, "Strongly Agree" = 4, "No response" = 99; however, in variable `q68` the response option "No response" was coded with a 5. I fixed this using the `ifelse` function, specifying that if this variable had a response of 5, it should be changed to 99. Next, I set the variable and value levels with `set_varl` and `set_vall`, respectively, because sometimes operations performed with R strips out these labels. 
+In the code below I also fixed a response option coding error I identified in the variable `q68`. Throughout most of the survey, response options were coded as "Strongly Disagree" = 1, "Disagree" = 2, "Agree" = 3, "Strongly Agree" = 4, "No response" = 99; however, in variable `q68` the response option "No response" was coded as 5. I fixed this using the [ifelse](https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/ifelse) function, specifying that if this variable had a response of 5, it should be changed to 99. Finally, I set the variable and value labels with the [set_varl](https://nicedoc.io/martinctc/surveytoolbox) and [set_vall](https://nicedoc.io/martinctc/surveytoolbox) functions, respectively, because sometimes procedures performed with R strips out these labels. 
+
+\pagebreak
 
 ```{r}
 
@@ -169,7 +177,257 @@ country."),
          q68 = set_vall(q68, c("Strongly Disagree" = 1, "Disagree" = 2, "Agree" = 3, "Strongly Agree" = 4, "No response" = 99)))
 ```
 
-Continue with collapsing of variables that Qualtrics "messed up" 
+### Dealing with split out responses from multiple choice, unique answer variables
+
+In this dataset, several multiple choice variables that were originally meant to have a single answer, were spread out as if they had multiple answers. I believe this was because in the Qualtrics survey development process, the option for *Multiple answer* was selected, instead of *Single answer*. 
+
+```{r, echo=FALSE, out.width="75%", fig.cap="Qualtrics survey development", fig.align="center"}
+
+knitr::include_graphics("../juntos/multi_answ.PNG")
+```
+
+\pagebreak
+
+When this happens, participants could select mutually exclusive options, like this:
+
+```{r, echo=FALSE, out.width="50%", fig.cap="Qualtrics survey preview", fig.align="center"}
+
+knitr::include_graphics("../juntos/multi_answ_look.PNG")
+```
+
+When *Multiple answer* is selected, Qualtrics splits these multi-value fields into columns, assigning a value of 1 if the response option was chosen and a 0 if a response option was not chosen. In the following code, I collapsed the Spanish variable that was split out so it could be used in analyses. To avoid overwhelming the reader, I am omitting the code I used to collapse other language variables. I used the same procedure in all of these variables. 
+
+In the code below, the function [pivot_longer](https://tidyr.tidyverse.org/articles/pivot.html) makes the dataset "long" as it increases the number of rows and decreases the number of columns. This function gathers varables' names under the new variable `item_2` and gathers the values of these variables under the new variable `spanish_comfort`. Then, I chose only the options that had a value of 1, indicating when a participant chose that response option. Finally, I recoded the response options to follow this  scheme: "Not at all comfortable" = 1, "Somewhat comfortable" = 2, "Comfortable" = 3, "Very comfortable" = 4, "No response" = 99. 
+
+```{r, echo=FALSE, message=FALSE}
+# NOT including this code chunk in report. Just adding it to deal with a pandoc error. 
+
+# collapsing english variables
+eng <- elt_w1_clean_3 %>% 
+  select(id, starts_with("q132_1")) %>% 
+    pivot_longer(
+      cols = starts_with("q132_1"),
+      names_to = "item_1",
+      values_to = "english_comfort",
+      values_drop_na = TRUE) %>% 
+   filter(english_comfort == 1) %>%
+  mutate(english_comfort = case_when(item_1 == "q132_1_1" ~ "1",
+                                     item_1 == "q132_1_2" ~ "2",
+                                     item_1 == "q132_1_3" ~ "3",
+                                     item_1 == "q132_1_4" ~ "4",
+                                     item_1 == "q132_1_99" ~ "99",
+                        TRUE ~ as.character(english_comfort)))  %>%
+  select(-item_1)
+
+# collapsing spanish variables
+spa <- elt_w1_clean_3 %>%
+  select(id, starts_with("q132_2")) %>% 
+    pivot_longer(
+      cols = starts_with("q132_2"),
+      names_to = "item_2",
+      values_to = "spanish_comfort",
+      values_drop_na = TRUE) %>% 
+   filter(spanish_comfort == 1) %>%
+  mutate(spanish_comfort = case_when(item_2 == "q132_2_1" ~ "1",
+                                     item_2 == "q132_2_2" ~ "2",
+                                     item_2 == "q132_2_3" ~ "3",
+                                     item_2 == "q132_2_4" ~ "4",
+                                     item_2 == "q132_2_99" ~ "99",
+                        TRUE ~ as.character(spanish_comfort))) %>%
+  select(-item_2) 
+
+# id 454 is duplicated. In w1_raw it shows that this participant chose options 1 and 2.
+
+# fixing duplicate
+spa_2 <- spa %>% 
+  distinct(id, .keep_all = TRUE) # Option 1, "not at all comfortable" was chosen because the duplicate was the second option.  
+
+# joining english and spanish variables
+langs <- left_join(eng, spa_2) 
+
+# collapsing other language 1 variables
+other_1 <- elt_w1_clean_3 %>% 
+  select(id, starts_with("q132_3"), -q132_3_text) %>% 
+    pivot_longer(
+      cols = starts_with("q132_3"),
+      names_to = "item_3",
+      values_to = "other1_lang_comfort",
+      values_drop_na = TRUE) %>% 
+   filter(other1_lang_comfort == 1) %>%
+  mutate(other1_lang_comfort = case_when(item_3 == "q132_3_1" ~ "1",
+                                    item_3 == "q132_3_2" ~ "2",
+                                    item_3 == "q132_3_3" ~ "3",
+                                    item_3 == "q132_3_4" ~ "4",
+                                    item_3 == "q132_3_99" ~ "99",
+                        TRUE ~ as.character(other1_lang_comfort)))  %>%
+  select(-item_3)
+
+# collapsing other language 2 variables
+other_2 <- elt_w1_clean_3 %>% 
+  select(id, starts_with("q132_4"), -q132_4_text) %>% 
+    pivot_longer(
+      cols = starts_with("q132_4"),
+      names_to = "item_4",
+      values_to = "other2_lang_comfort",
+      values_drop_na = TRUE) %>% 
+   filter(other2_lang_comfort == 1) %>%
+  mutate(other2_lang_comfort = case_when(item_4 == "q132_4_1" ~ "1",
+                                    item_4 == "q132_4_2" ~ "2",
+                                    item_4 == "q132_4_3" ~ "3",
+                                    item_4 == "q132_4_4" ~ "4",
+                                    item_4 == "q132_4_99" ~ "99",
+                        TRUE ~ as.character(other2_lang_comfort)))  %>%
+  select(-item_4)
+
+
+# joining other 1 and 2 language variables
+others <- left_join(other_1, other_2) 
+
+
+# joining dataframes with all language variables
+lang_vars <- left_join(langs, others)
+
+
+# renaming variables with text input in master dataset (n = 43)
+lang_inputs <- elt_w1_clean_3 %>%
+  select(id, q132_3_text, q132_4_text) %>%
+  rename(c("other1_lang" = "q132_3_text"), c("other2_lang" = "q132_4_text"))
+
+# joining renamed master dataset with all language variables now collapsed to "recover" id 153 data
+all_lang_vars <- left_join(lang_inputs, lang_vars)
+
+# recordering all language vars
+all_lang_vars <- all_lang_vars %>%
+  select(id, english_comfort, spanish_comfort, other1_lang, other1_lang_comfort, other2_lang, everything())
+
+# creating new dataset that joins master dataset with reordered and collapsed lang vars
+elt_w1_clean_4 <- left_join(elt_w1_clean_3, all_lang_vars) %>%
+  select(-starts_with("q132_")) # deleting all previous language variables that were included in new variables # 
+
+# adding value labels on language vars
+elt_w1_clean_4 <- elt_w1_clean_4 %>%
+  mutate(english_comfort = as.numeric(english_comfort),
+         english_comfort = set_vall(english_comfort, c("not at all comfortable" = 1, "somewhat comfortable" = 2, "comfortable" = 3, "very comfortable" = 4, "no response" = 99)),
+         spanish_comfort = as.numeric(spanish_comfort),
+         spanish_comfort = set_vall(spanish_comfort, c("not at all comfortable" = 1, "somewhat comfortable" = 2, "comfortable" = 3, "very comfortable" = 4, "no response" = 99)),
+         other1_lang_comfort = as.numeric(other1_lang_comfort),
+         other1_lang_comfort = set_vall(other1_lang_comfort, c("not at all comfortable" = 1, "somewhat comfortable" = 2, "comfortable" = 3, "very comfortable" = 4, "no response" = 99)),
+         other2_lang_comfort = as.numeric(other2_lang_comfort),
+         other2_lang_comfort = set_vall(other2_lang_comfort, c("not at all comfortable" = 1, "somewhat comfortable" = 2, "comfortable" = 3, "very comfortable" = 4, "no response" = 99)),
+         )
+```
+
+
+```{r, eval=FALSE}
+
+# collapsing spanish variables
+spa <- elt_w1_clean_3 %>%
+  select(id, starts_with("q132_2")) %>% # creating a dataset with only the id and Spanish variables
+    pivot_longer(
+      cols = starts_with("q132_2"), 
+      names_to = "item_2",
+      values_to = "spanish_comfort",
+      values_drop_na = TRUE) %>% 
+   filter(spanish_comfort == 1) %>%
+  mutate(spanish_comfort = case_when(item_2 == "q132_2_1" ~ "1",
+                                     item_2 == "q132_2_2" ~ "2",
+                                     item_2 == "q132_2_3" ~ "3",
+                                     item_2 == "q132_2_4" ~ "4",
+                                     item_2 == "q132_2_99" ~ "99",
+                        TRUE ~ as.character(spanish_comfort))) %>%
+  select(-item_2) # selecting out variable with repetitive information
+```
+
+When all the language variables were collapsed I tested if there were duplicated cases and I found that participant identified with `id` 454 chose response option 1 and response option 2. 
+```{r, echo=FALSE}
+
+d3 <- spa %>%
+  filter(id > 450 & id < 550)
+```
+
+```{r, echo=FALSE}
+
+d3 %>%
+  kbl() %>%
+  kable_material(c("striped", "hover", font_size = 7)) %>%
+  row_spec(4:5, color = "black", background = "#F3E35A")
+```
+
+Because I can only assume that this was an entry error because the choices are mutually exclusive, "Not at all comfortable" = 1, vs. "Somewhat comfortable" = 2, I used the [distinct](https://www.rdocumentation.org/packages/dplyr/versions/0.7.8/topics/distinct) function to retain only unique values. For this case, option 1 = "Not at all comfortable" was retained as the function "assumes" the second option is the duplicative. 
+
+```{r, eval=FALSE}
+
+spa_2 <- spa %>% 
+  distinct(id, .keep_all = TRUE)
+```
+
+```{r, echo=FALSE}
+
+spa_2 %>%
+  filter(id > 450 & id < 550) %>%
+  kbl() %>%
+  kable_material(c("striped", "hover", font_size = 7)) %>%
+  row_spec(4, color = "black", background = "#F3E35A")
+```
+
+The last step in this process was making the language variables numeric so they could be used in quantitative analyses and adding the value labels so that the SPSS users can use the value labels button. I used the code below to do that. 
+
+```{r, eval=FALSE}
+
+elt_w1_clean_4 <- elt_w1_clean_4 %>%
+  mutate(english_comfort = as.numeric(english_comfort),
+         english_comfort = set_vall(english_comfort, c("not at all comfortable" = 1, "somewhat comfortable" = 2, "comfortable" = 3, "very comfortable" = 4, "no response" = 99)),
+         spanish_comfort = as.numeric(spanish_comfort),
+         spanish_comfort = set_vall(spanish_comfort, c("not at all comfortable" = 1, "somewhat comfortable" = 2, "comfortable" = 3, "very comfortable" = 4, "no response" = 99)),
+         other1_lang_comfort = as.numeric(other1_lang_comfort),
+         other1_lang_comfort = set_vall(other1_lang_comfort, c("not at all comfortable" = 1, "somewhat comfortable" = 2, "comfortable" = 3, "very comfortable" = 4, "no response" = 99)),
+         other2_lang_comfort = as.numeric(other2_lang_comfort),
+         other2_lang_comfort = set_vall(other2_lang_comfort, c("not at all comfortable" = 1, "somewhat comfortable" = 2, "comfortable" = 3, "very comfortable" = 4, "no response" = 99)),
+         )
+```
+
+As shown, the following variables were the result of the collapsing process described above: `english_comfort`, `spanish_comfort`, `other1_lang_comfort`, and `other2_lang_comfort`. 
+
+### Renaming demographic variables
+
+In the code below, I used the [rename](https://www.rdocumentation.org/packages/reshape/versions/0.8.8/topics/rename) function to rename the demographic variables that I will use to describe participants's characteristics in the next section of this report. This function uses a "new name" = "old name" pattern. Very straightforward! 
+
+At the end I selected out a few variables that did not have meaningful information. For instance, variable `q127` was a response/no response question that only indicated if participants chose to answer it. The meaningul information was contained in variable `q127_1_text` that was renamed as `age`. 
+
+```{r}
+
+elt_w1_clean_5 <- elt_w1_clean_4 %>%
+  rename(c("age" = "q127_1_text"), 
+         c("birth_country" = "q128"),
+         c("another_birth_country_text" = "q128_2_text"),
+         c("age_first_moved_us" = "q129_1_text"),
+         c("white" = "q130_1"),
+         c("hispanic_latino_spanish" = "q130_2"),
+         c("black_african_american" = "q130_3"),
+         c("asian" = "q130_4"),
+         c("american_indian_alaska_native" = "q130_5"),
+         c("indigenous_americas" = "q130_6"),
+         c("middle_eastern_north_african" = "q130_7"),
+         c("native_hawaiian_pacific_islander" = "q130_8"),
+         c("race_ethnicity_other" = "q130_9"),
+         c("race_ethnicity_no_response" = "q130_99"),
+         c("indigenous_americas_text" = "q130_6_text"),
+         c("race_ethnicity_other_text" = "q130_9_text"),
+         c("gender_id" = "q131"),
+         c("years_in_position" = "q133"),
+         c("years_in_school" = "q134"),
+         c("equity_leadership" = "q135_1"),
+         c("cultural_responsiveness" = "q135_2"),
+         c("restorative_practices" = "q135_3"),
+         c("diversity" = "q135_4"),
+         c("ell" = "q135_5"),
+         c("cont_ed_other" = "q135_6"),
+         c("cont_ed_na" = "q135_88"),
+         c("cont_ed_no_response" = "q135_99"),
+         c("cont_ed_other_text" = "q135_6_text")) %>%
+  select(-q127, -q129, -q131_3_text) # selecting out because they did not have meaningful info
+```
+
 
 ## Parent dataset {-}
 
@@ -186,7 +444,9 @@ Continue with collapsing of variables that Qualtrics "messed up"
 
 # Participant descriptives  {-}
 
-Say something about participant characteristics
+In the following section, I will use descriptive statistics to summarize participants' characteristics. 
+
+to do: use function to create summariers from several vars. create nice table. 
 
 ## Educator's characteristics {-}
 
@@ -241,4 +501,5 @@ note: include plots with average scores
 I recommend...
 
 * id protocol
-  + ...
+  + When developing the id protocol for schools, make sure that both values and values labels coincide. 
+  + Assign an unique identifier for each participant and an unique identifier per family. 
