@@ -29219,7 +29219,7 @@ Figure 2: Value labels button off
 <a class="sourceLine" id="cb3-4" title="4">           school_id <span class="op">==</span><span class="st"> &quot;1&quot;</span> <span class="op">|</span><span class="st"> </span>school_id <span class="op">==</span><span class="st"> &quot;3&quot;</span> <span class="op">|</span><span class="st"> </span>school_id <span class="op">==</span><span class="st"> &quot;5&quot;</span> <span class="op">~</span><span class="st"> &quot;1&quot;</span>,</a>
 <a class="sourceLine" id="cb3-5" title="5">           school_id <span class="op">==</span><span class="st"> &quot;2&quot;</span> <span class="op">|</span><span class="st"> </span>school_id <span class="op">==</span><span class="st"> &quot;4&quot;</span> <span class="op">|</span><span class="st"> </span>school_id <span class="op">==</span><span class="st"> &quot;6&quot;</span> <span class="op">~</span><span class="st"> &quot;2&quot;</span>)) <span class="op">%&gt;%</span><span class="st"> </span><span class="co"># new condition variable</span></a>
 <a class="sourceLine" id="cb3-6" title="6"><span class="st">  </span><span class="kw">select</span>(school_id, condition, <span class="kw">everything</span>()) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb3-7" title="7"><span class="st">  </span><span class="kw">add_column</span>(<span class="dt">wave =</span> <span class="dv">1</span>, <span class="dt">.before =</span> <span class="dv">10</span>) <span class="op">%&gt;%</span><span class="st"> </span><span class="co"># new wave variable</span></a>
+<a class="sourceLine" id="cb3-7" title="7"><span class="st">  </span><span class="kw">add_column</span>(<span class="dt">wave =</span> <span class="dv">1</span>, <span class="dt">.before =</span> <span class="dv">9</span>) <span class="op">%&gt;%</span><span class="st"> </span><span class="co"># new wave variable</span></a>
 <a class="sourceLine" id="cb3-8" title="8"><span class="st">  </span><span class="kw">select</span>(<span class="op">-</span><span class="st"> </span>school) <span class="co"># deleting school variable</span></a></code></pre></div>
 <p>The <code>condition</code> and <code>school_id</code> variables I created in the previous code were string variables. In the code below I made them numeric so they can be used in quantitative analyses. I also added value labels with the <code>set_vall</code> function so that SPSS users can use the <em>value labels</em> button.</p>
 <p>In the code below I also fixed a response option coding error I identified in the variable <code>q68</code>. Throughout most of the survey, response options were coded as “Strongly Disagree” = 1, “Disagree” = 2, “Agree” = 3, “Strongly Agree” = 4, “No response” = 99; however, in variable <code>q68</code> the response option “No response” was coded as 5.</p>
@@ -29486,7 +29486,8 @@ spanish_comfort
 <a class="sourceLine" id="cb8-27" title="27">         <span class="kw">c</span>(<span class="st">&quot;cont_ed_na&quot;</span> =<span class="st"> &quot;q135_88&quot;</span>),</a>
 <a class="sourceLine" id="cb8-28" title="28">         <span class="kw">c</span>(<span class="st">&quot;cont_ed_no_response&quot;</span> =<span class="st"> &quot;q135_99&quot;</span>),</a>
 <a class="sourceLine" id="cb8-29" title="29">         <span class="kw">c</span>(<span class="st">&quot;cont_ed_other_text&quot;</span> =<span class="st"> &quot;q135_6_text&quot;</span>)) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb8-30" title="30"><span class="st">  </span><span class="kw">select</span>(<span class="op">-</span>q127, <span class="op">-</span>q129, <span class="op">-</span>q131_<span class="dv">3</span>_text) <span class="co"># selecting out because they did not have meaningful info</span></a></code></pre></div>
+<a class="sourceLine" id="cb8-30" title="30"><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">age =</span> <span class="kw">as.numeric</span>(age)) <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb8-31" title="31"><span class="st">  </span><span class="kw">select</span>(<span class="op">-</span>q127, <span class="op">-</span>q129, <span class="op">-</span>q131_<span class="dv">3</span>_text) <span class="co"># selecting out because they did not have meaningful info</span></a></code></pre></div>
 </div>
 </div>
 <div id="parent-dataset" class="section level2 unnumbered">
@@ -29500,11 +29501,14 @@ spanish_comfort
 </div>
 <div id="participant-descriptives" class="section level1 unnumbered">
 <h1>Participant descriptives</h1>
-<p>In the following section, I will use descriptive statistics to summarize participants’ characteristics.</p>
-<p>to do: use function to create summariers from several vars. create nice table.</p>
+<p>In the following section, I used descriptive statistics to summarize participants’ characteristics. In this analysis, I treated responses such as “99 = not applicable” or “88 = no response” as missing values. Other category of missing values were responses coded by Qualtrics as “-99 = seen but unanswered”, when participants were not forced to respond.</p>
+<p>In the code below I applied a function I created <code>recode_missing_df</code> to recode these values as <code>NA</code>, the way R codes missing values.</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb9-1" title="1">elt_w1_clean_<span class="dv">6</span> &lt;-<span class="st"> </span><span class="kw">recode_missing_df</span>(elt_w1_clean_<span class="dv">5</span>) </a></code></pre></div>
 <div id="educators-characteristics" class="section level2 unnumbered">
 <h2>Educator’s characteristics</h2>
-<p>…</p>
+<p>Educators in this first wave of data (<em>n</em> = 43) had a mean age of 42.89 years, with an age range between 24 and 62 years. The Overwhelming majority of educators were identified as female (72.09%). A little less than half of the educators were teachers (48.84%), followed by administrators (16.27%) and other classified staff (16.27%). The remaining 20% of the sample was comprised of educational assistants, counselors, and other certified staff. About half of the educators have been in their current career position, regardless of school site, for over 10 years. About 12% of the educators have been in their current career position for less than a year.</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb10-1" title="1"><span class="co"># include plot that has dots of educators within years of experience. </span></a></code></pre></div>
+<p>All but four of the educators were born in the United States (U.S.). These four educators traced back their roots to Mexico or El Salvador and report coming for the first time to the U.S. when they were between 11 and 24 years of age. The entirety of the Educators in the sample felt either <em>very comfortable</em> or <em>comfortable</em> speaking in English, but only about 20% felt the same way speaking in Spanish. Finally, the race/ethnicity breakdown of the sample was approximately 79% White, 12% Latino, 7% Native American, and 2% African American.</p>
 </div>
 <div id="parent-characteristics" class="section level2 unnumbered">
 <h2>Parent characteristics</h2>
@@ -29534,6 +29538,8 @@ spanish_comfort
 <div id="average-scores-of-major-study-constructs" class="section level1 unnumbered">
 <h1>Average Scores of Major Study Constructs</h1>
 <p>Say something about the average scores…</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb11-1" title="1"><span class="co"># using the function descriptives I created above</span></a>
+<a class="sourceLine" id="cb11-2" title="2"><span class="co"># descrip_table &lt;- descriptives(elt_w1_clean_6) # use df that has scales, not elt_w1_clean_6</span></a></code></pre></div>
 <div id="educators-average-scores" class="section level2 unnumbered">
 <h2>Educator’s average scores</h2>
 <p>…</p>
@@ -29558,6 +29564,2973 @@ spanish_comfort
 <li>Assign an unique identifier for each participant and an unique identifier per family.</li>
 </ul></li>
 </ul>
+</div>
+<div id="appendix" class="section level1 unnumbered">
+<h1>Appendix</h1>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb12-1" title="1"><span class="kw">view_df</span>(elt_w1_clean_<span class="dv">5</span>) <span class="co"># change for final_elt_w1 when done. </span></a></code></pre></div>
+<table style="border-collapse:collapse; border:none;">
+<caption>
+Data frame: elt_w1_clean_5
+</caption>
+<tr>
+<th style="border-bottom:double; font-style:italic; font-weight:normal; padding:0.2cm; text-align:left; vertical-align:top;">
+ID
+</th>
+<th style="border-bottom:double; font-style:italic; font-weight:normal; padding:0.2cm; text-align:left; vertical-align:top;">
+Name
+</th>
+<th style="border-bottom:double; font-style:italic; font-weight:normal; padding:0.2cm; text-align:left; vertical-align:top;">
+Label
+</th>
+<th style="border-bottom:double; font-style:italic; font-weight:normal; padding:0.2cm; text-align:left; vertical-align:top;">
+Values
+</th>
+<th style="border-bottom:double; font-style:italic; font-weight:normal; padding:0.2cm; text-align:left; vertical-align:top;">
+Value Labels
+</th>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+1
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+school_id
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+1<br>2<br>3<br>4<br>5<br>6
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+cascade<br>prairie_mountain<br>kelly<br>ata<br>briggs<br>agnes_stewart
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+2
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+condition
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+1<br>2
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+control<br>intervention
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+3
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+response_id
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+Response ID
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+&lt;output omitted&gt;
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+4
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+id
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+&lt;output omitted&gt;
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+5
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+participant_role
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+Your role at this school: - Selected Choice
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+1<br>2<br>3<br>4<br>5<br>6
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+Administrator<br>Teacher<br>Counselor<br>Aducational Assistant<br>Other classified staff (specify)<br>Other certified staff (specify)
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+6
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+participant_role_5_text
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+Your role at this school: - Other classified staff<br>(specify) - Text
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+&lt;output omitted&gt;
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+7
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+participant_role_6_text
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+Your role at this school: - Other certified staff<br>(specify) - Text
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+&lt;output omitted&gt;
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+8
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+wave
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee" colspan="2">
+<em>range: 1-1</em>
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+9
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+q1
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+<p>There are 135 questions on this survey. It is<br>designed to be answered by all members of the<br>school staff. As a result you may not always have<br>experience with the situations we refer to. You<br>may feel you don’t have enough contact with a<br>certain situation to answer a certain question,<br>but using your best judgement, please choose the<br>answer that best reflects your opinion and<br>experience.
+Because this survey is completely<br>voluntary, we have provided a “no response” option<br>on all statements however, we hope that you choose<br>to answer all questions as thoughtfully as<br>possible using the agreement scale provided.
+<br>School Climate</p>
+<p>This beginning section asks about<br>your opinion of the general climate of the school.<br></p>
+<p>Using the scale provided, please indicate how<br>much you agree or disagree with each statement.</p>
+<p><br></p>
+<p>The asterisks mean the following:</p>
+<ul>
+<li>=<br>Parents or Guardians</li>
+</ul>
+<p>** = Administrators,<br>teachers and all other staff</p>
+I enjoy working<br>at this school.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+1<br>2<br>3<br>4
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+10
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+q2
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+Teachers and parents* listen to each other.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+1<br>2<br>3<br>4<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree<br>No Response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+11
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+q3
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+Students get along well with each other.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+1<br>2<br>3<br>4<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree<br>No Response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+12
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+q4
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+I am a valued member of this school.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+1<br>2<br>3<br>4<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree<br>No Response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+13
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+q5
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+There is a trusting relationship between teachers<br>and students.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+1<br>2<br>3<br>4<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree<br>No Response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+14
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+q6
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+There is a trusting relationship between teachers<br>and parents.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+1<br>2<br>3<br>4<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree<br>No Response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+15
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+q7
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+There is a trusting relationship between teachers.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+1<br>2<br>3<br>4<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree<br>No Response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+16
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+q8
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+There is a trusting relationship between<br>administrators and all other school staff**.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+1<br>2<br>3<br>4<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree<br>No Response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+17
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+q9
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+Students in this school are enthusiastic learners.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+1<br>2<br>3<br>4<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree<br>No Response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+18
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+q10
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+Teachers are proud to be teachers.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+1<br>2<br>3<br>4<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree<br>No Response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+19
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+q11
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+School staff is respectful to the whole school<br>community.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+1<br>2<br>3<br>4<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree<br>No Response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+20
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+q12
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+Parents from diverse groups are involved in the<br>school.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+1<br>2<br>3<br>4<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree<br>No Response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+21
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+q13
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+Administration and other school staff collaborate<br>well.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+1<br>2<br>3<br>4<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree<br>No Response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+22
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+q14
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+The school is welcoming to all its members.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+1<br>2<br>3<br>4<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree<br>No Response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+23
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+q15
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+<p>This schoolâ€¦</p>
+â€¦creates opportunities for<br>community building.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+1<br>2<br>3<br>4<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree<br>No Response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+24
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+q16
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+<p>This schoolâ€¦</p>
+â€¦creates a sense of belonging for<br>all.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+1<br>2<br>3<br>4<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree<br>No Response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+25
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+q17
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+<p>This schoolâ€¦</p>
+â€¦actively engages parents to take<br>part in school-related activities and functions.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+1<br>2<br>3<br>4<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree<br>No Response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+26
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+q18
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+<p>This schoolâ€¦</p>
+â€¦clearly communicates its<br>expectations to students.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+1<br>2<br>3<br>4<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree<br>No Response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+27
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+q19
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+<p>This schoolâ€¦</p>
+â€¦clearly communicates its<br>expectations to parents.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+1<br>2<br>3<br>4<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree<br>No Response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+28
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+q20
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+<p>This schoolâ€¦</p>
+â€¦is a safe and caring environment<br>for all.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+1<br>2<br>3<br>4<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree<br>No Response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+29
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+q21
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+<p>This schoolâ€¦</p>
+â€¦views parents as important to the<br>schoolâ€™s success.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+1<br>2<br>3<br>4<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree<br>No Response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+30
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+q22
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+<p>This schoolâ€¦</p>
+â€¦has parents from diverse cultures<br>involved in school functions and activities.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+1<br>2<br>3<br>4<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree<br>No Response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+31
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+q23
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+<p>This schoolâ€¦</p>
+â€¦has a lot of parent participation<br>in school functions and activities.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+1<br>2<br>3<br>4<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree<br>No Response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+32
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+q24
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+<p>This schoolâ€¦</p>
+â€¦creates positive relationships with<br>all types of families, even if there are language<br>and cultural/ethnic differences.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+1<br>2<br>3<br>4<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree<br>No Response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+33
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+q25
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+<p>This section has to do with how your school and<br>the school community deal with conflict and<br>challenging behaviors. Please indicate how much<br>you agree or disagree with each statement by using<br>the scale provided.</p>
+<p>At this schoolâ€¦</p>
+<br>â€¦when a student causes harm, the schoolâ€™s main<br>response is to punish the student.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+1<br>2<br>3<br>4<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree<br>No Response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+34
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+q26
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+<p>At this schoolâ€¦</p>
+â€¦when there is conflict, school<br>staff considers the diverse background and<br>differing points of view of the people involved.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+1<br>2<br>3<br>4<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree<br>No Response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+35
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+q27
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+<p>At this schoolâ€¦</p>
+â€¦students and staff communicate<br>with each other respectfully.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+1<br>2<br>3<br>4<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree<br>No Response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+36
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+q28
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+<p>At this schoolâ€¦</p>
+â€¦parents contribute to solutions<br>for their studentâ€™s school-based behavioral<br>problems.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+1<br>2<br>3<br>4<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree<br>No Response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+37
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+q29
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+<p>At this schoolâ€¦</p>
+â€¦when there is conflict, we focus<br>on the needs and interests of all parties<br>involved.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+1<br>2<br>3<br>4<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree<br>No Response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+38
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+q30
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+<p>At this schoolâ€¦</p>
+â€¦we support direct and<br>constructive dialogue in a safe environment.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+1<br>2<br>3<br>4<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree<br>No Response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+39
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+q31
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+<p>At this schoolâ€¦</p>
+â€¦students are allowed to make<br>amends after causing harm.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+1<br>2<br>3<br>4<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree<br>No Response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+40
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+q32
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+<p>At this schoolâ€¦</p>
+â€¦when there is conflict, it is<br>handled quickly.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+1<br>2<br>3<br>4<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree<br>No Response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+41
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+q33
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+<p>At this schoolâ€¦</p>
+â€¦when there is conflict, we focus<br>on repairing the harm and restoring relationships.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+1<br>2<br>3<br>4<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree<br>No Response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+42
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+q34
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+<p>At this schoolâ€¦</p>
+â€¦we learn from conflict and donâ€™t<br>ignore it.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+1<br>2<br>3<br>4<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree<br>No Response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+43
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+q35
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+<p>At this schoolâ€¦</p>
+â€¦students work with school staff<br>to resolve conflicts and problems.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+1<br>2<br>3<br>4<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree<br>No Response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+44
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+q36
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+<p>This section has to do with how your school and<br>the school community engage with the different<br>cultural backgrounds present in your school.<br>Please indicate how much you agree or disagree<br>with each statement by using the scale provided.</p>
+<p><br>As staff at this schoolâ€¦</p>
+â€¦we are committed to our<br>own professional development and ongoing education<br>about how our cultural backgrounds influence our<br>work.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+1<br>2<br>3<br>4<br>88<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree<br>N/A<br>No Response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+45
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+q37
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+<p>As staff at this schoolâ€¦</p>
+â€¦we collaborate and<br>implement best practices for teaching students<br>from diverse cultural and language backgrounds.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+1<br>2<br>3<br>4<br>88<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree<br>N/A<br>No Response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+46
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+q38
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+<p>As staff at this schoolâ€¦</p>
+â€¦we recognize that<br>every child, no matter what they struggle with,<br>also has strengths and resources.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+1<br>2<br>3<br>4<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree<br>No Response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+47
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+q39
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+<p>As staff at this schoolâ€¦</p>
+â€¦we teach students about<br>civic awareness and social responsibility.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+1<br>2<br>3<br>4<br>88<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree<br>N/A<br>No Response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+48
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+q40
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+<p>As staff at this schoolâ€¦</p>
+â€¦the teachers and<br>administrators examine policies and practices to<br>make sure all students are treated fairly.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+1<br>2<br>3<br>4<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree<br>No Response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+49
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+q41
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+<p>As staff at this schoolâ€¦</p>
+â€¦we are comfortable<br>advocating for student equity with other staff<br>members.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+1<br>2<br>3<br>4<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree<br>No Response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+50
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+q42
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+<p>As staff at this schoolâ€¦</p>
+â€¦we ensure every student<br>has the resources needed to succeed (e.g. rents or<br>borrows musical instruments, ensures that computer<br>labs are open for use, provides resources and<br>materials available in languages other than<br>English.)
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+1<br>2<br>3<br>4<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree<br>No Response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+51
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+q43
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+<p>As staff at this schoolâ€¦</p>
+â€¦we make special efforts<br>to engage with families who have low participation<br>rates in school.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+1<br>2<br>3<br>4<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree<br>No Response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+52
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+q44
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+<p>As staff at this schoolâ€¦</p>
+â€¦we provide a Family<br>Resource Center which allows for safe and<br>welcoming interactions between school staff and<br>family members.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+1<br>2<br>3<br>4<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree<br>No Response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+53
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+q45
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+<p>As staff at this schoolâ€¦</p>
+â€¦we share common goals<br>for students no matter their background and<br>culture.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+1<br>2<br>3<br>4<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree<br>No Response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+54
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+q46
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+<p>As staff at this schoolâ€¦</p>
+â€¦we see ourselves as a<br>supportive community that includes all our<br>families.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+1<br>2<br>3<br>4<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree<br>No Response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+55
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+q47
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+<p>As staff at this schoolâ€¦</p>
+â€¦we are comfortable<br>talking about equity issues in deep ways.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+1<br>2<br>3<br>4<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree<br>No Response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+56
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+q48
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+<p>As staff at this schoolâ€¦</p>
+â€¦we are able to talk<br>about our own personal cultural identities and<br>experiences.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+1<br>2<br>3<br>4<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree<br>No Response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+57
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+q49
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+<p>As staff at this schoolâ€¦</p>
+â€¦we donâ€™t sweep issues<br>of race, equity, or culture under the rug.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+1<br>2<br>3<br>4<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree<br>No Response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+58
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+q50
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+<p>This section has to do with having conversations<br>about equity with your colleagues and other school<br>staff.
+Please indicate how much you agree or<br>disagree with each statement by using the scale<br>provided.</p>
+<p>Even if others in my school do not<br>share my commitment to equity issues, I know how<br>to â€¦</p>
+â€¦engage them around equity issues.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+1<br>2<br>3<br>4<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree<br>No Response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+59
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+q51
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+Even if others in my school do not share my<br>commitment to equity issues, I know how to â€¦
+<br>…promote equity work.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+1<br>2<br>3<br>4<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree<br>No Response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+60
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+q52
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+Even if others in my school do not share my<br>commitment to equity issues, I know how toâ€¦
+â€¦have<br>difficult conversations with colleagues about<br>issues such as implicit bias, discrimination,<br>disproportionality (e.g., disciplinary outcomes.)
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+1<br>2<br>3<br>4<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree<br>No Response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+61
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+q53
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+<p>At my school, I feel confident that â€¦</p>
+â€¦I could<br>facilitate a conversation with my colleagues about<br>difficult topics such as implicit bias,<br>discrimination, or disproportionality.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+1<br>2<br>3<br>4<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree<br>No Response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+62
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+q54
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+<p>At my school, I feel confident that â€¦</p>
+…if I<br>saw a colleague acting in a way that I felt was<br>inequitable or unfair, I would know how to reach<br>out to that person in order to have an open and<br>honest conversation about the incident.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+1<br>2<br>3<br>4<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree<br>No Response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+63
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+q55
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+<p>At my school, I feel confident that â€¦</p>
+â€¦if I saw<br>another staff member acting in a way I felt was<br>inequitable or unfair, I would feel comfortable<br>disrupting the behavior in a gentle, positive way.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+1<br>2<br>3<br>4<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree<br>No Response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+64
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+q56
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+<p>This section focuses specifically on the<br>relationship between the school and its Latino<br>families. Please indicate how much you agree or<br>disagree with each statement by using the scale<br>provided.</p>
+<p>At this schoolâ€¦</p>
+â€¦manuals and other<br>materials are readily available in Spanish
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+1<br>2<br>3<br>4<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree<br>No Response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+65
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+q57
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+At this schoolâ€¦
+â€¦ information about homework,<br>school activities, and opportunities for family<br>involvement is available in Spanish.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+1<br>2<br>3<br>4<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree<br>No Response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+66
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+q58
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+At this schoolâ€¦
+â€¦we have an open and accepting<br>attitude toward Latino families.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+1<br>2<br>3<br>4<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree<br>No Response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+67
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+q59
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+At this schoolâ€¦
+â€¦we have a welcoming environment<br>for Latino cultures and languages.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+1<br>2<br>3<br>4<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree<br>No Response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+68
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+q60
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+At this schoolâ€¦
+…teachers, administrators and<br>school staff actively engage Latino families in<br>school activities and functions.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+1<br>2<br>3<br>4<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree<br>No Response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+69
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+q61
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+At this schoolâ€¦
+…a bilingual (Spanish/English)<br>staff member or translator is readily available<br>when needed or requested.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+1<br>2<br>3<br>4<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree<br>No Response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+70
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+q62
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+At this schoolâ€¦
+â€¦we hold a number of<br>multi-cultural events and social nights in Spanish<br>or bilingually.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+1<br>2<br>3<br>4<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree<br>No Response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+71
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+q63
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+At this schoolâ€¦
+â€¦ we actively seek the<br>participation of our Latino families in all<br>aspects of the school.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+1<br>2<br>3<br>4<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree<br>No Response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+72
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+q64
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+At this schoolâ€¦
+â€¦ we offer workshops in Spanish on<br>topics such as parent leadership in the school,<br>how to understand the curriculum, and ways to help<br>children succeed academically.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+1<br>2<br>3<br>4<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree<br>No Response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+73
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+q65
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+<p>This section has to do with your relationship with<br>Latino families. Please indicate how much you<br>agree or disagree with each statement by using the<br>scale provided.</p>
+In general, I feel I can<br>talk with and am heard by Latino parents.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+1<br>2<br>3<br>4<br>88<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree<br>N/A<br>No Response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+74
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+q66
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+If I had a problem with a Latino child, I would<br>feel comfortable talking to his/her parent about<br>the situation.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+1<br>2<br>3<br>4<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree<br>No Response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+75
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+q67
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+If I am in contact with a Latino family, I keep in<br>mind that Latino families come from a variety of<br>different cultures and linguistic backgrounds.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+1<br>2<br>3<br>4<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree<br>No Response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+76
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+q68
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+When I communicate with Latino families, I keep in<br>mind that many Latino parents may not understand<br>how to navigate the educational system in this<br>country.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+1<br>2<br>3<br>4<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree<br>No response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+77
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+q69
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+I reach out to Latino families so they feel like<br>part of the school community.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+1<br>2<br>3<br>4<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree<br>No Response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+78
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+q70
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+The school makes Latino parents aware of<br>opportunities for leadership roles in the school<br>such as the Parent-Teacher Association or other<br>decision-making opportunities.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+1<br>2<br>3<br>4<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree<br>No Response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+79
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+q71
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+Community resources and information are readily<br>available and in Spanish at this school.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+1<br>2<br>3<br>4<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree<br>No Response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+80
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+q72
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+This school reaches out to community organizations<br>that focus on Latino families.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+1<br>2<br>3<br>4<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree<br>No Response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+81
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+q73
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+Regardless of Latino studentsâ€™ abilities, it seems<br>most Latino students are bound for a vocational<br>career rather than for community college or<br>university studies.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+1<br>2<br>3<br>4<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree<br>No Response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+82
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+q74
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+In general, Latino parents ask questions or make<br>suggestions to me about their child.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+1<br>2<br>3<br>4<br>88<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree<br>N/A<br>No Response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+83
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+q75
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+In general, I see Latino parents supporting their<br>children’s education, such as going to the library<br>or helping with homework.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+1<br>2<br>3<br>4<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree<br>No Response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+84
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+q76
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+In general, Latino parents are involved in their<br>children’s lives at school.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+1<br>2<br>3<br>4<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree<br>No Response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+85
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+q77
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+The next section is about the classroom<br>environment. You do not necessarily have to be a<br>teacher or teaching assistant, we are looking for<br>your opinion about how you think the classroom<br>environment is at your school. If you feel you<br>have enough knowledge of how the classroom<br>operates, even if you are not a teacher or<br>teaching assistant, please answer the next section<br>by answering ‘yes’, if not, answer ‘no’ below.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+1<br>2
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+Yes<br>No
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+86
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+q78
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+<p>For teachers, teacher assistants, and staff who<br>interact in the classroom environment.</p>
+<p>The<br>following questions are about interactions between<br>you and your students in your classroom. Please<br>answer how much you agree or disagree with the<br>following in your classroom(s) using the scale<br>provided.</p>
+<p>In the classroomâ€¦</p>
+â€¦ we honor<br>individual perspectives.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+1<br>2<br>3<br>4
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+87
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+q79
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+In the classroomâ€¦
+â€¦ we have class discussions that<br>celebrate the rich cultures and backgrounds<br>present at our school and in our classroom.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+1<br>2<br>3<br>4
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+88
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+q80
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+In the classroomâ€¦
+â€¦ we embrace all cultural and<br>family differences as assets to our school.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+1<br>2<br>3<br>4
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+89
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+q81
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+In the classroomâ€¦
+â€¦ we role model behaviors of<br>inclusion.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+1<br>2<br>3<br>4
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+90
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+q82
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+In the classroomâ€¦
+â€¦ we engage in<br>relationship-building activities in the classroom.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+1<br>2<br>3<br>4
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+91
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+q83
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+In the classroomâ€¦
+â€¦we talk about the importance of<br>seeing from anotherâ€™s point of view as a way to<br>challenge personal assumptions, implicit biases,<br>and stereotypes.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+1<br>2<br>3<br>4
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+92
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+q84
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+In the classroomâ€¦
+â€¦ we use examples from the<br>different cultural experiences in the class to<br>enrich our discussions.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+1<br>2<br>3<br>4
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+93
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+q85
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+In the classroomâ€¦
+â€¦ we talk about how stereotypes<br>and assumptions can cause injustice.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+1<br>2<br>3<br>4
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+94
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+q86
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+In the classroomâ€¦
+â€¦we reflect on how our own<br>personal beliefs, backgrounds, and assumptions may<br>affect how we interact with others.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+1<br>2<br>3<br>4
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+95
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+q87
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+In the classroomâ€¦
+â€¦ we discuss how different<br>beliefs, assumptions and stereotypes can create an<br>uneven playing field for minorities and other<br>under-represented groups.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+1<br>2<br>3<br>4
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+96
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+q88
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+In the classroomâ€¦
+â€¦ we discuss how stereotypes and<br>different beliefs that exist in our society can<br>lead to achievement gaps.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+1<br>2<br>3<br>4
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+97
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+q89
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+In the classroomâ€¦
+â€¦ we discuss the importance of<br>giving back to the community through volunteering<br>or other community outreach projects.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+1<br>2<br>3<br>4
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+98
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+q90
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+In the classroomâ€¦
+â€¦ we practice active listening.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+1<br>2<br>3<br>4<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree<br>No response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+q91
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+In the classroomâ€¦
+â€¦ we create an environment that<br>all of us enjoy being part of.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+1<br>2<br>3<br>4<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree<br>No response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+100
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+q92
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+In the classroomâ€¦
+â€¦ we work together to resolve<br>most conflicts that arise.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+1<br>2<br>3<br>4<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree<br>No response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+101
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+q93
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+In the classroomâ€¦
+â€¦ we are allies against social<br>injustices (i.e., racism, sexism, classism, etc.)
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+1<br>2<br>3<br>4<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree<br>No response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+102
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+q94
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+<p>In the classroomâ€¦</p>
+â€¦ we expect each other to<br>perform to our highest ability.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+1<br>2<br>3<br>4<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree<br>No response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+103
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+q95
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+In the classroomâ€¦
+â€¦ our classroom celebrates<br>diversity (through books, posters on the wall,<br>etc.)
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+1<br>2<br>3<br>4<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree<br>No response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+104
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+q96
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+In the classroomâ€¦
+â€¦students are very aware of<br>expectations of behavior.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+1<br>2<br>3<br>4<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree<br>No response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+105
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+q97
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+In the classroomâ€¦
+â€¦ I reinforce and encourage<br>desired behavior of my students through positive<br>recognition (for example, praise or compliments).
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+1<br>2<br>3<br>4<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree<br>No response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+106
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+q98
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+<p>Several of the following statements assume a role<br>of interacting with students in the classroom,<br>however you still may have contact with students<br>outside the classroom, if certain situations do<br>not apply to you please use the N/A option,<br>otherwise use the scale provided for your answer.<br>During this school year, I haveâ€¦</p>
+â€¦greeted the<br>English Language Learners in my classroom (or<br>students at the school in general) with a word or<br>phrase from their heritage language.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+1<br>2<br>3<br>4
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+107
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+q99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+During this school year, I haveâ€¦
+â€¦ looked up<br>information about the cultures of my students, (<br>or the students at this school in general).
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+1<br>2<br>3<br>4
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+108
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+q100
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+During this school year, I haveâ€¦
+â€¦ developed<br>personal relationships with my students.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+1<br>2<br>3<br>4
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+109
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+q101
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+During this school year, I haveâ€¦
+â€¦ helped students<br>develop positive relationships with their<br>classmates.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+1<br>2<br>3<br>4
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+110
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+q102
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+During this school year, I haveâ€¦
+â€¦ determined<br>whether my students like to work in groups or<br>individually.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+1<br>2<br>3<br>4<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree<br>No response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+111
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+q103
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+During this school year, I haveâ€¦
+â€¦ taken steps to<br>learn about the difference between equity and<br>equality.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+1<br>2<br>3<br>4<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree<br>No response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+112
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+q104
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+During this school year, I haveâ€¦
+â€¦ examined my own<br>position of power and privilege.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+1<br>2<br>3<br>4<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree<br>No response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+113
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+q105
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+During this school year, I haveâ€¦
+â€¦ taken a class<br>or a professional development course on issues<br>such as equity or cultural responsiveness.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+1<br>2<br>3<br>4<br>88<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree<br>N/A<br>No response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+114
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+q106
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+During this school year, I haveâ€¦
+â€¦ concentrated on<br>the learning style of my students in order to<br>create multiple pathways for students to be<br>successful.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+1<br>2<br>3<br>4<br>88<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+Strongly Disagree<br>Disagree<br>Agree<br>Strongly Agree<br>N/A<br>No response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+115
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+q107
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+Are you a teacher, Teacher’s Assistant (TA), or<br>any other form of school staff that aids in hands<br>on activities in the classroom?
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+1<br>2
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+Yes<br>No
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+116
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+q108
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+<p>Teacher Efficacy Scale (Short Form) *In Hoy, W.K.<br>&amp; Woolfolk, A.E.
+(1993). Teachers’ sense of<br>efficacy and the organizational health of
+schools.<br>The Elementary School Journal 93,
+356-372.</p>
+<p>A<br>number of statements about organizations, people,<br>and teaching are presented below. The purpose is<br>to gather information regarding the attitudes of<br>educators concerning these statements.</p>
+<p>Please<br>indicate how much you agree or disagree with each<br>statement by using the scale provided.</p>
+<br>The amount a student can learn is primarily<br>related to family background.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+1<br>2<br>3<br>4<br>5<br>6<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+Strongly Agree<br>Moderately Agree<br>Agree slightly more than disagree<br>Disagree slightly more than agree<br>Moderately Disagree<br>Strongly Disagree<br>No response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+117
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+q109
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+If students aren’t disciplined at home, they<br>arenâ€™t likely to accept any discipline.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+1<br>2<br>3<br>4<br>5<br>6<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+Strongly Agree<br>Moderately Agree<br>Agree slightly more than disagree<br>Disagree slightly more than agree<br>Moderately Disagree<br>Strongly Disagree<br>No response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+118
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+q110
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+When I really try, I can get through to most<br>difficult students.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+1<br>2<br>3<br>4<br>5<br>6<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+Strongly Agree<br>Moderately Agree<br>Agree slightly more than disagree<br>Disagree slightly more than agree<br>Moderately Disagree<br>Strongly Disagree<br>No response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+119
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+q111
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+A teacher is very limited in what he/she can<br>achieve because a student’s home environment is a<br>large influence on his/her achievement.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+1<br>2<br>3<br>4<br>5<br>6<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+Strongly Agree<br>Moderately Agree<br>Agree slightly more than disagree<br>Disagree slightly more than agree<br>Moderately Disagree<br>Strongly Disagree<br>No response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+120
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+q112
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+If parents would do more for their children, I<br>could do more.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+1<br>2<br>3<br>4<br>5<br>6<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+Strongly Agree<br>Moderately Agree<br>Agree slightly more than disagree<br>Disagree slightly more than agree<br>Moderately Disagree<br>Strongly Disagree<br>No response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+121
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+q113
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+If a student did not remember information I gave<br>in a previous lesson, I would know how to increase<br>his/her retention in the next lesson.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+1<br>2<br>3<br>4<br>5<br>6<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+Strongly Agree<br>Moderately Agree<br>Agree slightly more than disagree<br>Disagree slightly more than agree<br>Moderately Disagree<br>Strongly Disagree<br>No response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+122
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+q114
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+If a student in my class becomes disruptive and<br>noisy, I feel assured that I know some techniques<br>to redirect him/her quickly.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+1<br>2<br>3<br>4<br>5<br>6<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+Strongly Agree<br>Moderately Agree<br>Agree slightly more than disagree<br>Disagree slightly more than agree<br>Moderately Disagree<br>Strongly Disagree<br>No response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+123
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+q115
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+If one of my students couldn’t do a class<br>assignment, I would be able to accurately assess<br>whether the assignment was at the appropriate<br>level of difficulty.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+1<br>2<br>3<br>4<br>5<br>6<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+Strongly Agree<br>Moderately Agree<br>Agree slightly more than disagree<br>Disagree slightly more than agree<br>Moderately Disagree<br>Strongly Disagree<br>No response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+124
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+q116
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+I can get through to even the most difficult or<br>unmotivated students.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+1<br>2<br>3<br>4<br>5<br>6<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+Strongly Agree<br>Moderately Agree<br>Agree slightly more than disagree<br>Disagree slightly more than agree<br>Moderately Disagree<br>Strongly Disagree<br>No response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+125
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+q117
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+A teacher really canâ€™t do much because most of a<br>studentâ€™s motivation and performance depends on<br>his or her home environment.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+1<br>2<br>3<br>4<br>5<br>6<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+Strongly Agree<br>Moderately Agree<br>Agree slightly more than disagree<br>Disagree slightly more than agree<br>Moderately Disagree<br>Strongly Disagree<br>No response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+126
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+q118
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+<p>This section has to do with the environment at<br>your school since the presidential election of<br>2016. â€œReprinted with permission of Teaching<br>Tolerance, a project of the Southern Poverty Law<br>Center. www.tolerance.org&quot;</p>
+<p>Using the scale<br>provided please answer how much you agree or<br>disagree with the following statements.</p>
+<p>Since<br>the presidential election of 2016, at my schoolâ€¦</p>
+<p><br></p>
+I have witnessed an increase in anti-immigrant<br>sentiment.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+1<br>2<br>3<br>4<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+Strongly Disagree<br>Somewhat Disagree<br>Somewhat Agree<br>Strongly Agree<br>No response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+127
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+q119
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+<p>Since the presidential election of 2016, at my<br>schoolâ€¦</p>
+Students have expressed an increased<br>unease or fear about what may happen to them or<br>their families.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+1<br>2<br>3<br>4<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+Strongly Disagree<br>Somewhat Disagree<br>Somewhat Agree<br>Strongly Agree<br>No response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+128
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+q120
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+<p>Since the presidential election of 2016, at my<br>schoolâ€¦</p>
+I have noticed an increase in<br>derogatory language or slurs about students of<br>color.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+1<br>2<br>3<br>4<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+Strongly Disagree<br>Somewhat Disagree<br>Somewhat Agree<br>Strongly Agree<br>No response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+129
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+q121
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+<p>Since the presidential election of 2016, at my<br>schoolâ€¦</p>
+Students are targeting other students<br>based on who they supported in the election.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+1<br>2<br>3<br>4<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+Strongly Disagree<br>Somewhat Disagree<br>Somewhat Agree<br>Strongly Agree<br>No response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+130
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+q122
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+<p>Since the presidential election of 2016, at my<br>schoolâ€¦</p>
+Teachers or administrators are being<br>harassed for standing up for children.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+1<br>2<br>3<br>4<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+Strongly Disagree<br>Somewhat Disagree<br>Somewhat Agree<br>Strongly Agree<br>No response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+131
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+q123
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+<p>Since the presidential election of 2016, at my<br>schoolâ€¦</p>
+The administration is being responsive<br>to incidents that occur due to the post-election<br>climate.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+1<br>2<br>3<br>4<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+Strongly Disagree<br>Somewhat Disagree<br>Somewhat Agree<br>Strongly Agree<br>No response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+132
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+q124
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+<p>Since the presidential election of 2016, at my<br>schoolâ€¦</p>
+Teachers and administrators have put<br>in place a support system specifically to help the<br>school deal with the post-election climate.
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+1<br>2<br>3<br>4<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+Strongly Disagree<br>Somewhat Disagree<br>Somewhat Agree<br>Strongly Agree<br>No response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+133
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+q125
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+Since the presidential election of 2016, if<br>specific incidents of election-related bigotry or<br>harassment have occurred in your school, please<br>describe them in the space below. (In about 400<br>words or less)
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+&lt;output omitted&gt;
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+134
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+q126
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+Since the presidential election of 2016, using the<br>space below, please describe any examples of hope<br>or inclusion that have occurred in your school<br>following the election. (In about 400 words or<br>less)
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+&lt;output omitted&gt;
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+135
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+age
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;" colspan="2">
+<em>range: -99-62</em>
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+136
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+birth_country
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+In which country were you born? (MARK one) -<br>Selected Choice
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+1<br>2<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+United States<br>Another country (specify):<br>No response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+137
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+another_birth_country_text
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+In which country were you born? (MARK one) -<br>Another country (specify): - Text
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+&lt;output omitted&gt;
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+138
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+age_first_moved_us
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+If you were born outside the U.S, how old were you<br>when you first moved to the US? - Age: - Text
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+139
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+white
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+Please describe your race/ethnicity: (MARK those<br>that apply) - Selected Choice White
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+1
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+White
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+140
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+hispanic_latino_spanish
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+Please describe your race/ethnicity: (MARK those<br>that apply) - Selected Choice Hispanic, Latino, or<br>Spanish Origin
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+1
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+Hispanic, Latino, or Spanish Origin
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+141
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+black_african_american
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+Please describe your race/ethnicity: (MARK those<br>that apply) - Selected Choice Black or African<br>American
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+1
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+Black or African American
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+142
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+asian
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+Please describe your race/ethnicity: (MARK those<br>that apply) - Selected Choice Asian
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+1
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+Asian
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+143
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+american_indian_alaska_native
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+Please describe your race/ethnicity: (MARK those<br>that apply) - Selected Choice American Indian,<br>Alaska Native
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+1
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+American Indian, Alaska Native
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+144
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+indigenous_americas
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+Please describe your race/ethnicity: (MARK those<br>that apply) - Selected Choice Indigenous from<br>Mexico, Central America or South America<br>(specify):
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+1
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+Indigenous from Mexico, Central America or South America (specify):
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+145
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+middle_eastern_north_african
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+Please describe your race/ethnicity: (MARK those<br>that apply) - Selected Choice Middle Eastern or<br>North African
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+1
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+Middle Eastern or North African
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+146
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+native_hawaiian_pacific_islander
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+Please describe your race/ethnicity: (MARK those<br>that apply) - Selected Choice Native Hawaiian or<br>other Pacific Islander
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+1
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+Native Hawaiian or other Pacific Islander
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+147
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+race_ethnicity_other
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+Please describe your race/ethnicity: (MARK those<br>that apply) - Selected Choice Other: (specify)
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+1
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+Other: (specify)
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+148
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+race_ethnicity_no_response
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+Please describe your race/ethnicity: (MARK those<br>that apply) - Selected Choice no response
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+1
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+no response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+149
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+indigenous_americas_text
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+Please describe your race/ethnicity: (MARK those<br>that apply) - Indigenous from Mexico, Central<br>America or South America (specify): - Text
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+&lt;output omitted&gt;
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+150
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+race_ethnicity_other_text
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+Please describe your race/ethnicity: (MARK those<br>that apply) - Other: (specify) - Text
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+&lt;output omitted&gt;
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+151
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+gender_id
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+Gender identity: - Selected Choice
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+1<br>2<br>3
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+Male<br>Female<br>Other (specify)
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+152
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+years_in_position
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+How long have you been in your current career<br>position (regardless of school/site)?
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+1<br>2<br>3<br>4<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+Less than 1 year<br>1 to 5 years<br>5 to 10 years<br>10 years or more<br>no response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+153
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+years_in_school
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+How many years have you worked at your current<br>school?
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+1<br>2<br>3<br>4<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+Less than 1 year<br>1 to 5 years<br>5 to 10 years<br>10 years or more<br>No response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+154
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+equity_leadership
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+My continuing education coursework has covered the<br>following topics (MARK all that apply): - Selected<br>Choice Equity leadershipâ€¯
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+1
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+Equity leadershipâ€¯
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+155
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+cultural_responsiveness
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+My continuing education coursework has covered the<br>following topics (MARK all that apply): - Selected<br>Choice Cultural responsivenessâ€¯â€¯
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+1
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+Cultural responsivenessâ€¯â€¯
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+156
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+restorative_practices
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+My continuing education coursework has covered the<br>following topics (MARK all that apply): - Selected<br>Choice Restorative practicesâ€¯â€¯
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+1
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+Restorative practicesâ€¯â€¯
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+157
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+diversity
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+My continuing education coursework has covered the<br>following topics (MARK all that apply): - Selected<br>Choice Diversityâ€¯
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+1
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+Diversityâ€¯
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+158
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+ell
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+My continuing education coursework has covered the<br>following topics (MARK all that apply): - Selected<br>Choice English language learners
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+1
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+English language learners
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+159
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+cont_ed_other
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+My continuing education coursework has covered the<br>following topics (MARK all that apply): - Selected<br>Choice Other, explain
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+1
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+Other, explain
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+160
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+cont_ed_na
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+My continuing education coursework has covered the<br>following topics (MARK all that apply): - Selected<br>Choice N/A, I am not required to take continuing<br>education courses
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+1
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+N/A, I am not required to take continuing education courses
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+161
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+cont_ed_no_response
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+My continuing education coursework has covered the<br>following topics (MARK all that apply): - Selected<br>Choice No response
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+1
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+No response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+162
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+cont_ed_other_text
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+My continuing education coursework has covered the<br>following topics (MARK all that apply): - Other,<br>explain - Text
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+&lt;output omitted&gt;
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+163
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+english_comfort
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+1<br>2<br>3<br>4<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+not at all comfortable<br>somewhat comfortable<br>comfortable<br>very comfortable<br>no response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+164
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+spanish_comfort
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+1<br>2<br>3<br>4<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+not at all comfortable<br>somewhat comfortable<br>comfortable<br>very comfortable<br>no response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+165
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+other1_lang
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+How comfortable are you speaking the following<br>languages? - Other (specify, or mark NA if it<br>doesn’t apply) - Text
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+&lt;output omitted&gt;
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+166
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+other1_lang_comfort
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+1<br>2<br>3<br>4<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+not at all comfortable<br>somewhat comfortable<br>comfortable<br>very comfortable<br>no response
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+167
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+other2_lang
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+How comfortable are you speaking the following<br>languages? - Other (specify, or mark NA if it<br>doesn’t apply) - Text
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top;">
+&lt;output omitted&gt;
+</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+168
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+other2_lang_comfort
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+1<br>2<br>3<br>4<br>99
+</td>
+<td style="padding:0.2cm; text-align:left; vertical-align:top; background-color:#eeeeee">
+not at all comfortable<br>somewhat comfortable<br>comfortable<br>very comfortable<br>no response
+</td>
+</tr>
+</table>
 </div>
 </div>
 

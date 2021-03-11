@@ -160,7 +160,7 @@ elt_w1_clean_2 <- elt_w1_clean %>%
            school_id == "1" | school_id == "3" | school_id == "5" ~ "1",
            school_id == "2" | school_id == "4" | school_id == "6" ~ "2")) %>% # new condition variable
   select(school_id, condition, everything()) %>%
-  add_column(wave = 1, .before = 10) %>% # new wave variable
+  add_column(wave = 1, .before = 9) %>% # new wave variable
   select(- school) # deleting school variable
 ```
 
@@ -437,6 +437,7 @@ elt_w1_clean_5 <- elt_w1_clean_4 %>%
          c("cont_ed_na" = "q135_88"),
          c("cont_ed_no_response" = "q135_99"),
          c("cont_ed_other_text" = "q135_6_text")) %>%
+  mutate(age = as.numeric(age)) %>% 
   select(-q127, -q129, -q131_3_text) # selecting out because they did not have meaningful info
 ```
 
@@ -449,20 +450,46 @@ elt_w1_clean_5 <- elt_w1_clean_4 %>%
 
 ...
 
-```{r}
-
-```
-
 
 # Participant descriptives  {-}
 
-In the following section, I will use descriptive statistics to summarize participants' characteristics. 
+```{r include=FALSE}
+# recoding missing values as N/A with function
 
-to do: use function to create summariers from several vars. create nice table. 
+# vector with missing values in dataset
+missing_vals <- c(77, 88, 99, -99)
+
+# function that returns true if values in vector are equal to missing_vals. The function takes a vector x, and specified values of missing data
+recode_missing <- function(x, missing_vals = c(77, 88, 99, -99)) {
+  test <- x %in% missing_vals
+  ifelse(test, NA, x)
+}
+
+# function that recodes missing values to NA. The function takes a dataframe with variables with missing data, and specified values of missing data
+recode_missing_df <- function(df, missing_vals = c(77, 88, 99, -99)) {
+  modify(df, ~recode_missing(.x, missing_vals)) # here uses the function created above
+}
+```
+
+In the following section, I used descriptive statistics to summarize participants' characteristics. In this analysis, I treated responses such as "99 = not applicable" or "88 = no response" as missing values. Other category of missing values were responses coded by Qualtrics as "-99 = seen but unanswered", when participants were not forced to respond. 
+
+In the code below I applied a function I created `recode_missing_df` to recode these values as `NA`, the way R codes missing values. 
+
+```{r}
+
+elt_w1_clean_6 <- recode_missing_df(elt_w1_clean_5) 
+```
 
 ## Educator's characteristics {-}
 
-...
+Educators in this first wave of data (*n* = 43) had a mean age of 42.89 years, with an age range between 24 and 62 years. The Overwhelming majority of educators were identified as female (72.09%). A little less than half of the educators were teachers (48.84%), followed by administrators (16.27%) and other classified staff (16.27%). The remaining 20% of the sample was comprised of educational assistants, counselors, and other certified staff. About half of the educators have been in their current career position, regardless of school site, for over 10 years. About 12% of the educators have been in their current career position for less than a year. 
+
+```{r}
+# include plot that has dots of educators within years of experience. 
+```
+
+All but four of the educators were born in the United States (U.S.). These four educators traced back their roots to Mexico or El Salvador and report coming for the first time to the U.S. when they were between 11 and 24 years of age. The entirety of the Educators in the sample felt either *very comfortable* or *comfortable* speaking in English, but only about 20% felt the same way speaking in Spanish. Finally, the race/ethnicity breakdown of the sample was approximately 79% White, 12% Latino, 7% Native American, and 2% African American. 
+
 
 ## Parent characteristics {-}
 
@@ -493,6 +520,39 @@ Say something about scales
 
 Say something about the average scores...
 
+
+```{r include=FALSE}
+
+# descriptive stats function
+
+# function that takes a df and returns a df with only the numeric columns
+only_numeric <- function(df) {
+  select_numeric <- dplyr::select_if(df, is.numeric)
+  return(select_numeric)
+}
+
+# a list with the functions we want
+smry <- list(mean = function(x) mean(x, na.rm = TRUE), 
+             sd = function(x) sd(x, na.rm = TRUE),
+             min = function(x) min(x, na.rm = TRUE),
+             max = function(x) max(x, na.rm = TRUE))
+
+# wrapping solution in a function
+descriptives <- function(df) {
+  select_numeric <- only_numeric(df)
+  mean_sd <- map_df(select_numeric, function(col) map_df(smry, ~.x(col)),
+       .id = "column")
+  return(mean_sd)
+}
+
+```
+
+```{r}
+# using the function descriptives I created above
+# descrip_table <- descriptives(elt_w1_clean_6) # use df that has scales, not elt_w1_clean_6
+```
+
+
 ## Educator's average scores {-}
 
 ...
@@ -515,3 +575,10 @@ I recommend...
 * id protocol
   + When developing the id protocol for schools, make sure that both values and values labels coincide. 
   + Assign an unique identifier for each participant and an unique identifier per family. 
+
+# Appendix  {-}
+
+```{r}
+view_df(elt_w1_clean_5) # change for final_elt_w1 when done. 
+```
+
