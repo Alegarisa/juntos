@@ -484,9 +484,60 @@ elt_w1_clean_6 <- recode_missing_df(elt_w1_clean_5)
 
 Educators in this first wave of data (*n* = 43) had a mean age of 42.89 years, with an age range between 24 and 62 years. The Overwhelming majority of educators were identified as female (72.09%). A little less than half of the educators were teachers (48.84%), followed by administrators (16.27%) and other classified staff (16.27%). The remaining 20% of the sample was comprised of educational assistants, counselors, and other certified staff. About half of the educators have been in their current career position, regardless of school site, for over 10 years. About 12% of the educators have been in their current career position for less than a year. 
 
-```{r}
-# include plot that has dots of educators within years of experience. 
+```{r, fig.height= 8, fig.width=10}
+
+tidy_d <- elt_w1_clean_6 %>%
+  select(4, 5, 136, 139:147, 151, 152, 163, 164) %>%
+  gather(race, count, 4:12) %>%
+  filter(count == 1)
+
+viz <- tidy_d %>%
+  mutate(race = as.factor(race),
+         race = fct_recode(race,
+                           "White" = "white",
+                            "Other race/ethnicity" = "race_ethnicity_other",
+                            "Indigenous Latin America" = "indigenous_americas",
+                            "Latino" = "hispanic_latino_spanish",
+                            "African American" = "black_african_american",
+                            "Native American" = "american_indian_alaska_native"),
+         years_in_position = as.factor(years_in_position),
+         participant_role = as.factor(participant_role),
+         participant_role = fct_recode(participant_role,
+                           "Administrator" = "1",
+                            "Teacher" = "2",
+                            "Counselor" = "3",
+                            "Educational Assistant" = "4",
+                            "Classified staff" = "5",
+                            "Certified staff" = "6"))
+
+  
+ggplot(viz, aes(fct_reorder(race, count), count)) +
+  geom_point(aes(color = participant_role), position = "jitter", size = 3) +
+  coord_flip() +
+  scale_colour_viridis_d("Educator's roles", option = "plasma") +
+  theme_minimal() +
+  labs(title = "Educators' Races/ethnicities and Roles",
+       y = "",
+       x = "") +
+  theme(plot.title = element_text(family = "sans", size = 25, face = "bold", hjust = 0.5, margin = margin(20, 20, 10, 10)),
+        axis.text = element_text(family = "sans", size = 12))
+
+# why is the count in decimals? How to take it out?
+# better way to organize the races?
+
 ```
+
+```{r}
+ggplot(elt_w1_clean_6, aes(gender_id)) +
+  geom_bar()
+
+ggplot(elt_w1_clean_6, aes(years_in_position, spanish_comfort)) +
+  geom_point(aes(color = participant_role))
+
+ggplot(elt_w1_clean_6, aes(participant_role, spanish_comfort)) +
+  geom_boxplot() 
+```
+
 
 All but four of the educators were born in the United States (U.S.). These four educators traced back their roots to Mexico or El Salvador and report coming for the first time to the U.S. when they were between 11 and 24 years of age. The entirety of the Educators in the sample felt either *very comfortable* or *comfortable* speaking in English, but only about 20% felt the same way speaking in Spanish. Finally, the race/ethnicity breakdown of the sample was approximately 79% White, 12% Latino, 7% Native American, and 2% African American. 
 
@@ -579,6 +630,6 @@ I recommend...
 # Appendix  {-}
 
 ```{r}
-view_df(elt_w1_clean_5) # change for final_elt_w1 when done. 
+view_df(elt_w1_clean_5) # change for final_elt_w1 when done.
 ```
 
