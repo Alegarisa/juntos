@@ -457,91 +457,34 @@ view_df(final_elt_w1)
 in report say that only scales have reverse coded items. In the dataset in itself, I won't reverse code because it strips out value labels. 
 
 
-```{r echo=FALSE}
+# Descriptives 
 
-elt_w1_clean_6 %>%
-  group_by(participant_role) %>%
-  summarize(n = n()) %>%
-  mutate(prop = (n/sum(n)* 100)) # how to round to 2 decimals?
+```{r}
+# function to take proportions
+prop_fun <- function(df, var) {
+  df %>%
+    group_by({{var}}) %>%
+    summarize(n = n()) %>%
+    mutate(prop = round(n/sum(n), 2))
+}
+
+prop_fun(elt_w1_clean_6, white)
+
+prop_fun(elt_w1_clean_6, hispanic_latino_spanish)
+
+prop_fun(elt_w1_clean_6, black_african_american)
+
+prop_fun(elt_w1_clean_6, american_indian_alaska_native)
+
+prop_fun(elt_w1_clean_6, indigenous_americas)
+
+prop_fun(elt_w1_clean_6, race_ethnicity_other)
 ```
 
-```{r echo=FALSE}
-
-elt_w1_clean_6 %>%
-  group_by(gender_id) %>%
-  summarize(n = n()) %>%
-  mutate(prop = (n/sum(n)* 100))
-```
-
-```{r echo=FALSE}
-
-elt_w1_clean_6 %>%
-  group_by(birth_country) %>%
-  summarize(n = n()) %>%
-  mutate(prop = (n/sum(n)* 100))
-```
-
-```{r echo=FALSE}
-
-elt_w1_clean_6 %>%
-  group_by(years_in_position) %>%
-  summarize(n = n()) %>%
-  mutate(prop = (n/sum(n)* 100))
-```
-
-```{r echo=FALSE}
-
-elt_w1_clean_6 %>%
-  group_by(english_comfort) %>%
-  summarize(n = n()) %>%
-  mutate(prop = (n/sum(n)* 100))
-```
-
-```{r echo=FALSE}
-
-elt_w1_clean_6 %>%
-  group_by(spanish_comfort) %>%
-  summarize(n = n()) %>%
-  mutate(prop = (n/sum(n)* 100))
-```
-
-```{r echo=FALSE}
-
-elt_w1_clean_6 %>%
-  group_by(white) %>%
-  summarize(n = n()) %>%
-  mutate(prop = (n/sum(n)* 100))
-```
-
-```{r echo=FALSE}
-
-elt_w1_clean_6 %>%
-  group_by(hispanic_latino_spanish) %>%
-  summarize(n = n()) %>%
-  mutate(prop = (n/sum(n)* 100))
-```
-
-```{r echo=FALSE}
-
-elt_w1_clean_6 %>%
-  group_by(black_african_american) %>%
-  summarize(n = n()) %>%
-  mutate(prop = (n/sum(n)* 100))
-```
-
-```{r echo=FALSE}
-
-elt_w1_clean_6 %>%
-  group_by(american_indian_alaska_native) %>%
-  summarize(n = n()) %>%
-  mutate(prop = (n/sum(n)* 100))
-```
-
-```{r echo=FALSE}
-
-elt_w1_clean_6 %>%
-  group_by(indigenous_americas) %>%
-  summarize(n = n()) %>%
-  mutate(prop = (n/sum(n)* 100))
+```{r}
+# nice frequencies table
+elt_w1_clean_6 %>% 
+  select(1, 2, 5, 136:168) %>% 
+  gtsummary::tbl_summary()
 ```
 

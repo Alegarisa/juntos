@@ -35,7 +35,7 @@ library(gtsummary)
 
 # nice frequencies table
 elt_w1_clean_6 %>% 
-  select(1:5, 136:168) %>% 
+  select(1, 2, 5, 136:168) %>% 
   gtsummary::tbl_summary()
 
 
@@ -67,3 +67,9 @@ ggplot(viz, aes(fct_reorder(race, count), count)) +
        x = "") +
   theme(plot.title = element_text(family = "sans", size = 25, face = "bold", hjust = 0.5, margin = margin(20, 20, 10, 10)),
         axis.text = element_text(family = "sans", size = 12))
+
+
+# plot.title = element_text(family = "sans", size = 25, face = "bold", hjust = 0.5, margin = margin(20, 20, 10, 10))
+# 
+# plot.title = element_text(family = "sans", size = 25, face = "bold", hjust = 0.3, margin = margin(20, 20, 10, 10))
+
