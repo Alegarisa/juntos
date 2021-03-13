@@ -1,6 +1,6 @@
 ---
 title: "Juntos Project Initial Report"
-subtitle: "Baseline Assessment Cleaning and Recommendations"
+subtitle: "Educators' Baseline Assessment Cleaning and Recommendations"
 author: "Alejandra Garcia Isaza"
 date: "March 2021"
 output: 
@@ -37,22 +37,42 @@ The *Conexiones* curricula was built on Latino cultural assets, addressed common
 
 The six participating schools belonged to three different school districts in the state of Oregon and were randomly assigned to either a control group or a intervention group that received the *Conexiones* intervention program. Study participants completed assessments at three different time points (baseline, immediately post-intervention, and 12-month post-intervention). The complete dataset in the project is made of three waves of data with separate assessments for each participant type (parents, students, and educators). 
 
-## Report details {-}
-
-This report will be focusing only on the baseline assessment and is intended to describe the data cleaning process with the aim of helping CEQP staff replicate these procedures in subsequent waves of data and future projects. The report will also include a brief description of the sociodemographic characteristics of the study participants, the scale creation process, the average scores of participants’ responses in regards to major study constructs, and recommendations for more advanced statistical analyses that link the different types of participants in the study.
-
-\pagebreak
-
 ```{r echo=FALSE, out.width="50%", fig.align="center"}
 
 knitr::include_graphics("../juntos/ceqp_logo.PNG")
 ```
 
+\pagebreak
+
+## Report details {-}
+
+This report will be focusing only on the educators' baseline assessment and is intended to describe the data cleaning process with the aim of guiding CEQP's researchers and data analysts in the procedures performed to the dataset. A secondary aim is to help CEQP staff with data management responsibilities to replicate these procedures in subsequent waves of data and future projects. 
+
+The report will also include a brief description of the sociodemographic characteristics of the study participants, the scale creation process, the average scores of participants’ responses in regards to major study constructs, and recommendations for more advanced statistical analyses that link the different types of participants in the study. In the appendix section, data analysts interested in using this dataset will find a codebook with all the items, variable names, and response options. 
+
+
+```{r echo=FALSE, out.width="50%", fig.align="center"}
+
+knitr::include_graphics("../juntos/CEQP_final_panel_3.jpg")
+```
+
+
+```{r echo=FALSE, out.width="50%", fig.align="center"}
+
+knitr::include_graphics("../juntos/CEQP_final_panel_6.jpg")
+```
+
+```{r echo=FALSE, out.width="50%", fig.align="center"}
+
+#knitr::include_graphics("../juntos/CEQP_final_panel_7.jpg") # including this image produces a timeout error :/
+```
+
+
 # Data Cleaning procedures {-}
 
 The following section describes the data cleaning procedures I performed in each of the participant's type datasets. I performed data cleaning using the [R](https://www.r-project.org/) and [R Studio](https://rstudio.com/) softwares, but had in mind that end users of the cleaned datasets will likely be SPSS users. 
 
-## Educator's dataset {-}
+## The dataset {-}
 
 ```{r include=FALSE}
 
@@ -349,11 +369,13 @@ spa <- elt_w1_clean_3 %>%
 ```
 
 When all the language variables were collapsed I tested if there were duplicated cases and I found that participant identified with `id` 454 chose response option 1 and response option 2. 
+
 ```{r echo=FALSE}
 
 d3 <- spa %>%
   filter(id > 450 & id < 550)
 ```
+
 
 ```{r echo=FALSE}
 
@@ -437,18 +459,9 @@ elt_w1_clean_5 <- elt_w1_clean_4 %>%
          c("cont_ed_na" = "q135_88"),
          c("cont_ed_no_response" = "q135_99"),
          c("cont_ed_other_text" = "q135_6_text")) %>%
-  mutate(age = as.numeric(age)) %>% 
+  mutate(age = as.numeric(age)) %>% # making it numeric for QUAN analyses
   select(-q127, -q129, -q131_3_text) # selecting out because they did not have meaningful info
 ```
-
-
-## Parent dataset {-}
-
-...
-
-## Youth dataset {-}
-
-...
 
 
 # Participant descriptives  {-}
@@ -484,7 +497,8 @@ elt_w1_clean_6 <- recode_missing_df(elt_w1_clean_5)
 
 Educators in this first wave of data (*n* = 43) had a mean age of 42.89 years, with an age range between 24 and 62 years. The Overwhelming majority of educators were identified as female (72.09%). A little less than half of the educators were teachers (48.84%), followed by administrators (16.27%) and other classified staff (16.27%). The remaining 20% of the sample was comprised of educational assistants, counselors, and other certified staff. About half of the educators have been in their current career position, regardless of school site, for over 10 years. About 12% of the educators have been in their current career position for less than a year. 
 
-```{r, fig.height= 8, fig.width=10}
+
+```{r echo=FALSE, fig.height= 8, fig.width=10, fig.align="center"}
 
 tidy_d <- elt_w1_clean_6 %>%
   select(4, 5, 136, 139:147, 151, 152, 163, 164) %>%
@@ -511,44 +525,29 @@ viz <- tidy_d %>%
                             "Certified staff" = "6"))
 
   
-ggplot(viz, aes(fct_reorder(race, count), count)) +
-  geom_point(aes(color = participant_role), position = "jitter", size = 3) +
-  coord_flip() +
-  scale_colour_viridis_d("Educator's roles", option = "plasma") +
+ggplot(viz, aes(fct_relevel(race, "White", "Latino"))) +
+  geom_bar(aes(fill = participant_role), position = position_dodge2(width = 0.9, preserve = "single")) +
+  scale_y_continuous() +
+  scale_fill_viridis_d("Educator's roles", option = "plasma") +
   theme_minimal() +
   labs(title = "Educators' Races/ethnicities and Roles",
        y = "",
        x = "") +
   theme(plot.title = element_text(family = "sans", size = 25, face = "bold", hjust = 0.5, margin = margin(20, 20, 10, 10)),
-        axis.text = element_text(family = "sans", size = 12))
-
-# why is the count in decimals? How to take it out?
-# better way to organize the races?
+        axis.text = element_text(family = "sans", size = 12)) +
+  coord_flip()
 
 ```
+
 
 ```{r}
 ggplot(elt_w1_clean_6, aes(gender_id)) +
   geom_bar()
 
-ggplot(elt_w1_clean_6, aes(years_in_position, spanish_comfort)) +
-  geom_point(aes(color = participant_role))
-
-ggplot(elt_w1_clean_6, aes(participant_role, spanish_comfort)) +
-  geom_boxplot() 
 ```
 
 
 All but four of the educators were born in the United States (U.S.). These four educators traced back their roots to Mexico or El Salvador and report coming for the first time to the U.S. when they were between 11 and 24 years of age. The entirety of the Educators in the sample felt either *very comfortable* or *comfortable* speaking in English, but only about 20% felt the same way speaking in Spanish. Finally, the race/ethnicity breakdown of the sample was approximately 79% White, 12% Latino, 7% Native American, and 2% African American. 
-
-
-## Parent characteristics {-}
-
-...
-
-## Youth characteristics {-}
-
-...
 
 
 # Scale creation and Testing {-}
@@ -559,13 +558,6 @@ Say something about scales
 
 ...
 
-## Parent scales {-}
-
-...
-
-## Youth scales {-}
-
-...
 
 # Average Scores of Major Study Constructs  {-}
 
@@ -583,8 +575,8 @@ only_numeric <- function(df) {
 }
 
 # a list with the functions we want
-smry <- list(mean = function(x) mean(x, na.rm = TRUE), 
-             sd = function(x) sd(x, na.rm = TRUE),
+smry <- list(mean = function(x) round(mean(x, na.rm = TRUE), 2), 
+             sd = function(x) round(sd(x, na.rm = TRUE), 2),
              min = function(x) min(x, na.rm = TRUE),
              max = function(x) max(x, na.rm = TRUE))
 
@@ -600,19 +592,11 @@ descriptives <- function(df) {
 
 ```{r}
 # using the function descriptives I created above
-# descrip_table <- descriptives(elt_w1_clean_6) # use df that has scales, not elt_w1_clean_6
+#descrip_table <- descriptives(elt_w1_clean_6) # use df that has scales, not elt_w1_clean_6
 ```
 
 
 ## Educator's average scores {-}
-
-...
-
-## Parent average scores {-}
-
-...
-
-## Youth average scores {-}
 
 ...
 
