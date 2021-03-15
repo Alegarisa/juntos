@@ -25,6 +25,7 @@ library(knitr)
 library(surveytoolbox)
 library(sjPlot)
 library(kableExtra)
+library(psych)
 
 ```
 
@@ -86,7 +87,9 @@ w1_raw_elt <- read_sav(here("nopublish", "ELT W1 ERC 11.11.2020.sav"))
 
 The raw dataset had 43 observations and 202 variables of which 17 were metadata variables created by Qualtrics, the software used to develop the assessment surveys. Of the 43 observations, one case, participant with `id` 153 had incomplete data. I called the raw dataset downloaded directly from Qualtrics as `w1_raw_elt` which stands for wave one of the raw data from the equity leadership team (i.e. elt).
 
-In the following code, I created a new dataset (`elt_w1_clean`) that selects out all but one of the metadata variables, `response_id`. This variable is an unique identifier assigned by Qualtrics that resulted handy in dealing with duplicated ids. 
+### Initial cleaning
+
+In the following code, I created a new dataframe `elt_w1_clean` where I selected out all but one of the metadata variables, `response_id`. This variable is an unique identifier assigned by Qualtrics that resulted handy in dealing with duplicated ids. 
 
 Other simple data cleaning procedures are noted in the comments marked with a # sign using the [clean_names](https://www.rdocumentation.org/packages/janitor/versions/1.2.0/topics/clean_names), [select](https://www.rdocumentation.org/packages/dplyr/versions/0.7.8/topics/select), [rename](https://www.rdocumentation.org/packages/plyr/versions/1.8.6/topics/rename), and [arrange](https://www.rdocumentation.org/packages/dplyr/versions/0.7.8/topics/arrange) functions. 
 
@@ -101,7 +104,7 @@ elt_w1_clean <- w1_raw_elt %>%
 
 ### Dealing with duplicated ids
 
-When evaluating if the dataset had duplicated ids, I found that `id` 257 was duplicated and there was no `id` 254. 
+When evaluating if the dataframe had duplicated ids, I found that `id` 257 was duplicated and there was no `id` 254. 
 
 In the table below, I am just showing a few variables and participants from `school` 2. 
 
@@ -160,12 +163,16 @@ As can be seen in the table above, ids in the 300's are coded to belong to `scho
 
 At first, I thought that this could be due to an error in the data exporting process and it seemed like an easy enough fix to make. I thought I just needed to recode the names of the levels of the `school` variable. Later I found that this fix did not solve the issue. It took me a couple of months to identify that the error was coded in the Qualtrics survey.
 
+\pagebreak
+
 The images below are screenshots of the same raw data SPSS file downloaded directly from Qualtrics. In figure 1, it can be seen that when the *value labels* button is "on" (i.e. showing value labels and not values), it appears as if there was no flip-flop because the names of the schools coincided with the numbers that were assigned to them. Indeed, school "K" was school 3 and its participants were identified with ids in the 300's and school "A" was school 4 and its participants were identified with ids in the 400's, and so on.
 
 ```{r echo=FALSE, out.width="75%", fig.cap="Value labels button on.", fig.align="center"}
 
 knitr::include_graphics("../juntos/val_lab_on.PNG")
 ```
+
+\pagebreak
 
 This changed when the *value labels* button was "off". In the image below, the flip-flopped school ids is evident again: 
 
@@ -176,9 +183,11 @@ knitr::include_graphics("../juntos/val_lab_off.PNG")
 
 This survey coding error meant that the `school` variable's value labels properly corresponded to the participants' ids, but the variable's values did not. Instead of recoding the values, I decided to create a new variable called `school_id` and delete the flawed original variable `school`. 
 
-In the code below, I used the first digit of the individual participant id variable `id` as the reference for the new `school_id` variable, following CEQP'S id protocol. I also created a new variable called `condition` to indicate which schools were randomly assigned to the control group (coded as 1) or to the intervention group (coded as 2). 
+In the code below, I created a new dataframe `elt_w1_clean_2` where I used the first digit of the individual participant id variable `id` as the reference for the new `school_id` variable, following CEQP'S id protocol. I also created a new variable called `condition` to indicate which schools were randomly assigned to the control group (coded as 1) or to the intervention group (coded as 2). 
 
 I coded schools identified with a `school_id` odd number (1, 3, and 5) as the control schools and the schools identified with an even number (2, 4, and 6) as the intervention schools, as directed by CEQP's research assistant. Finally, I also created a `wave` variable to indicate the wave of the data. Note that I am creating all of these new variables with the [mutate](https://dplyr.tidyverse.org/reference/mutate.html) function.
+
+\pagebreak
 
 ```{r}
 
@@ -192,13 +201,12 @@ elt_w1_clean_2 <- elt_w1_clean %>%
   select(- school) # selecting out (i.e. deleting) school variable
 ```
 
-The `condition` and `school_id` variables I created in the previous code were string variables. In the code below I coerced them to be numeric so they can be used in quantitative analyses using the [as.numeric](https://www.rdocumentation.org/packages/h2o/versions/3.32.0.1/topics/as.numeric) function. I also added value labels with the [set_vall](https://nicedoc.io/martinctc/surveytoolbox) function so that SPSS users can use the *value labels* button. 
+The `condition` and `school_id` variables I created in the previous code were string variables. In the code below I created a new dataframe `elt_w1_clean_3` where I coerced these variables to be numeric so they can be used in quantitative analyses using the [as.numeric](https://www.rdocumentation.org/packages/h2o/versions/3.32.0.1/topics/as.numeric) function. I also added value labels with the [set_vall](https://nicedoc.io/martinctc/surveytoolbox) function so that SPSS users can use the *value labels* button. 
 
 In the code below I also fixed a response option coding error I identified in the variable `q68`. Throughout most of the survey, response options were coded as "Strongly Disagree" = 1, "Disagree" = 2, "Agree" = 3, "Strongly Agree" = 4, "No response" = 99; however, in variable `q68` the response option "No response" was coded as "5". 
 
 I fixed this using the [ifelse](https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/ifelse) function, specifying that if this variable had a response of 5, it should be changed to 99. Finally, I set the variable and value labels with the [set_varl](https://nicedoc.io/martinctc/surveytoolbox) and [set_vall](https://nicedoc.io/martinctc/surveytoolbox) functions, respectively, because sometimes procedures performed with R strips out these labels. 
 
-\pagebreak
 
 ```{r}
 
@@ -222,7 +230,6 @@ In this dataset, several multiple choice variables that were originally meant to
 knitr::include_graphics("../juntos/multi_answ.PNG")
 ```
 
-\pagebreak
 
 When this happens, participants could select mutually exclusive options, like this:
 
@@ -231,9 +238,11 @@ When this happens, participants could select mutually exclusive options, like th
 knitr::include_graphics("../juntos/multi_answ_look.PNG")
 ```
 
+\pagebreak
+
 When *Multiple answer* is selected, Qualtrics splits these multi-value fields into columns, assigning a value of 1 if a response option is chosen and a value of 0 if a response option is not chosen. In the following code, I collapsed the Spanish variable that was split out so it could be easily used in analyses. To avoid overwhelming the reader, I am omitting the code I used to collapse other language variables. I used the same procedure in all of these variables. 
 
-In the code below, the function [pivot_longer](https://tidyr.tidyverse.org/articles/pivot.html) makes the dataset "long" as it increases the number of rows and decreases the number of columns. This function gathers variables' names under the new variable `item_2` and gathers the values of these variables under the new variable `spanish_comfort`. Then, I chose only the options that had a value of 1, indicating when a participant chose that response option. 
+In the code below, the function [pivot_longer](https://tidyr.tidyverse.org/articles/pivot.html) makes the dataframe "long" as it increases the number of rows and decreases the number of columns. This function gathers variables' names under the new variable `item_2` and gathers the values of these variables under the new variable `spanish_comfort`. Then, I chose only the options that had a value of 1, indicating when a participant chose that response option. 
 
 Finally, I recoded the response options to follow this scheme: "Not at all comfortable" = 1, "Somewhat comfortable" = 2, "Comfortable" = 3, "Very comfortable" = 4, "No response" = 99. 
 
@@ -340,7 +349,7 @@ all_lang_vars <- all_lang_vars %>%
 
 # creating new dataset that joins master dataset with reordered and collapsed lang vars
 elt_w1_clean_4 <- left_join(elt_w1_clean_3, all_lang_vars) %>%
-  select(-starts_with("q132_")) # deleting all previous language variables that were included in new variables # 
+  select(-starts_with("q132_")) # deleting all previous language variables that were included in new variables  
 
 # adding value labels on language vars
 elt_w1_clean_4 <- elt_w1_clean_4 %>%
@@ -360,7 +369,7 @@ elt_w1_clean_4 <- elt_w1_clean_4 %>%
 
 # collapsing spanish variables
 spa <- elt_w1_clean_3 %>%
-  select(id, starts_with("q132_2")) %>% # creating a dataset with only the id and Spanish variables
+  select(id, starts_with("q132_2")) %>% # creating a dataframe with only the id and Spanish variables
     pivot_longer(
       cols = starts_with("q132_2"), 
       names_to = "item_2",
@@ -376,7 +385,7 @@ spa <- elt_w1_clean_3 %>%
   select(-item_2) # selecting out variable with repetitive information
 ```
 
-When all the language variables were collapsed I tested if there were duplicated cases and I found that participant identified with `id` 454 chose response option "1" and response option "2". 
+When all the language variables were collapsed I checked if there were duplicated cases and I found that participant identified with `id` 454 chose response option "1" and response option "2". 
 
 ```{r echo=FALSE}
 
@@ -412,9 +421,15 @@ spa_2 %>%
   row_spec(4, color = "black", background = "#F3E35A")
 ```
 
-The last step in this process was making the language variables numeric so they could be used in quantitative analyses and adding the value labels so that the SPSS users can use the *value labels* button. I used the code below to do this. 
+
+The last step in this process was joining the dataframe I created with all the language variables I collapsed (`all_lang_vars`) and the `elt_w1_clean_3` dataframe that had all of the variables. I used the [left_join](https://www.rdocumentation.org/packages/tidytable/versions/0.5.9/topics/left_join.) function to do this. 
+
+In this new dataframe `elt_w1_clean_4` I also coerced the language variables to become numeric so they could be used in quantitative analyses and added the value labels so that SPSS users can use the *value labels* button. I used the code below to do this. 
 
 ```{r eval=FALSE}
+
+elt_w1_clean_4 <- left_join(elt_w1_clean_3, all_lang_vars) %>%
+  select(-starts_with("q132_")) # deleting all previous language variables that were included in new vlanguage ariables  
 
 elt_w1_clean_4 <- elt_w1_clean_4 %>%
   mutate(english_comfort = as.numeric(english_comfort),
@@ -432,9 +447,9 @@ As shown, the following variables were the result of the collapsing process desc
 
 ### Renaming demographic variables
 
-In the code below, I used the [rename](https://www.rdocumentation.org/packages/reshape/versions/0.8.8/topics/rename) function to rename some of the demographic variables that I will use to describe participants's characteristics in the next section of this report. This function uses a "new name" = "old name" pattern. Very straightforward! 
+In the code below, I created a new dataframe `elt_w1_clean_5` where I used the [rename](https://www.rdocumentation.org/packages/reshape/versions/0.8.8/topics/rename) function to rename some of the demographic variables that I used to describe participants's characteristics in the next section of this report. This function uses a "new name" = "old name" pattern. Very straightforward! 
 
-At the end I selected out a few variables that did not have meaningful information. For instance, variable `q127` was a response/no response question that only indicated if participants chose to answer it. The meaningul information was contained in variable `q127_1_text` that was renamed as `age`. 
+At the end I selected out a few variables that did not have meaningful information. For instance, variable `q127` was a response/no response question that only indicated if participants chose to answer it. The meaningul information was contained in variable `q127_1_text` that was renamed as `age`, which I also coerced to become a numeric variable.  
 
 ```{r}
 
@@ -494,7 +509,7 @@ recode_missing_df <- function(df, missing_vals = c(88, 99, -99)) {
 
 In the following section, I used descriptive statistics to summarize participants' characteristics. In this analysis, I treated responses such as "99 = not applicable" or "88 = no response" as missing values. Other category of missing values were responses coded by Qualtrics as "-99 = seen but unanswered", when participants were not forced to respond. 
 
-In the code below I applied a function I created `recode_missing_df` (code of the function not shown) to recode these values as `NA`, the way R codes missing values. 
+In the code below I created a new dataframe called `elt_w1_clean_6` where I applied a function I created `recode_missing_df` (code of the function not shown) to recode the 88, 99, and -99 values as `NA`, the way R codes missing values. 
 
 ```{r include=FALSE}
 
@@ -573,15 +588,17 @@ ggplot(viz_2, aes(fct_relevel(race, "White", "Latino"))) +
 As can be seen in figure 6, educators in this sample were overwhelmingly White (81%). Other educators identified as Latino (12%), Native American (7%), Indigenous from Latin America (2%), and African American (2%). Roughly 5% identified as other race/ethnicity ^[In this study, participants were allowed to select as many races or ethnicities they felt identified with, thus, percent of total adds up to more than 100%].
 
 
-# Scale creation and Testing {-}
+# Study constructs' scales {-}
 
-In this section, I describe the scale creation process for major strudy constructs (i.e. school climate, adjustment, and quality of relationships between participants). 
+In this section, I describe the scale creation process of some of the study constructs the intervention was designed to influence. The steps involved in this process were: reverse coding of items, scale reliability check, and scale creation.
 
-## Educator's scales {-}
+## Reverse coding of items {-}
 
-The first step in the scale creation process was to identify which items needed to be reverse coded. Unfortunately, there was no indication in the original survey of which items needed to be reverse coded, so I had to use my subjective judgement to do identify them. 
+The first step in the scale creation process was to identify which items needed to be reverse coded. Unfortunately, there was no indication in the original survey of which items needed to be reverse coded, so I had to use my subjective judgement to identify them. 
 
-This was a time consuming process because it entailed an item by item and then a scale by scale review. Luckily, once the items were identified, the reverse coding process was really fast because [likert_reverse](https://rdrr.io/github/martinctc/surveytoolbox/man/likert_reverse.html) does the "heavy lifting" for you! Note that I use this function within a mutate function call:
+This was a time consuming step because it entailed an item by item and then a scale by scale review. Luckily, once the items were identified, the reverse coding process was really fast because the [likert_reverse](https://rdrr.io/github/martinctc/surveytoolbox/man/likert_reverse.html) function did the "heavy lifting"! Note that I use this function within a mutate function call.
+
+In the code below I created a new dataframe called `elt_w1_clean_6_rev_code` where I included the new reverse coded variables. 
 
 ```{r}
 elt_w1_clean_6_rev_code <- elt_w1_clean_6 %>%
@@ -594,7 +611,7 @@ elt_w1_clean_6_rev_code <- elt_w1_clean_6 %>%
          q116 = likert_reverse(q116, top = 6, bottom = 1))
 ```
 
-The following are the items I reverse coded: 
+Here I only reverse coded the items involved in study constructs such as school climate, family-school relationships, and efficacy, however, the survey had other items that required reverse coding that I did not include in this report. The following are the items I reverse coded for this report: 
 
 > 
 Item q25: *At this school... when a student causes harm, the school’s main response is to punish the student.*  
@@ -605,9 +622,133 @@ Item 114: *If a student in my class becomes disruptive and noisy, I feel assured
 Item q115: *If one of my students couldn't do a class assignment, I would be able to accurately assess whether the assignment was at the appropriate level of difficulty.*
 Item q116: *I can get through to even the most difficult or unmotivated students.*  
 
+
+## Reliability check {-}
+
+Once I completed the reverse coding step, I checked the reliability of the scales of the study constructs mentioned before. I used Chronbach's alpha as a measure of the internal consistency of the scale and I followed these guidelines to indicate the level of the scale's reliability:
+
+> 
+.00 to .69 = Poor reliability  
+.70 to .79 = Fair reliability  
+.80 to .89 = Good reliability  
+.90 to .99 = Excellent/Strong reliability  
+
+The first scale I checked was school climate. In the original survey that educators completed, the prompt indicated that these items referred to general school climate. Despite my efforts to find the original measure that was used as a reference to create these items, I was not succesful in finding it. For what I gathered of the survey development process, different items from different measures were used, however, the survey developer(s) did not leave a precise record of what items belonged to what measure.
+
+It is likely that several items from this scale were adapted from items in Part A: *General Climate Factors* of the public domain Charles F. Kettering Instrument (Fox et al., 1973) and *the Omnibus T-Scale* (Hoy & Tschannen-Moran, 2007). It is important to note that these two measures had a number of subscales within them, thus, it is possible that the scale named here as *general school climate* also has subscales. 
+
+In the code below, first, I created a dataframe with the specific items of interest making reference to the column numbers in the dataset. Then, I checked the internal consistency of this dataframe or scale using the [alpha](https://www.rdocumentation.org/packages/psych/versions/2.0.12/topics/alpha) function. I followed this same procedure for all of the scales. 
+
+Following the guidelines stated above, the general school climate scale has an excellent internal consistency or reliability, however, because Cronbach’s alpha increases as the number of item increases, this high score may be due to the number of items included in the scale (24 items). This scale is a good candidate for further Exploratory and Confirmatory Factor Analyses (EFA and CFA).
+
+For this scale, higher scores indicate better school climate. 
+# (check this tomorrw)
+
+```{r eval=FALSE}
+climate_gen <- data.frame(elt_w1_clean_6_rev_code[,12:35]) # these are q1 - q24
+
+alpha(climate_gen) # alpha = .92 -->  excellent consistency
+```
+
+For the diversity engagement, the equity self-efficacy, the school-family relationship, and the teacher-family relationship scales I was not able to locate any measures of reference. These were probably created by the survey developer(s). 
+
+The diversity engagement scale has 14 items and it has an excellent internal consistency or reliability, however, by reading the items it could be seen that several topics are alluded to, from professional development to coonecting student with resources. This scale is also a good candidate for EFA and CFA. 
+
+For this scale, higher scores indicate more engagement of diversity. 
+# (check this tomorrw)
+
+```{r eval=FALSE}
+
+diver_engage <- data.frame(elt_w1_clean_6_rev_code[,47:60]) # these are q36 - q49
+
+alpha(diver_engage) # alpha = .92 -->  excellent consistency
+```
+
+
+The equity self-efficacy scale... 
+
+```{r eval=FALSE}
+
+equity_self_eff <- data.frame(elt_w1_clean_6_rev_code[,61:66]) # q50 - q55
+
+alpha(equity_self_eff) # alpha = .89 -->  good consistency
+```
+
+The school-Latino families relationship scale...
+
+```{r eval=FALSE}
+
+scho_lat_fam_rel <- data.frame(elt_w1_clean_6_rev_code[,67:75]) # q56 - q64
+alpha(scho_lat_fam_rel) # alpha = . --> .84 good consistency
+
+scho_lat_fam_rel_2 <- elt_w1_clean_6_rev_code %>%
+  select(q56:q64, q70:q72) %>% 
+  data.frame() 
+alpha(scho_lat_fam_rel_2) # alpha = .88 --> good consistency
+```
+
+The teacher-Latino families relationship scale...
+
+```{r eval=FALSE}
+
+teach_lat_fam_rel <- data.frame(elt_w1_clean_6_rev_code[,76:87]) # q65 - q76 (q73 was reverse coded)
+alpha(teach_lat_fam_rel) # alpha = .70 --> fair consistency, better if dropping q73 and q75
+
+teach_lat_fam_rel_2 <- elt_w1_clean_6_rev_code %>%
+  select(q65:q69, q74:q76) %>% # leaving out 70:73
+  data.frame()
+alpha(teach_lat_fam_rel_2) # alpha = .75 --> fair consistency
+```
+
+The teacheer self efficacy was adapted from... Hoy & Woolfolk (1993)
+
+talk about the way I reverse coded items and the 2 subscales. 
+
+```{r eval=FALSE}
+# teach_self_eff_all <- data.frame(elt_w1_clean_6_rev_code[,119:128]) # q108 - q117 (q110, q113, q114, q115, q116 were reverse coded)
+# alpha(teach_self_eff_all) # alpha = .74 --> fair consistency
+
+teach_eff_gen <- elt_w1_clean_6_rev_code %>% # general teaching efficacy dimension in original measure
+  select(q108, q109, q111, q112, q117) %>% 
+  data.frame()
+alpha(teach_eff_gen) # alpha = .73 --> fair consistency
+
+teach_eff_per <- elt_w1_clean_6_rev_code %>% # personal teaching efficacy dimension in original measure
+  select(q110, q113, q114, q115, q116) %>% 
+  data.frame()
+alpha(teach_eff_per) # alpha = .88 --> good consistency
+```
+
+
+References 
+
+Fox, R. S., Boles, H. E., Brainard, E., Fletcher, E., Huge, J. S., Martin, C. L., Maynard, W., Monasmith, J., Olivero, J., Schmuck, R., Shaheen, T. A., Stegeman, W. H. (1973) School climate improvement: a challenge to the school administrator. Bloomington, IN: Phi Delta Kappa Educational Foundation.
+
+Hoy, W. K., & Tschannen-Moran, M. (2007). The conceptualization and measurement of faculty trust in schools: The Omnibus T-Scale. In Hoy, W. K., & DiPaola, M. (Eds.). Essential ideas for the reform of American schools (pp. 87-114). Charlotte, NC: IAP.
+
+Hoy, W. K., & Woolfolk, A. E. (1993). Teachers' sense of efficacy and the organizational health of schools. The elementary school journal, 93(4), 355-372.
+
+
+## Scale creation {-}
+
+
+```{r}
+elt_w1_scales <- elt_w1_clean_6_rev_code %>%
+  rowwise() %>% 
+  mutate(climate_general = mean(c(q1, q2, q3, q4, q5, q6, q7, q8, q9, q10, q11,  q12, q13, q14, q15, q16, q17, q18, q19, q20, q21, q22, q23, q24), na.rm = TRUE),
+         school_engage_diversity = mean(c(q36, q37, q38, q39, q40, q41, q42, q43, q44, q45, q46, q47, q48, q49), na.rm = TRUE),
+         equity_self_efficacy = mean(c(q50, q51, q52, q53, q54, q55), na.rm = TRUE),
+         school_lat_fam_rel = mean(c(q56, q57, q58, q59, q60, q61, q62, q63, q64, q70, q71, q72), na.rm = TRUE),
+         teacher_lat_fam_rel = mean(c(q65, q66, q67, q68, q69, q74, q75, q76), na.rm = TRUE),
+         gen_teaching_efficacy = mean(c(q108, q109, q111, q112, q117), na.rm = TRUE),
+         per_teaching_efficacy = mean(c(q110, q113, q114, q115, q116), na.rm = TRUE)) %>%
+  select(1:7, 169:175)
+```
+
+
 # Average Scores of Major Study Constructs  {-}
 
-Say something about the average scores...
+
 
 
 ```{r include=FALSE}
