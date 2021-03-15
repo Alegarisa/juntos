@@ -20,6 +20,7 @@ library(rio)
 library(here)
 library(tidyverse)
 library(haven)
+library(janitor)
 library(knitr)
 library(surveytoolbox)
 library(sjPlot)
@@ -80,17 +81,19 @@ I performed data cleaning procedures using the [R](https://www.r-project.org/) a
 
 ```{r include=FALSE}
 
-w1_raw_elt <- haven::read_sav(here("nopublish", "ELT W1 ERC 11.11.2020.sav"))
+w1_raw_elt <- read_sav(here("nopublish", "ELT W1 ERC 11.11.2020.sav"))
 ```
 
-The raw dataset had 43 observations and 202 variables of which 17 were metadata variables created by Qualtrics, the software used to develop the assessment surveys. Of the 43 observations, one case, participant with `id` 153 had incomplete data. 
+The raw dataset had 43 observations and 202 variables of which 17 were metadata variables created by Qualtrics, the software used to develop the assessment surveys. Of the 43 observations, one case, participant with `id` 153 had incomplete data. I called the raw dataset downloaded directly from Qualtrics as `w1_raw_elt` which stands for wave one of the raw data from the equity leadership team (i.e. elt).
 
-In the following code, I removed all but one of the metadata variables, `response_id`, that is an unique identifier assigned by Qualtrics that resulted handy in dealing with duplicated ids. Other data cleaning procedures are described in the comments marked with a # sign.
+In the following code, I created a new dataset (`elt_w1_clean`) that selects out all but one of the metadata variables, `response_id`. This variable is an unique identifier assigned by Qualtrics that resulted handy in dealing with duplicated ids. 
+
+Other simple data cleaning procedures are noted in the comments marked with a # sign using the [clean_names](https://www.rdocumentation.org/packages/janitor/versions/1.2.0/topics/clean_names), [select](https://www.rdocumentation.org/packages/dplyr/versions/0.7.8/topics/select), [rename](https://www.rdocumentation.org/packages/plyr/versions/1.8.6/topics/rename), and [arrange](https://www.rdocumentation.org/packages/dplyr/versions/0.7.8/topics/arrange) functions. 
 
 ```{r}
 
 elt_w1_clean <- w1_raw_elt %>% 
-  janitor::clean_names() %>% # function that formats variables' names
+  clean_names() %>% # function that formats variables' names
   select(-1:-8, -10:-17, -202) %>% # selecting out columns with metadata
   rename(c("id" = "pj")) %>% # renaming id variable.
   arrange(id) # ordering participants ids in descending order
@@ -102,7 +105,6 @@ When evaluating if the dataset had duplicated ids, I found that `id` 257 was dup
 
 In the table below, I am just showing a few variables and participants from `school` 2. 
 
-\pagebreak
 
 ```{r echo=FALSE}
 
@@ -123,7 +125,7 @@ d %>%
 
 After checking with CEQP's research assistant, I corroborated that one of the duplicated cases of `id` 257 in fact was `id` 254. I fixed this mistake with the code below using the `response_id` variable and the  [mutate](https://dplyr.tidyverse.org/reference/mutate.html) and [case_when](https://dplyr.tidyverse.org/reference/case_when.html) functions. 
 
-The combination of these two functions is creating a new variable (that I am naming the same as it was, `id`) to follow the condition that if the variable `response_id` has the "R_6EELe7Uuwi9W7zX" value, the `id` value should be "254".  
+The combination of these two functions is creating a new variable (that I am naming the same as it was, `id`) to follow the condition that if the variable `response_id` has the "R_6EELe7Uuwi9W7zX" value, the `id` value should be recoded as "254".  
 
 ```{r}
 
@@ -158,7 +160,7 @@ As can be seen in the table above, ids in the 300's are coded to belong to `scho
 
 At first, I thought that this could be due to an error in the data exporting process and it seemed like an easy enough fix to make. I thought I just needed to recode the names of the levels of the `school` variable. Later I found that this fix did not solve the issue. It took me a couple of months to identify that the error was coded in the Qualtrics survey.
 
-The images below are screenshots of the same raw data SPSS file downloaded directly from Qualtrics. In figure 1, it can be seen that when the *value labels* button is "on" (i.e. showing value labels and not values), it appears as if there was no flip-flop because the names of the schools coincided with the numbers that were assigned to them. Indeed, "Kelly" was school 3 and its participants were identified with ids in the 300's and "ATA" was school 4 and its participants were identified with ids in the 400's, and so on.
+The images below are screenshots of the same raw data SPSS file downloaded directly from Qualtrics. In figure 1, it can be seen that when the *value labels* button is "on" (i.e. showing value labels and not values), it appears as if there was no flip-flop because the names of the schools coincided with the numbers that were assigned to them. Indeed, school "K" was school 3 and its participants were identified with ids in the 300's and school "A" was school 4 and its participants were identified with ids in the 400's, and so on.
 
 ```{r echo=FALSE, out.width="75%", fig.cap="Value labels button on.", fig.align="center"}
 
@@ -190,7 +192,7 @@ elt_w1_clean_2 <- elt_w1_clean %>%
   select(- school) # selecting out (i.e. deleting) school variable
 ```
 
-The `condition` and `school_id` variables I created in the previous code were string variables. In the code below I corced them to be numeric so they can be used in quantitative analyses using the [as.numeric](https://www.rdocumentation.org/packages/h2o/versions/3.32.0.1/topics/as.numeric) function. I also added value labels with the [set_vall](https://nicedoc.io/martinctc/surveytoolbox) function so that SPSS users can use the *value labels* button. 
+The `condition` and `school_id` variables I created in the previous code were string variables. In the code below I coerced them to be numeric so they can be used in quantitative analyses using the [as.numeric](https://www.rdocumentation.org/packages/h2o/versions/3.32.0.1/topics/as.numeric) function. I also added value labels with the [set_vall](https://nicedoc.io/martinctc/surveytoolbox) function so that SPSS users can use the *value labels* button. 
 
 In the code below I also fixed a response option coding error I identified in the variable `q68`. Throughout most of the survey, response options were coded as "Strongly Disagree" = 1, "Disagree" = 2, "Agree" = 3, "Strongly Agree" = 4, "No response" = 99; however, in variable `q68` the response option "No response" was coded as "5". 
 
@@ -391,7 +393,7 @@ d3 %>%
   row_spec(4:5, color = "black", background = "#F3E35A")
 ```
 
-Because I can only assume that this was an entry error because the choices are mutually exclusive, "Not at all comfortable" = 1, vs. "Somewhat comfortable" = 2, I used the [distinct](https://www.rdocumentation.org/packages/dplyr/versions/0.7.8/topics/distinct) function to retain only unique values. 
+Because I can only assume that this was an entry error given that the choices are, in theory, mutually exclusive: "Not at all comfortable" = 1, vs. "Somewhat comfortable" = 2, I used the [distinct](https://www.rdocumentation.org/packages/dplyr/versions/0.7.8/topics/distinct) function to retain only unique values. 
 
 For this case, option 1 = "Not at all comfortable" was retained as the function "assumes" the second option is the duplicative. 
 
@@ -465,7 +467,7 @@ elt_w1_clean_5 <- elt_w1_clean_4 %>%
          c("cont_ed_na" = "q135_88"),
          c("cont_ed_no_response" = "q135_99"),
          c("cont_ed_other_text" = "q135_6_text")) %>%
-  mutate(age = as.numeric(age)) %>% # making it numeric for QUAN analyses
+  mutate(age = as.numeric(age)) %>% # making variable numeric for QUAN analyses
   select(-q127, -q129, -q131_3_text) # selecting out because they did not have meaningful info
 ```
 
@@ -476,16 +478,16 @@ elt_w1_clean_5 <- elt_w1_clean_4 %>%
 # recoding missing values as N/A with function
 
 # vector with missing values in dataset
-missing_vals <- c(77, 88, 99, -99)
+missing_vals <- c(88, 99, -99)
 
 # function that returns true if values in vector are equal to missing_vals. The function takes a vector x, and specified values of missing data
-recode_missing <- function(x, missing_vals = c(77, 88, 99, -99)) {
+recode_missing <- function(x, missing_vals = c(88, 99, -99)) {
   test <- x %in% missing_vals
   ifelse(test, NA, x)
 }
 
 # function that recodes missing values to NA. The function takes a dataframe with variables with missing data, and specified values of missing data
-recode_missing_df <- function(df, missing_vals = c(77, 88, 99, -99)) {
+recode_missing_df <- function(df, missing_vals = c(88, 99, -99)) {
   modify(df, ~recode_missing(.x, missing_vals)) # here uses the function created above
 }
 ```
@@ -501,7 +503,7 @@ elt_w1_clean_6 <- recode_missing_df(elt_w1_clean_5)
 
 ## Educator's characteristics {-}
 
-Educators in this first wave of data (*n* = 43) had a mean age of 42.89 years, with an age range between 24 and 62 years (see figure 5). The majority of educators were identified as female (74%).  
+Educators in this first wave of data (*n* = 43) had a mean age of 42.89 years, with an age range between 24 and 62 years of age (see figure 5). The majority of educators were identified as female (74%).  
 
 ```{r echo=FALSE, warning=FALSE, fig.height= 4, fig.width=6, fig.cap="Educator's Age by gender", fig.align="center"}
 
@@ -513,7 +515,7 @@ viz_1 <- elt_w1_clean_6 %>%
                             "Female" = "2"))
   
 ggplot(viz_1, aes(age)) +
-  geom_histogram(fill = "#340E69", color = "white", alpha = 0.7, bins = 15) +
+  geom_histogram(fill = "#D4AC0D", color = "white", alpha = 0.7, bins = 15) +
   facet_wrap(~ gender_id, nrow = 2) +
   theme_minimal() +
   labs(title = "",
@@ -525,7 +527,7 @@ ggplot(viz_1, aes(age)) +
 
 ```
 
-A little less than half of the educators were teachers (49%), followed by administrators (16%) and other classified staff (16%). The remaining 20% of the sample was comprised of educational assistants, counselors, and other certified staff. A little more than half of the educators had been in their current career position, regardless of school site, for over 10 years. About 12% of the educators had been in their current career position for less than a year. 
+A little less than half of the educators were teachers (49%), followed by administrators (16%) and other classified staff (16%). The remaining of the sample (19%) was comprised of educational assistants, counselors, and other certified staff. A little more than half of the educators had been in their current career position, regardless of school site, for over 10 years. About 12% of the educators had been in their current career position for less than a year. 
 
 All but four of the educators were born in the United States (U.S.). These four educators traced back their roots to Mexico or El Salvador and report coming for the first time to the U.S. when they were between 11 and 24 years of age. The entirety of the educators in the sample felt either *very comfortable* or *comfortable* speaking in English, but only about 20% felt the same way speaking in Spanish.
 
@@ -573,12 +575,35 @@ As can be seen in figure 6, educators in this sample were overwhelmingly White (
 
 # Scale creation and Testing {-}
 
-Say something about scales
+In this section, I describe the scale creation process for major strudy constructs (i.e. school climate, adjustment, and quality of relationships between participants). 
 
 ## Educator's scales {-}
 
-...
+The first step in the scale creation process was to identify which items needed to be reverse coded. Unfortunately, there was no indication in the original survey of which items needed to be reverse coded, so I had to use my subjective judgement to do identify them. 
 
+This was a time consuming process because it entailed an item by item and then a scale by scale review. Luckily, once the items were identified, the reverse coding process was really fast because [likert_reverse](https://rdrr.io/github/martinctc/surveytoolbox/man/likert_reverse.html) does the "heavy lifting" for you! Note that I use this function within a mutate function call:
+
+```{r}
+elt_w1_clean_6_rev_code <- elt_w1_clean_6 %>%
+  mutate(q25 = likert_reverse(q25, top = 4, bottom = 1),
+         q73 = likert_reverse(q73, top = 4, bottom = 1),
+         q110 = likert_reverse(q110, top = 6, bottom = 1),
+         q113 = likert_reverse(q113, top = 6, bottom = 1),
+         q114 = likert_reverse(q114, top = 6, bottom = 1),
+         q115 = likert_reverse(q115, top = 6, bottom = 1),
+         q116 = likert_reverse(q116, top = 6, bottom = 1))
+```
+
+The following are the items I reverse coded: 
+
+> 
+Item q25: *At this school... when a student causes harm, the school’s main response is to punish the student.*  
+Item q73: *Regardless of Latino students’ abilities, it seems most Latino students are bound for a vocational career rather than for community college or university studies.*  
+Item q110: *When I really try, I can get through to most difficult students.*
+Item q113: *If a student did not remember information I gave in a previous lesson, I would know how to increase his/her retention in the next lesson.*  
+Item 114: *If a student in my class becomes disruptive and noisy, I feel assured that I know some techniques to redirect him/her quickly.*  
+Item q115: *If one of my students couldn't do a class assignment, I would be able to accurately assess whether the assignment was at the appropriate level of difficulty.*
+Item q116: *I can get through to even the most difficult or unmotivated students.*  
 
 # Average Scores of Major Study Constructs  {-}
 
@@ -631,6 +656,9 @@ I recommend...
 * id protocol
   + When developing the id protocol for schools, make sure that both values and values labels coincide. 
   + Assign an unique identifier for each participant and an unique identifier per family. 
+
+* Survey developmnet
+  + When creating items for a survey, indicate which items need to be reverse coded. 
 
 # Appendix  {-}
 
