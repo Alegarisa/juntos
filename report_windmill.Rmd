@@ -426,10 +426,10 @@ The last step in this process was joining the dataframe I created with all the l
 
 In this new dataframe `elt_w1_clean_4` I also coerced the language variables to become numeric so they could be used in quantitative analyses and added the value labels so that SPSS users can use the *value labels* button. I used the code below to do this. 
 
-```{r eval=FALSE}
+```{r eval=FALSE, message=FALSE}
 
 elt_w1_clean_4 <- left_join(elt_w1_clean_3, all_lang_vars) %>%
-  select(-starts_with("q132_")) # deleting all previous language variables that were included in new vlanguage ariables  
+  select(-starts_with("q132_")) # selecting out language variables included now in new language Variables  
 
 elt_w1_clean_4 <- elt_w1_clean_4 %>%
   mutate(english_comfort = as.numeric(english_comfort),
@@ -439,8 +439,7 @@ elt_w1_clean_4 <- elt_w1_clean_4 %>%
          other1_lang_comfort = as.numeric(other1_lang_comfort),
          other1_lang_comfort = set_vall(other1_lang_comfort, c("not at all comfortable" = 1, "somewhat comfortable" = 2, "comfortable" = 3, "very comfortable" = 4, "no response" = 99)),
          other2_lang_comfort = as.numeric(other2_lang_comfort),
-         other2_lang_comfort = set_vall(other2_lang_comfort, c("not at all comfortable" = 1, "somewhat comfortable" = 2, "comfortable" = 3, "very comfortable" = 4, "no response" = 99)),
-         )
+         other2_lang_comfort = set_vall(other2_lang_comfort, c("not at all comfortable" = 1, "somewhat comfortable" = 2, "comfortable" = 3, "very comfortable" = 4, "no response" = 99)))
 ```
 
 As shown, the following variables were the result of the collapsing process described above: `english_comfort`, `spanish_comfort`, `other1_lang_comfort`, and `other2_lang_comfort`. 
@@ -510,6 +509,8 @@ recode_missing_df <- function(df, missing_vals = c(88, 99, -99)) {
 In the following section, I used descriptive statistics to summarize participants' characteristics. In this analysis, I treated responses such as "99 = not applicable" or "88 = no response" as missing values. Other category of missing values were responses coded by Qualtrics as "-99 = seen but unanswered", when participants were not forced to respond. 
 
 In the code below I created a new dataframe called `elt_w1_clean_6` where I applied a function I created `recode_missing_df` (code of the function not shown) to recode the 88, 99, and -99 values as `NA`, the way R codes missing values. 
+
+The downside of this function is that it strips out the variable and value labels. I dealt with this downside to the best of my coding abilities and I describe what I did later in the report. 
 
 ```{r include=FALSE}
 
@@ -601,6 +602,7 @@ This was a time consuming step because it entailed an item by item and then a sc
 In the code below I created a new dataframe called `elt_w1_clean_6_rev_code` where I included the new reverse coded variables. 
 
 ```{r}
+
 elt_w1_clean_6_rev_code <- elt_w1_clean_6 %>%
   mutate(q25 = likert_reverse(q25, top = 4, bottom = 1),
          q73 = likert_reverse(q73, top = 4, bottom = 1),
@@ -608,13 +610,14 @@ elt_w1_clean_6_rev_code <- elt_w1_clean_6 %>%
          q113 = likert_reverse(q113, top = 6, bottom = 1),
          q114 = likert_reverse(q114, top = 6, bottom = 1),
          q115 = likert_reverse(q115, top = 6, bottom = 1),
-         q116 = likert_reverse(q116, top = 6, bottom = 1))
+         q116 = likert_reverse(q116, top = 6, bottom = 1),
+         q123 = likert_reverse(q123, top = 4, bottom = 1),
+         q124 = likert_reverse(q124, top = 4, bottom = 1))
 ```
 
-Here I only reverse coded the items involved in study constructs such as school climate, family-school relationships, and efficacy, however, the survey had other items that required reverse coding that I did not include in this report. The following are the items I reverse coded for this report: 
+Here I reverse coded all of the items in the survey that needed to be reverse coded, however, I did not use the first and last two variables, `q25`, `q123`, and `q124` in the scale creation process because they belong to scale constructs other than school climate, family-school relationships, and efficacy. The following are the items I reverse coded and used in the scale creation process described below: 
 
 > 
-Item q25: *At this school... when a student causes harm, the school’s main response is to punish the student.*  
 Item q73: *Regardless of Latino students’ abilities, it seems most Latino students are bound for a vocational career rather than for community college or university studies.*  
 Item q110: *When I really try, I can get through to most difficult students.*
 Item q113: *If a student did not remember information I gave in a previous lesson, I would know how to increase his/her retention in the next lesson.*  
@@ -633,19 +636,24 @@ Once I completed the reverse coding step, I checked the reliability of the scale
 .80 to .89 = Good reliability  
 .90 to .99 = Excellent/Strong reliability  
 
-The first scale I checked was school climate. In the original survey that educators completed, the prompt indicated that these items referred to general school climate. Despite my efforts to find the original measure that was used as a reference to create these items, I was not succesful in finding it. For what I gathered of the survey development process, different items from different measures were used, however, the survey developer(s) did not leave a precise record of what items belonged to what measure.
+In the code below, first, I created a dataframe only with the specific items of interest, selecting them by their variable name in the dataset. Then, I checked the internal consistency of this dataframe or scale using the [alpha](https://www.rdocumentation.org/packages/psych/versions/2.0.12/topics/alpha) function. I followed this same procedure for all of the scales. 
 
-It is likely that several items from this scale were adapted from items in Part A: *General Climate Factors* of the public domain Charles F. Kettering Instrument (Fox et al., 1973) and *the Omnibus T-Scale* (Hoy & Tschannen-Moran, 2007). It is important to note that these two measures had a number of subscales within them, thus, it is possible that the scale named here as *general school climate* also has subscales. 
+The first scale I checked was school climate. In the original survey that educators completed, the prompt indicated that these items referred to general school climate. Despite my efforts to find the original measure that was used as a reference to create these items, I was not succesful in finding it. 
 
-In the code below, first, I created a dataframe with the specific items of interest making reference to the column numbers in the dataset. Then, I checked the internal consistency of this dataframe or scale using the [alpha](https://www.rdocumentation.org/packages/psych/versions/2.0.12/topics/alpha) function. I followed this same procedure for all of the scales. 
+For what I gathered of the survey development process, different items from different measures were used, however, the survey developer(s) did not leave a precise record of what items belonged to what measure.
 
-Following the guidelines stated above, the general school climate scale has an excellent internal consistency or reliability, however, because Cronbach’s alpha increases as the number of item increases, this high score may be due to the number of items included in the scale (24 items). This scale is a good candidate for further Exploratory and Confirmatory Factor Analyses (EFA and CFA).
+It is likely that several items from this scale were adapted from items in Part A: *General Climate Factors* of the public domain Charles F. Kettering Instrument (Fox et al., 1973) and *the Omnibus T-Scale* (Hoy & Tschannen-Moran, 2007). It is important to note that these two measures had a number of subscales within them, thus, it is possible that the scale named here as *general school climate* also has subscales. This scale is a good candidate for further Exploratory and Confirmatory Factor Analyses (EFA and CFA).
+
+Following the guidelines stated above, the general school climate scale has an excellent internal consistency or reliability. It is important to say, however, that because Cronbach’s alpha increases as the number of item increases, this high score may be due to the high number of items included in the scale (24 items). 
 
 For this scale, higher scores indicate better school climate. 
-# (check this tomorrw)
+
 
 ```{r eval=FALSE}
-climate_gen <- data.frame(elt_w1_clean_6_rev_code[,12:35]) # these are q1 - q24
+
+climate_gen <- elt_w1_clean_6_rev_code %>%
+  select(q1:q24) %>% 
+  data.frame() 
 
 alpha(climate_gen) # alpha = .92 -->  excellent consistency
 ```
@@ -659,7 +667,9 @@ For this scale, higher scores indicate more engagement of diversity.
 
 ```{r eval=FALSE}
 
-diver_engage <- data.frame(elt_w1_clean_6_rev_code[,47:60]) # these are q36 - q49
+diver_engage <- elt_w1_clean_6_rev_code %>%
+  select(q36:q49) %>% 
+  data.frame()
 
 alpha(diver_engage) # alpha = .92 -->  excellent consistency
 ```
@@ -669,7 +679,9 @@ The equity self-efficacy scale...
 
 ```{r eval=FALSE}
 
-equity_self_eff <- data.frame(elt_w1_clean_6_rev_code[,61:66]) # q50 - q55
+equity_self_eff <- elt_w1_clean_6_rev_code %>%
+  select(q50:q55) %>% 
+  data.frame()
 
 alpha(equity_self_eff) # alpha = .89 -->  good consistency
 ```
@@ -678,44 +690,68 @@ The school-Latino families relationship scale...
 
 ```{r eval=FALSE}
 
-scho_lat_fam_rel <- data.frame(elt_w1_clean_6_rev_code[,67:75]) # q56 - q64
-alpha(scho_lat_fam_rel) # alpha = . --> .84 good consistency
+scho_lat_fam_rel <- elt_w1_clean_6_rev_code %>%
+  select(q56:q64) %>% 
+  data.frame() # alpha = --> .84 good consistency
+
+alpha(scho_lat_fam_rel)
 
 scho_lat_fam_rel_2 <- elt_w1_clean_6_rev_code %>%
   select(q56:q64, q70:q72) %>% 
   data.frame() 
+
 alpha(scho_lat_fam_rel_2) # alpha = .88 --> good consistency
 ```
 
 The teacher-Latino families relationship scale...
 
+in the `teach_lat_fam_rel` scale, .69poor consistency, message suggests reverse coding items q73 and q75. 
+
+
+in the `teach_lat_fam_rel_2` scale, .75 fair consistency, message suggests reverse coding item q75. 
 ```{r eval=FALSE}
 
-teach_lat_fam_rel <- data.frame(elt_w1_clean_6_rev_code[,76:87]) # q65 - q76 (q73 was reverse coded)
-alpha(teach_lat_fam_rel) # alpha = .70 --> fair consistency, better if dropping q73 and q75
+teach_lat_fam_rel <- elt_w1_clean_6_rev_code %>%
+  select(q65:q76) %>%
+  data.frame() # (q73 was reverse coded)
+
+alpha(teach_lat_fam_rel) # alpha = .69 --> poor consistency, better if dropping q73 and q75
 
 teach_lat_fam_rel_2 <- elt_w1_clean_6_rev_code %>%
-  select(q65:q69, q74:q76) %>% # leaving out 70:73
+  select(q65:q69, q74:q76) %>% # leaving out q70:q73
   data.frame()
+
 alpha(teach_lat_fam_rel_2) # alpha = .75 --> fair consistency
 ```
 
 The teacheer self efficacy was adapted from... Hoy & Woolfolk (1993)
 
+the response options changed competely from previous items (1-6) strongly agree to strongly disagree. 
+
 talk about the way I reverse coded items and the 2 subscales. 
+`teach_self_eff_all` message suggests reverse: q112
+
+`teach_eff_gen` no message
+
+`teach_eff_per` no message
 
 ```{r eval=FALSE}
-# teach_self_eff_all <- data.frame(elt_w1_clean_6_rev_code[,119:128]) # q108 - q117 (q110, q113, q114, q115, q116 were reverse coded)
-# alpha(teach_self_eff_all) # alpha = .74 --> fair consistency
+teach_self_eff_all <- elt_w1_clean_6_rev_code %>% 
+  select(q108:q117) %>% 
+  data.frame() # q110, q113, q114, q115, q116 were reverse coded)
+
+alpha(teach_self_eff_all) # alpha = .74 --> fair consistency
 
 teach_eff_gen <- elt_w1_clean_6_rev_code %>% # general teaching efficacy dimension in original measure
   select(q108, q109, q111, q112, q117) %>% 
   data.frame()
+
 alpha(teach_eff_gen) # alpha = .73 --> fair consistency
 
 teach_eff_per <- elt_w1_clean_6_rev_code %>% # personal teaching efficacy dimension in original measure
   select(q110, q113, q114, q115, q116) %>% 
-  data.frame()
+  data.frame() # all items were reverse coded)
+
 alpha(teach_eff_per) # alpha = .88 --> good consistency
 ```
 

@@ -367,14 +367,19 @@ q110, q113, q114, q115, q116 (1-6, s. disagree - s. agree (Rev coded)) higher sc
 .80 to .89 = Good 
 .90 to .99 = Excellent/Strong
 
+Note: all of the code that referred to columns were wrong. I changed it here to reflect the variable names. 
+
 ```{r}
 ####### internal consistency ######
 
 library(psych)
 
 ################
-climate_gen <- data.frame(elt_w1_clean_6_rev_code[,12:35]) # q1 - q24
-alpha(climate_gen) # alpha = .92 -->  excellent consistency. Probably because the sheer number of items in scale (26)
+climate_gen <- elt_w1_clean_6_rev_code %>%
+  select(q1:q24) %>% 
+  data.frame() 
+
+alpha(climate_gen) # alpha = .92 -->  excellent consistency. Probably because the sheer number of items in scale (24)
 
 # with these i'm trying to follow the scales of the Kettering measure, but not great consistency
 # respect <- elt_w1_clean_6_rev_code %>%
@@ -390,15 +395,23 @@ alpha(climate_gen) # alpha = .92 -->  excellent consistency. Probably because th
 # conclusion: it's too hard to find ways to make them hang together. Ask Heather, describe in report that it is advised to conduct an exploratory and confirmatory factro analysis for this important construct.  
 #######################
 
-diver_engage <- data.frame(elt_w1_clean_6_rev_code[,47:60]) # q36 - q49
+diver_engage <- elt_w1_clean_6_rev_code %>%
+  select(q36:q49) %>% 
+  data.frame()
+
 alpha(diver_engage) # alpha = .92 -->  Excellent consistency
 
-equity_self_eff <- data.frame(elt_w1_clean_6_rev_code[,61:66]) # q50 - q55
+equity_self_eff <- elt_w1_clean_6_rev_code %>%
+  select(q50:q55) %>% 
+  data.frame()
+
 alpha(equity_self_eff) # alpha = .89 -->  good consistency
 
 #######################
-# scho_lat_fam_rel <- data.frame(elt_w1_clean_6_rev_code[,67:75]) # q56 - q64
-# alpha(scho_lat_fam_rel) # alpha = . --> .84 good consistency
+# scho_lat_fam_rel <- elt_w1_clean_6_rev_code %>%
+#   select(q56:q64) %>%
+#   data.frame() # alpha = . --> .84 good consistency
+# alpha(scho_lat_fam_rel)
 
 scho_lat_fam_rel_2 <- elt_w1_clean_6_rev_code %>%
   select(q56:q64, q70:q72) %>% 
@@ -407,8 +420,11 @@ alpha(scho_lat_fam_rel_2) # alpha = .88 --> good consistency
 ##########################
 
 ##########################
-# teach_lat_fam_rel <- data.frame(elt_w1_clean_6_rev_code[,76:87]) # q65 - q76 (q73 was reverse coded)
-# alpha(teach_lat_fam_rel) # alpha = .70 --> fair consistency, better if dropping q73 and q75
+# teach_lat_fam_rel <- elt_w1_clean_6_rev_code %>%
+#   select(q65:q76) %>%
+#   data.frame() # (q73 was reverse coded)
+# 
+# alpha(teach_lat_fam_rel) # alpha = .69 --> poor consistency, better if dropping q73 and q75
 
 teach_lat_fam_rel_2 <- elt_w1_clean_6_rev_code %>%
   select(q65:q69, q74:q76) %>% # leaving out 70:73
@@ -417,7 +433,9 @@ alpha(teach_lat_fam_rel_2) # alpha = .75 --> fair consistency
 ###########################
 
 ############################
-# teach_self_eff_all <- data.frame(elt_w1_clean_6_rev_code[,119:128]) # q108 - q117 (q110, q113, q114, q115, q116 were reverse coded)
+# teach_self_eff_all <- elt_w1_clean_6_rev_code %>% 
+#   select(q108:q117) %>% 
+#   data.frame() # (q110, q113, q114, q115, q116 were reverse coded)
 # alpha(teach_self_eff_all) # alpha = .74 --> fair consistency
 
 teach_eff_gen <- elt_w1_clean_6_rev_code %>% # general teaching efficacy dimension in original measure
