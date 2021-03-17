@@ -55,22 +55,16 @@ The report will also include a brief description of the sociodemographic charact
 In the appendix section, data analysts interested in using this dataset will find a codebook with all the items, variable names, and response options. 
 
 
-```{r echo=FALSE, out.width="70%", fig.align="center"}
+```{r echo=FALSE, out.width="75%", fig.align="center"}
 
 knitr::include_graphics("../juntos/CEQP_final_panel_3.jpg")
 ```
 
 
-```{r echo=FALSE, out.width="70%", fig.align="center"}
+```{r echo=FALSE, out.width="75%", fig.align="center"}
 
 knitr::include_graphics("../juntos/CEQP_final_panel_6.jpg")
 ```
-
-```{r echo=FALSE, out.width="50%", fig.align="center"}
-
-#knitr::include_graphics("../juntos/CEQP_final_panel_7.jpg") # including this image produces a timeout error :/
-```
-
 
 # Data Cleaning procedures {-}
 
@@ -517,9 +511,9 @@ In the code below I created a new dataframe called `elt_w1_clean_6` where I appl
 elt_w1_clean_6 <- recode_missing_df(elt_w1_clean_5) 
 ```
 
-The downside of this function is that it strips out the variable and value labels. For this reason, the final dataset that will be exported to an SPSS file will be `elt_w1_clean_5` where the `recode_missing_df` function was not applied. 
+The downside of this function is that it strips out the variable and value labels, but having `NA` instead of the 88, 99, and -99 values is required to perform analyses in R. 
 
-SPSS users should manually code, when performing analyses, the 88, 99, and -99 values as *system myssing*. 
+For this reason, the final dataset that will be exported to an SPSS file will still have the 88, 99, and -99 values. In the final cleaned dataset, SPSS users should manually code these values before performing analyses as *system myssing*. 
 
 \pagebreak
 
@@ -843,14 +837,17 @@ elt_w1_scales <- elt_w1_clean_6_rev_code %>%
          teacher_lat_fam_rel = mean(c(q65, q66, q67, q68, q69, q74), na.rm = TRUE),
          gen_teaching_efficacy = mean(c(q108, q109, q111, q112, q117), na.rm = TRUE),
          per_teaching_efficacy = mean(c(q110, q113, q114, q115, q116), na.rm = TRUE)) %>%
-  select(1:7, 169:175) # selecting only id variables and the new scales
+  select(1, 3, 4, 169:175) # selecting only id variables and the new scales
 ```
 
+Finally, the code below shows how I merged, (or *joined* in R lingo), the scales' dataframe `elt_w1_scales` and the complete cleaned dataset called `elt_w1_clean_5`. I am using `elt_w1_clean_5` because in this version of the dataset the `recode_missing_d()` function that strips out variable and value labels was not yet applied. This means too that the final cleaned dataset will not have reverse coded items. I am still working on figuring out if there is a way I can include them. 
 
-```{r include=FALSE}
+```{r}
 
-final_elt_w1 <- left_join(elt_w1_clean_5, elt_w1_scales) # this was supposed to be the final codebook but when joining, the scales appear as NA. I am not sure what is happening because this code worked for the youth and parent datasets. 
+final_elt_w1 <- left_join(elt_w1_clean_5, elt_w1_scales, by = c("school_id", "response_id", "id")) 
 ```
+
+The final wave 1 educator dataset called now `final_elt_w1` is the dataset that will be exported to an SPSS file and the codebook that appears in the Appendix section in this report includes all of its variables and response options, with variable and value labels. 
 
 \pagebreak
 
@@ -881,7 +878,6 @@ descriptives <- function(df) {
        .id = "column")
   return(mean_sd)
 }
-
 ```
 
 
@@ -889,7 +885,7 @@ descriptives <- function(df) {
 # using the function descriptives I created above
 
 elt_w1_scales_2 <- elt_w1_scales %>%
-  select(-1:-7) %>%
+  select(-1:-3) %>%
   rename(c("General school climate" = "climate_general"), 
          c("Diversity engagement" = "school_engage_diversity"),
          c("Equity self efficacy" = "equity_self_efficacy"),
@@ -900,14 +896,13 @@ elt_w1_scales_2 <- elt_w1_scales %>%
 
 descrip_table <- descriptives(elt_w1_scales_2) %>%
   rename(c("Scale" = "column"))
-
 ```
 
 ```{r echo=FALSE}
+
 descrip_table %>%
   kbl() %>%
   kable_material(c("striped", "hover", font_size = 7)) 
-
 ```
 
 
@@ -920,18 +915,18 @@ descrip_table %>%
   + If the survey development software provides the option to indicate if responses are either single or multiple responses, make sure that the option coincides with the type of question. That is, if response options are mutually exclusive select the single answer option; if response options are *NOT* mutually exclusive, select the multiple answer option.
   + Avoid including survey instructions in the variable labels so that they are not too long. 
  
-* Survey development
-  + When a survey is being developed for the first time, leave a precise record of where items are taken from. It is a good practice to include the whole citation of the measure that served as a reference and preferably download and save the measure because internet links can get broken or reused over time.
+* Questionnaire development
+  + When a questionnaire is being developed for the first time, leave a precise record of where items are taken from. It is a good practice to include the whole citation of the measure that served as a reference and preferably download and save the measure because internet links can get broken or reused over time.
   + Try to use scales as they were designed. Cherry-picking items from different measures can lead to difficulties at identifying what is the construct being measured.
   + Always indicate what items need to be reverse coded. A simple asterisk sign by the item may save lots of time at the backend.
-  + With items created for a project, it is a good idea to at least conduct an EFA to identify if the scale may have subscales.
+  + With items originally created for a project, it is a good idea to at least conduct an EFA to identify if the scale may have subscales. Chronbach's alpha values on scales that have a high number of items can be deceiving as the number of items increases Chronbach's alpha values increase too.  
 
 
 # Appendix  {-}
 
 ```{r echo=FALSE}
 
-view_df(elt_w1_clean_5)
+view_df(final_elt_w1)
 ```
 
 # References {-}

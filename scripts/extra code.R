@@ -73,3 +73,13 @@ ggplot(viz, aes(fct_reorder(race, count), count)) +
 # 
 # plot.title = element_text(family = "sans", size = 25, face = "bold", hjust = 0.3, margin = margin(20, 20, 10, 10))
 
+
+### dealing with suffixes
+final_elt_w1 <- left_join(elt_w1_clean_5, elt_w1_scales, by = c("school_id", "response_id", "id")) %>%
+  select(-169:-172) %>%
+  rename(c("condition" = "condition.x"), 
+         c("participant_role" = "participant_role.x"),
+         c("participant_role_5_text" = "participant_role_5_text.x"),
+         c("participant_role_6_text" = "participant_role_6_text.x"))
+
+# note: I tried using the the gsub() function to remove the .x, but it didn't work: gsub(".x", "", colnames(final_elt_w1))
