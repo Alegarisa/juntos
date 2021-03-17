@@ -50,18 +50,18 @@ knitr::include_graphics("../juntos/ceqp_logo.PNG")
 
 This report focuses only on the educators' baseline assessment and is intended to describe the data cleaning process with the aim of guiding CEQP's researchers and data analysts in the procedures performed to the dataset. A secondary aim is to help CEQP staff with data management responsibilities to replicate these procedures in subsequent waves of data and future projects. 
 
-The report will also include a brief description of the sociodemographic characteristics of the study participants, the scale creation process, the average scores of participants’ responses in regards to major study constructs, and recommendations for more advanced statistical analyses that link the different types of participants in the study. 
+The report will also include a brief description of the sociodemographic characteristics of the study participants, the scale creation process, the average scores of participants’ responses in regards to major study constructs, and recommendations for data management and cleaning. 
 
 In the appendix section, data analysts interested in using this dataset will find a codebook with all the items, variable names, and response options. 
 
 
-```{r echo=FALSE, out.width="50%", fig.align="center"}
+```{r echo=FALSE, out.width="70%", fig.align="center"}
 
 knitr::include_graphics("../juntos/CEQP_final_panel_3.jpg")
 ```
 
 
-```{r echo=FALSE, out.width="50%", fig.align="center"}
+```{r echo=FALSE, out.width="70%", fig.align="center"}
 
 knitr::include_graphics("../juntos/CEQP_final_panel_6.jpg")
 ```
@@ -87,11 +87,11 @@ w1_raw_elt <- read_sav(here("nopublish", "ELT W1 ERC 11.11.2020.sav"))
 
 The raw dataset had 43 observations and 202 variables of which 17 were metadata variables created by Qualtrics, the software used to develop the assessment surveys. Of the 43 observations, one case, participant with `id` 153 had incomplete data. I called the raw dataset downloaded directly from Qualtrics as `w1_raw_elt` which stands for wave one of the raw data from the equity leadership team (i.e. elt).
 
-### Initial cleaning
+## Initial cleaning {-}
 
 In the following code, I created a new dataframe `elt_w1_clean` where I selected out all but one of the metadata variables, `response_id`. This variable is an unique identifier assigned by Qualtrics that resulted handy in dealing with duplicated ids. 
 
-Other simple data cleaning procedures are noted in the comments marked with a # sign using the [clean_names](https://www.rdocumentation.org/packages/janitor/versions/1.2.0/topics/clean_names), [select](https://www.rdocumentation.org/packages/dplyr/versions/0.7.8/topics/select), [rename](https://www.rdocumentation.org/packages/plyr/versions/1.8.6/topics/rename), and [arrange](https://www.rdocumentation.org/packages/dplyr/versions/0.7.8/topics/arrange) functions. 
+Other simple data cleaning procedures are noted in the comments marked with a # sign. I used the [clean_names](https://www.rdocumentation.org/packages/janitor/versions/1.2.0/topics/clean_names), [select](https://www.rdocumentation.org/packages/dplyr/versions/0.7.8/topics/select), [rename](https://www.rdocumentation.org/packages/plyr/versions/1.8.6/topics/rename), and [arrange](https://www.rdocumentation.org/packages/dplyr/versions/0.7.8/topics/arrange) functions. 
 
 ```{r}
 
@@ -102,7 +102,7 @@ elt_w1_clean <- w1_raw_elt %>%
   arrange(id) # ordering participants ids in descending order
 ```
 
-### Dealing with duplicated ids
+## Dealing with duplicated ids {-}
 
 When evaluating if the dataframe had duplicated ids, I found that `id` 257 was duplicated and there was no `id` 254. 
 
@@ -138,7 +138,7 @@ elt_w1_clean <- elt_w1_clean %>%
   arrange(id)
 ```
 
-### Dealing with survey coding errors
+## Dealing with survey coding errors {-}
 
 The id protocol followed in CEQP projects is very straightforward. They use three digits for each individual participant id and use the first of these three digits to indicate the school id. In this system, ids in the 100’s would belong to school 1, ids in the 200’s to school 2, and so on.
 
@@ -205,7 +205,7 @@ The `condition` and `school_id` variables I created in the previous code were st
 
 In the code below I also fixed a response option coding error I identified in the variable `q68`. Throughout most of the survey, response options were coded as "Strongly Disagree" = 1, "Disagree" = 2, "Agree" = 3, "Strongly Agree" = 4, "No response" = 99; however, in variable `q68` the response option "No response" was coded as "5". 
 
-I fixed this using the [ifelse](https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/ifelse) function, specifying that if this variable had a response of 5, it should be changed to 99. Finally, I set the variable and value labels with the [set_varl](https://nicedoc.io/martinctc/surveytoolbox) and [set_vall](https://nicedoc.io/martinctc/surveytoolbox) functions, respectively, because sometimes procedures performed with R strips out these labels. 
+I fixed this using the [ifelse](https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/ifelse) function, specifying that if this variable had a response of 5, it should be changed to 99. Finally, I set the variable and value labels with the [set_varl](https://nicedoc.io/martinctc/surveytoolbox) and [set_vall](https://nicedoc.io/martinctc/surveytoolbox) functions, respectively, because sometimes procedures performed with ceratin functions strips out these labels. 
 
 
 ```{r}
@@ -221,7 +221,7 @@ country."),
          q68 = set_vall(q68, c("Strongly Disagree" = 1, "Disagree" = 2, "Agree" = 3, "Strongly Agree" = 4, "No response" = 99)))
 ```
 
-### Dealing with split out responses from multiple choice, unique answer variables
+## Dealing with split out responses {-}
 
 In this dataset, several multiple choice variables that were originally meant to have a single answer, were spread out as if they allowed to have multiple answers. I believe this was because in the Qualtrics survey development process, the option for *Multiple answer* was selected, instead of *Single answer*. 
 
@@ -387,6 +387,8 @@ spa <- elt_w1_clean_3 %>%
 
 When all the language variables were collapsed I checked if there were duplicated cases and I found that participant identified with `id` 454 chose response option "1" and response option "2". 
 
+\pagebreak
+
 ```{r echo=FALSE}
 
 d3 <- spa %>%
@@ -422,7 +424,7 @@ spa_2 %>%
 ```
 
 
-The last step in this process was joining the dataframe I created with all the language variables I collapsed (`all_lang_vars`) and the `elt_w1_clean_3` dataframe that had all of the variables. I used the [left_join](https://www.rdocumentation.org/packages/tidytable/versions/0.5.9/topics/left_join.) function to do this. 
+The last step in this process was joining the dataframe I created with all the language variables I collapsed (`all_lang_vars`) and the `elt_w1_clean_3` dataframe that had  the remaining variables. I used the [left_join](https://www.rdocumentation.org/packages/tidytable/versions/0.5.9/topics/left_join.) function to do this. 
 
 In this new dataframe `elt_w1_clean_4` I also coerced the language variables to become numeric so they could be used in quantitative analyses and added the value labels so that SPSS users can use the *value labels* button. I used the code below to do this. 
 
@@ -444,7 +446,7 @@ elt_w1_clean_4 <- elt_w1_clean_4 %>%
 
 As shown, the following variables were the result of the collapsing process described above: `english_comfort`, `spanish_comfort`, `other1_lang_comfort`, and `other2_lang_comfort`. 
 
-### Renaming demographic variables
+## Renaming demographic variables {-}
 
 In the code below, I created a new dataframe `elt_w1_clean_5` where I used the [rename](https://www.rdocumentation.org/packages/reshape/versions/0.8.8/topics/rename) function to rename some of the demographic variables that I used to describe participants's characteristics in the next section of this report. This function uses a "new name" = "old name" pattern. Very straightforward! 
 
@@ -510,12 +512,16 @@ In the following section, I used descriptive statistics to summarize participant
 
 In the code below I created a new dataframe called `elt_w1_clean_6` where I applied a function I created `recode_missing_df` (code of the function not shown) to recode the 88, 99, and -99 values as `NA`, the way R codes missing values. 
 
-The downside of this function is that it strips out the variable and value labels. I dealt with this downside to the best of my coding abilities and I describe what I did later in the report. 
-
-```{r include=FALSE}
+```{r}
 
 elt_w1_clean_6 <- recode_missing_df(elt_w1_clean_5) 
 ```
+
+The downside of this function is that it strips out the variable and value labels. For this reason, the final dataset that will be exported to an SPSS file will be `elt_w1_clean_5` where the `recode_missing_df` function was not applied. 
+
+SPSS users should manually code, when performing analyses, the 88, 99, and -99 values as *system myssing*. 
+
+\pagebreak
 
 ## Educator's characteristics {-}
 
@@ -615,14 +621,14 @@ elt_w1_clean_6_rev_code <- elt_w1_clean_6 %>%
          q124 = likert_reverse(q124, top = 4, bottom = 1))
 ```
 
-Here I reverse coded all of the items in the survey that needed to be reverse coded, however, I did not use the first and last two variables, `q25`, `q123`, and `q124` in the scale creation process because they belong to scale constructs other than school climate, family-school relationships, and efficacy. The following are the items I reverse coded and used in the scale creation process described below: 
+Here I reverse coded all of the items in the survey that needed to be reverse coded, however, I did not use the first and last two variables, `q25`, `q123`, and `q124` in the scale creation process because they belong to scale constructs other than school climate, family-school relationships, and teacher self efficacy. The following are the items I reverse coded and used in the scale creation process described below: 
 
 > 
 Item q73: *Regardless of Latino students’ abilities, it seems most Latino students are bound for a vocational career rather than for community college or university studies.*  
-Item q110: *When I really try, I can get through to most difficult students.*
+Item q110: *When I really try, I can get through to most difficult students.*  
 Item q113: *If a student did not remember information I gave in a previous lesson, I would know how to increase his/her retention in the next lesson.*  
 Item 114: *If a student in my class becomes disruptive and noisy, I feel assured that I know some techniques to redirect him/her quickly.*  
-Item q115: *If one of my students couldn't do a class assignment, I would be able to accurately assess whether the assignment was at the appropriate level of difficulty.*
+Item q115: *If one of my students couldn't do a class assignment, I would be able to accurately assess whether the assignment was at the appropriate level of difficulty.*  
 Item q116: *I can get through to even the most difficult or unmotivated students.*  
 
 
@@ -636,18 +642,15 @@ Once I completed the reverse coding step, I checked the reliability of the scale
 .80 to .89 = Good reliability  
 .90 to .99 = Excellent/Strong reliability  
 
-In the code below, first, I created a dataframe only with the specific items of interest, selecting them by their variable name in the dataset. Then, I checked the internal consistency of this dataframe or scale using the [alpha](https://www.rdocumentation.org/packages/psych/versions/2.0.12/topics/alpha) function. I followed this same procedure for all of the scales. 
+In the following code chunks, first, I created a dataframe with only the specific items of interest. Then, I checked the internal consistency of this dataframe (i.e., the scale) using the [alpha](https://www.rdocumentation.org/packages/psych/versions/2.0.12/topics/alpha) function. I followed this same procedure for all of the scales. 
 
-The first scale I checked was school climate. In the original survey that educators completed, the prompt indicated that these items referred to general school climate. Despite my efforts to find the original measure that was used as a reference to create these items, I was not succesful in finding it. 
+### School climate
+
+In the original survey that educators completed, the prompt for items q1 to q24 asked about the school's general climate. Despite my efforts to find the original measure that was used as a reference to create these items, I was not succesful in finding it. 
 
 For what I gathered of the survey development process, different items from different measures were used, however, the survey developer(s) did not leave a precise record of what items belonged to what measure.
 
-It is likely that several items from this scale were adapted from items in Part A: *General Climate Factors* of the public domain Charles F. Kettering Instrument (Fox et al., 1973) and *the Omnibus T-Scale* (Hoy & Tschannen-Moran, 2007). It is important to note that these two measures had a number of subscales within them, thus, it is possible that the scale named here as *general school climate* also has subscales. This scale is a good candidate for further Exploratory and Confirmatory Factor Analyses (EFA and CFA).
-
-Following the guidelines stated above, the general school climate scale has an excellent internal consistency or reliability. It is important to say, however, that because Cronbach’s alpha increases as the number of item increases, this high score may be due to the high number of items included in the scale (24 items). 
-
-For this scale, higher scores indicate better school climate. 
-
+It is likely that several items from this scale were adapted from items in Part A: *General Climate Factors* of the public domain Charles F. Kettering Instrument (Fox et al., 1973) and *the Omnibus T-Scale* (Hoy & Tschannen-Moran, 2007). It is important to note that these two measures have a number of subscales within them, thus, it is possible that the scale named here as `climate_gen` also has subscales. This scale is a good candidate for further Exploratory and Confirmatory Factor Analyses (EFA and CFA).
 
 ```{r eval=FALSE}
 
@@ -658,12 +661,13 @@ climate_gen <- elt_w1_clean_6_rev_code %>%
 alpha(climate_gen) # alpha = .92 -->  excellent consistency
 ```
 
-For the diversity engagement, the equity self-efficacy, the school-family relationship, and the teacher-family relationship scales I was not able to locate any measures of reference. These were probably created by the survey developer(s). 
+Following the guidelines stated above, the general school climate scale has an excellent internal consistency (.92). It is important to say, however, that because Cronbach’s alpha increases as the number of items increases, this high score may be due to the high number of items included in the scale (24 items). 
 
-The diversity engagement scale has 14 items and it has an excellent internal consistency or reliability, however, by reading the items it could be seen that several topics are alluded to, from professional development to coonecting student with resources. This scale is also a good candidate for EFA and CFA. 
+Items within this scale had response options that ranged from 1 - 4 (i.e., strongly disagree - strongly agree). Higher scores in this scale indicate better general school climate. 
 
-For this scale, higher scores indicate more engagement of diversity. 
-# (check this tomorrw)
+### Diversity engagement
+
+For this scale, I was not able to locate any measures of reference.
 
 ```{r eval=FALSE}
 
@@ -674,8 +678,13 @@ diver_engage <- elt_w1_clean_6_rev_code %>%
 alpha(diver_engage) # alpha = .92 -->  excellent consistency
 ```
 
+The diversity engagement scale has 14 items and it has an excellent internal consistency (.92), however, items within the scale seemingly allude to very different topics, from professional development to connecting student with resources. This scale may also be a good candidate for EFA and CFA. 
 
-The equity self-efficacy scale... 
+Items within this scale had response options that ranged from 1 - 4 (i.e., strongly disagree - strongly agree). Higher scores in this scale indicate more engagement of diverse students/families at the school. 
+
+### Equity self-efficacy
+
+For this scale, I was not able to locate any measures of reference.
 
 ```{r eval=FALSE}
 
@@ -686,7 +695,26 @@ equity_self_eff <- elt_w1_clean_6_rev_code %>%
 alpha(equity_self_eff) # alpha = .89 -->  good consistency
 ```
 
-The school-Latino families relationship scale...
+The equity self-efficacy scale has 5 items and it has a good reliability (.89).
+
+Items within this scale had response options that ranged from 1 - 4 (i.e., strongly disagree - strongly agree). Higher scores in this scale indicate that educators were more self efficacious when promoting equity at their school. 
+
+### Relationship with Latino families
+
+For these scales, I was not able to locate any measures of reference.
+
+In the original survey that educators completed, there were two sections about relationships with Latino families. The first section prompted educators to think about the school-Latino Families relationships and the second section prompted educators to think about their own relationship with Latino families. 
+
+#### School-Latino families relationship
+
+In the teacher-Latino families section of the survey, I noticed that 3 items referred more to the school-Latino families relationship than to the teacher-Latino families relationship:
+
+>
+Item q70: *The school makes Latino parents aware of opportunities for leadership roles in the school such as the Parent-Teacher Association or other decision-making opportunities.*  
+Item q71: *Community resources and information are readily available and in Spanish at this school.*  
+Item q72: *This school reaches out to community organizations that focus on Latino families.*  
+
+I checked the reliability values of this scale with and without these 3 items.
 
 ```{r eval=FALSE}
 
@@ -703,44 +731,81 @@ scho_lat_fam_rel_2 <- elt_w1_clean_6_rev_code %>%
 alpha(scho_lat_fam_rel_2) # alpha = .88 --> good consistency
 ```
 
-The teacher-Latino families relationship scale...
+As shown in the code above, the scale with the 3 additional items has a slightly better internal consistency (.88) so I decided to keep those items in the scale.
 
-in the `teach_lat_fam_rel` scale, .69poor consistency, message suggests reverse coding items q73 and q75. 
+The school-Latino families relationship scale has 12 items and it has a good reliability (.88).
 
+Items within this scale had response options that ranged from 1 - 4 (i.e., strongly disagree - strongly agree). Higher scores in this scale indicate better school-Latino families relationships. 
 
-in the `teach_lat_fam_rel_2` scale, .75 fair consistency, message suggests reverse coding item q75. 
+#### Teacher-Latino families relationship
+
+I conducted a similar process for the teacher-Latino families relationship scale. First I checked the internal consistency of the scale as it was presented to the educators (i.e., as a section) and then I checked the internal consistency of the scale without the items I included in the school-Latino families relationship.
+
+In the code below it can be seen that the internal consistency of the `teach_lat_fam_rel` scale was poor (.69). Applying the [alpha](https://www.rdocumentation.org/packages/psych/versions/2.0.12/topics/alpha) function threw a message that indicated that items q73 and q75 were negatively correlated with the total scale and a possible solution was reverse coding them. 
+
 ```{r eval=FALSE}
 
 teach_lat_fam_rel <- elt_w1_clean_6_rev_code %>%
   select(q65:q76) %>%
   data.frame() # (q73 was reverse coded)
 
-alpha(teach_lat_fam_rel) # alpha = .69 --> poor consistency, better if dropping q73 and q75
-
-teach_lat_fam_rel_2 <- elt_w1_clean_6_rev_code %>%
-  select(q65:q69, q74:q76) %>% # leaving out q70:q73
-  data.frame()
-
-alpha(teach_lat_fam_rel_2) # alpha = .75 --> fair consistency
+alpha(teach_lat_fam_rel) # alpha = .69 --> poor consistency, prblematic items: q73 and q75
 ```
 
-The teacheer self efficacy was adapted from... Hoy & Woolfolk (1993)
+Item q73 was actually one of the items I reverse coded at the beginning of this section and I don't think it should be reversed back. Item q75 did not appear to need to be reverse coded: 
 
-the response options changed competely from previous items (1-6) strongly agree to strongly disagree. 
+> 
+Item q73: *Regardless of Latino students’ abilities, it seems most Latino students are bound for a vocational career rather than for community college or university studies.*  
+Item q75: *In general, I see Latino parents supporting their children's education, such as going to the library or helping with homework.* 
 
-talk about the way I reverse coded items and the 2 subscales. 
-`teach_self_eff_all` message suggests reverse: q112
+In my view, q73 does not hang well with the rest of the items in the scale as it does not probe the teacher-family relationship. What it does probe is a bias about Latino students. 
 
-`teach_eff_gen` no message
-
-`teach_eff_per` no message
+For its part, item q75, does not appear to probe the teacher-family relationship either, but the teacher's perception of Latino parents' involvement in their children education at home. Even though item q76 was not flagged, it appears to probe something similar to q75, the teacher's perception of Latino parents' involvement in their children education at school. I checked how the scale fared taking out these 3 items. 
 
 ```{r eval=FALSE}
+
+teach_lat_fam_rel_2 <- elt_w1_clean_6_rev_code %>%
+  select(q65:q72, q74) %>% # keeping q70:q72, leaving out q73, q75, q76
+  data.frame()
+
+alpha(teach_lat_fam_rel_2) # alpha = .76 --> fair consistency
+```
+
+As can be seen, taking out these items improved the Chronbach's alpha values of the `teach_lat_fam_rel_2` scale (.76, fair consistency). Despite the improvement, I still wanted to check the internal consistency of the scale if I took out the items I consider better reflect the relationship with school.
+
+```{r eval=FALSE}
+
+teach_lat_fam_rel_3 <- elt_w1_clean_6_rev_code %>%
+  select(q65:q69, q74) %>% # leaving out q70:q73, q75, q76
+  data.frame()
+
+alpha(teach_lat_fam_rel_3) # alpha = .84--> good consistency
+```
+
+In the `teach_lat_fam_rel_3` scale I left out items q70 to q72 and the Chronbach's alpha score improved substantially, thus, I settled for this scale to measure the teacher-Latino family relationship. 
+
+The final teacher-latino families relationship scale has 6 items and it has a good reliability (.84).
+
+Items within this scale had response options that ranged from 1 - 4 (i.e., strongly disagree - strongly agree). Higher scores in this scale indicate better teacher-Latino families relationships.   
+
+### Teacher self efficacy
+
+Items to measure teacher's self efficacy were adapted from the Hoy & Woolfolk (1993) version of the *Teacher Efficacy Scale* (TES; Gibson & Dembo, 1984). Hoy & Woolfolk (1993) proposed and tested two independent dimensions in the TES, general teaching self efficacy and personal teaching self efficacy. Here I checked the reliability of the complete scale and of the two independent dimensions. 
+
+Its important to note that the response options in this scale differed substantially from the previous scales. Response options ranged from 1 - 6 (i.e., strongly agree - strongly disagree). Also, Items q110, q113, q114, q115, q116 were reverse coded so that higher scores, either in the whole scale or the independent dimensions, indicate better teacher self efficacy. 
+
+```{r eval=FALSE}
+
 teach_self_eff_all <- elt_w1_clean_6_rev_code %>% 
   select(q108:q117) %>% 
   data.frame() # q110, q113, q114, q115, q116 were reverse coded)
 
 alpha(teach_self_eff_all) # alpha = .74 --> fair consistency
+```
+
+Chronbach's alpha results indicate that the complete scale has a fair reliability (.74). In terms of the dimensions, the general teaching self efficacy scale has a fair reliability (.73) and the personal teaching self efficacy has a good reliability (.88).
+
+```{r eval=FALSE}
 
 teach_eff_gen <- elt_w1_clean_6_rev_code %>% # general teaching efficacy dimension in original measure
   select(q108, q109, q111, q112, q117) %>% 
@@ -755,37 +820,43 @@ teach_eff_per <- elt_w1_clean_6_rev_code %>% # personal teaching efficacy dimens
 alpha(teach_eff_per) # alpha = .88 --> good consistency
 ```
 
+I decided to use the independent dimensions instead of the whole scale as they provide more nuanced information. 
 
-References 
+The general teaching self efficacy scale has 5 items. Higher scores indicate better general teaching self efficacy. 
 
-Fox, R. S., Boles, H. E., Brainard, E., Fletcher, E., Huge, J. S., Martin, C. L., Maynard, W., Monasmith, J., Olivero, J., Schmuck, R., Shaheen, T. A., Stegeman, W. H. (1973) School climate improvement: a challenge to the school administrator. Bloomington, IN: Phi Delta Kappa Educational Foundation.
-
-Hoy, W. K., & Tschannen-Moran, M. (2007). The conceptualization and measurement of faculty trust in schools: The Omnibus T-Scale. In Hoy, W. K., & DiPaola, M. (Eds.). Essential ideas for the reform of American schools (pp. 87-114). Charlotte, NC: IAP.
-
-Hoy, W. K., & Woolfolk, A. E. (1993). Teachers' sense of efficacy and the organizational health of schools. The elementary school journal, 93(4), 355-372.
+The personal teaching self efficacy scale has also 5 items. Higher scores indicate better personal teaching self efficacy.
 
 
 ## Scale creation {-}
 
+The last step in this process was to create the scales with the best reliability values that were checked before. 
+
+In the code below I created a new data frame `elt_w1_scales` that only has id variables and the newly created scales. I created the new scales within a [mutate](https://dplyr.tidyverse.org/reference/mutate.html) call and I used the [rowwise](https://dplyr.tidyverse.org/articles/rowwise.html) function to conduct row-wise operations. 
 
 ```{r}
 elt_w1_scales <- elt_w1_clean_6_rev_code %>%
   rowwise() %>% 
-  mutate(climate_general = mean(c(q1, q2, q3, q4, q5, q6, q7, q8, q9, q10, q11,  q12, q13, q14, q15, q16, q17, q18, q19, q20, q21, q22, q23, q24), na.rm = TRUE),
+  mutate(climate_general = mean(c(q1, q2, q3, q4, q5, q6, q7, q8, q9, q10, q11, q12, q13, q14, q15, q16, q17, q18, q19, q20, q21, q22, q23, q24), na.rm = TRUE),
          school_engage_diversity = mean(c(q36, q37, q38, q39, q40, q41, q42, q43, q44, q45, q46, q47, q48, q49), na.rm = TRUE),
          equity_self_efficacy = mean(c(q50, q51, q52, q53, q54, q55), na.rm = TRUE),
          school_lat_fam_rel = mean(c(q56, q57, q58, q59, q60, q61, q62, q63, q64, q70, q71, q72), na.rm = TRUE),
-         teacher_lat_fam_rel = mean(c(q65, q66, q67, q68, q69, q74, q75, q76), na.rm = TRUE),
+         teacher_lat_fam_rel = mean(c(q65, q66, q67, q68, q69, q74), na.rm = TRUE),
          gen_teaching_efficacy = mean(c(q108, q109, q111, q112, q117), na.rm = TRUE),
          per_teaching_efficacy = mean(c(q110, q113, q114, q115, q116), na.rm = TRUE)) %>%
-  select(1:7, 169:175)
+  select(1:7, 169:175) # selecting only id variables and the new scales
 ```
 
 
-# Average Scores of Major Study Constructs  {-}
+```{r include=FALSE}
 
+final_elt_w1 <- left_join(elt_w1_clean_5, elt_w1_scales) # this was supposed to be the final codebook but when joining, the scales appear as NA. I am not sure what is happening because this code worked for the youth and parent datasets. 
+```
 
+\pagebreak
 
+## Average scores {-}
+
+In this final section, I include a table with the educator's baseline average scores in regards to the scales that I created above.
 
 ```{r include=FALSE}
 
@@ -798,10 +869,10 @@ only_numeric <- function(df) {
 }
 
 # a list with the functions we want
-smry <- list(mean = function(x) round(mean(x, na.rm = TRUE), 2), 
-             sd = function(x) round(sd(x, na.rm = TRUE), 2),
-             min = function(x) min(x, na.rm = TRUE),
-             max = function(x) max(x, na.rm = TRUE))
+smry <- list(M = function(x) round(mean(x, na.rm = TRUE), 2), 
+             SD = function(x) round(sd(x, na.rm = TRUE), 2),
+             Min = function(x) round(min(x, na.rm = TRUE), 2),
+             Max = function(x) round(max(x, na.rm = TRUE), 2))
 
 # wrapping solution in a function
 descriptives <- function(df) {
@@ -813,33 +884,62 @@ descriptives <- function(df) {
 
 ```
 
-```{r}
+
+```{r echo=FALSE}
 # using the function descriptives I created above
-#descrip_table <- descriptives(elt_w1_clean_6) # use df that has scales, not elt_w1_clean_6
+
+elt_w1_scales_2 <- elt_w1_scales %>%
+  select(-1:-7) %>%
+  rename(c("General school climate" = "climate_general"), 
+         c("Diversity engagement" = "school_engage_diversity"),
+         c("Equity self efficacy" = "equity_self_efficacy"),
+         c("School-Latino families rel." = "school_lat_fam_rel"),
+         c("Teacher-Latino families rel." = "teacher_lat_fam_rel"),
+         c("General teaching efficacy" = "gen_teaching_efficacy"),
+         c("Personal teaching efficacy" = "per_teaching_efficacy"))
+
+descrip_table <- descriptives(elt_w1_scales_2) %>%
+  rename(c("Scale" = "column"))
+
+```
+
+```{r echo=FALSE}
+descrip_table %>%
+  kbl() %>%
+  kable_material(c("striped", "hover", font_size = 7)) 
+
 ```
 
 
-## Educator's average scores {-}
-
-...
-
-
-note: include plots with average scores
-
 # Recommendations  {-}
 
-I recommend...
+* Survey development software
+  + Assign a unique identifier for each participant and a different unique identifier per family. Additional unique identifiers that survey development software include can be handy when dealing with duplicated ids.
+  + When developing the id protocol for schools, make sure that both values and value labels coincide in the survey development software that is being used. Using the value labels button in SPSS or the view_df() function in R can help identify discrepancies.
+  + When a survey is being developed, have several team members go over the response options in the survey development software to check for potential coding errors.
+  + If the survey development software provides the option to indicate if responses are either single or multiple responses, make sure that the option coincides with the type of question. That is, if response options are mutually exclusive select the single answer option; if response options are *NOT* mutually exclusive, select the multiple answer option.
+  + Avoid including survey instructions in the variable labels so that they are not too long. 
+ 
+* Survey development
+  + When a survey is being developed for the first time, leave a precise record of where items are taken from. It is a good practice to include the whole citation of the measure that served as a reference and preferably download and save the measure because internet links can get broken or reused over time.
+  + Try to use scales as they were designed. Cherry-picking items from different measures can lead to difficulties at identifying what is the construct being measured.
+  + Always indicate what items need to be reverse coded. A simple asterisk sign by the item may save lots of time at the backend.
+  + With items created for a project, it is a good idea to at least conduct an EFA to identify if the scale may have subscales.
 
-* id protocol
-  + When developing the id protocol for schools, make sure that both values and values labels coincide. 
-  + Assign an unique identifier for each participant and an unique identifier per family. 
-
-* Survey developmnet
-  + When creating items for a survey, indicate which items need to be reverse coded. 
 
 # Appendix  {-}
 
 ```{r echo=FALSE}
-view_df(elt_w1_clean_5) # change for final_elt_w1 when done.
+
+view_df(elt_w1_clean_5)
 ```
 
+# References {-}
+
+  Fox, R. S., Boles, H. E., Brainard, E., Fletcher, E., Huge, J. S., Martin, C. L., Maynard, W., Monasmith, J., Olivero, J., Schmuck, R., Shaheen, T. A., Stegeman, W. H. (1973). *School climate improvement: a challenge to the school administrator*. Bloomington, IN: Phi Delta Kappa Educational Foundation.
+
+  Gibson, S., & Dembo, M. H. (1984). Teacher efficacy: A construct validation. *Journal of Educational Psychology*, 76(4), 569.
+
+  Hoy, W. K., & Tschannen-Moran, M. (2007). *The conceptualization and measurement of faculty trust in schools: The Omnibus T-Scale*. In Hoy, W. K., & DiPaola, M. (Eds.). Essential ideas for the reform of American schools (pp. 87-114). Charlotte, NC: IAP.
+
+  Hoy, W. K., & Woolfolk, A. E. (1993). Teachers' sense of efficacy and the organizational health of schools. *The Elementary School Journal*, 93(4), 355-372.
