@@ -68,11 +68,6 @@ country."),
          q68 = set_vall(q68, c("Strongly Disagree" = 1, "Disagree" = 2, "Agree" = 3, "Strongly Agree" = 4, "No response" = 99)))
 ```
 
-```{r}
-# maester dataset
-view_df(elt_w1_clean_3)
-```
-
 # Collapsing spreaded out language variables
 ```{r}
 lang_vars <- elt_w1_clean_3 %>% 
@@ -85,6 +80,8 @@ lang_vars <- elt_w1_clean_3 %>%
     values_drop_na = TRUE) %>% 
   filter(language_comfort == 1) %>%
   mutate(language_comfort = as.numeric(language_comfort))
+
+get_dupes(lang_vars, id, language)
 
 # id 454 chose options 1 and 2.
 lang_vars <- lang_vars %>% 
@@ -99,13 +96,13 @@ lang_vars <- lang_vars %>%
          c("other2_lang_comfort" = "4")) %>%
   select(-item, -language_comfort)
 
-# renaming input var in master dataset
+# renaming input var in elt_w1_clean_3 dataset
 lang_inputs <- elt_w1_clean_3 %>%
   select(id, q132_3_text, q132_4_text) %>%
   rename(c("other1_lang" = "q132_3_text"), 
          c("other2_lang" = "q132_4_text"))
 
-# joining renamed master dataset with all language variables now collapsed to "recover" id 153 data
+# joining renamed elt_w1_clean_3 dataset with all language variables now collapsed to "recover" id 153 data
 all_lang_vars <- left_join(lang_inputs, lang_vars) %>%
 select(id, english_comfort, spanish_comfort, other1_lang, other1_lang_comfort, other2_lang, everything())
 ```
@@ -161,4 +158,111 @@ elt_w1_clean_5 <- elt_w1_clean_4 %>%
 ```
 
 
+```{r}
+# final cleaned dataset wave 1
+view_df(elt_w1_clean_5)
+```
+
+
+## WAVE 2
+
+# Loading the data
+```{r}
+w2_raw_elt <- read_sav(here("nopublish", "ELT W2 ERC 11.11.2020.sav"))
+```
+
+# Initial cleaning
+```{r}
+elt_w2_clean <- w2_raw_elt %>% 
+  clean_names() %>% # function that formats variables' names
+  select(-1:-8, -10:-17, -202) %>% # selecting out columns with metadata
+  rename(c("id" = "pj")) %>% # renaming id variable.
+  arrange(id) # ordering participants ids in descending order
+
+# checking for dupplicated ids
+get_dupes(elt_w2_clean, id)
+```
+
+# Fixing wrong condition assignment and school id
+```{r}
+# this wave also had the wrong condition assignment
+elt_w2_clean_2 <- elt_w2_clean %>%
+  mutate(school_id = str_sub(id, 1, 1), # new school id variable
+         condition = case_when(
+           school_id == "1" | school_id == "3" | school_id == "5" ~ "1",
+           school_id == "2" | school_id == "4" | school_id == "6" ~ "2")) %>% # new condition variable
+  select(school_id, condition, everything()) %>%
+  add_column(wave = 2, .before = 9) %>% # new wave variable
+  select(- school) # selecting out (i.e. deleting) original faulty school variable
+```
+
+# Adding value labels and recoding response option in q68
+```{r}
+# this wave also had q68 with the wrong responce code
+elt_w2_clean_3 <- elt_w2_clean_2 %>%
+  mutate(condition = as.numeric(condition),
+         condition = set_vall(condition, c("control" = 1, "intervention" = 2)),
+         school_id = as.numeric(school_id),
+         school_id = set_vall(school_id, c("cascade" = 1, "prairie_mountain" = 2, "kelly" = 3, "ata" = 4, "briggs" = 5, "agnes_stewart" = 6)),
+         q68 = ifelse(q68 == 5, 99, q68),
+         q68 = set_varl(q68, "When I communicate with Latino families, I keep in mind that many Latino parents may not understand how to navigate the educational system in this
+country."),
+         q68 = set_vall(q68, c("Strongly Disagree" = 1, "Disagree" = 2, "Agree" = 3, "Strongly Agree" = 4, "No response" = 99)))
+```
+
+# Collapsing spreaded out language variables
+```{r}
+lang_vars_w2 <- elt_w2_clean_3 %>% 
+  select(id, starts_with("q132_1"), starts_with("q132_2"), starts_with("q132_3"), starts_with("q132_4"), -q132_4_text, -q132_3_text) %>% 
+  pivot_longer(
+    cols = starts_with("q132"),
+    names_to = c("item", "language", "response"),
+    names_sep = "_",
+    values_to = "language_comfort",
+    values_drop_na = TRUE) %>% 
+  filter(language_comfort == 1) %>%
+  mutate(language_comfort = as.numeric(language_comfort))
+
+# checking for dupplicated ids
+get_dupes(lang_vars_w2, id, language)
+
+# id 155 chose options 1 and 99 for other 1.
+lang_vars_w2 <- lang_vars_w2 %>% 
+  distinct(id, language, .keep_all = TRUE) # Option 1, "not at all comfortable" was chosen because the duplicate was the second option.  
+
+# renaming vars
+lang_vars_w2 <- lang_vars_w2 %>% 
+  pivot_wider(names_from = language, values_from = response) %>%
+  rename(c("english_comfort" = "1"),
+         c("spanish_comfort" = "2"),
+         c("other1_lang_comfort" = "3"),
+         c("other2_lang_comfort" = "4")) %>%
+  select(-item, -language_comfort)
+
+# renaming input var in elt_w1_clean_3 dataset
+lang_inputs_w2 <- elt_w2_clean_3 %>%
+  select(id, q132_3_text, q132_4_text) %>%
+  rename(c("other1_lang" = "q132_3_text"), 
+         c("other2_lang" = "q132_4_text"))
+
+# joining renamed elt_w1_clean_3 dataset with all language variables now collapsed to "recover" id 153 data
+all_lang_vars_w2 <- left_join(lang_inputs_w2, lang_vars_w2) %>%
+select(id, english_comfort, spanish_comfort, other1_lang, other1_lang_comfort, other2_lang, everything())
+```
+
+# need to identify which variables is the one that id 155 is duplicated in. Explore in general this! 
+
+
+
+
+
+
+
+
+
+
+
+```{r}
+view_df(elt_w2_clean_3)
+```
 
