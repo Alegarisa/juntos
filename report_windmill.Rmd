@@ -79,7 +79,7 @@ I performed data cleaning procedures using the [R](https://www.r-project.org/) a
 w1_raw_elt <- read_sav(here("nopublish", "ELT W1 ERC 11.11.2020.sav"))
 ```
 
-The raw dataset had 43 observations and 202 variables of which 17 were metadata variables created by Qualtrics, the software used to develop the assessment surveys. Of the 43 observations, one case, participant with `id` 153 had incomplete data. I called the raw dataset downloaded directly from Qualtrics as `w1_raw_elt` which stands for wave one of the raw data from the equity leadership team (i.e. elt).
+The raw dataset had `r nrow(w1_raw_elt)` observations and `r ncol(w1_raw_elt)` variables of which `r ncol(w1_raw_elt %>% select(1:17))` were metadata variables created by Qualtrics, the software used to develop the assessment surveys. Of the `r nrow(w1_raw_elt)` observations, one case, participant with `id` `r w1_raw_elt$PJ__[10]` had incomplete data. I called the raw dataset downloaded directly from Qualtrics as `w1_raw_elt` which stands for wave one of the raw data from the equity leadership team (i.e. elt).
 
 ## Initial cleaning {-}
 
@@ -519,7 +519,7 @@ For this reason, the final dataset that will be exported to an SPSS file will st
 
 ## Educator's characteristics {-}
 
-Educators in this first wave of data (*n* = 43) had a mean age of 42.89 years, with an age range between 24 and 62 years of age (see figure 5). The majority of educators were identified as female (74%).  
+Educators in this first wave of data (*n* = `r nrow(elt_w1_clean_6)`) had a mean age of `r round(mean(elt_w1_clean_6[["age"]], na.rm = TRUE), 2)` years, with an age range between `r min(elt_w1_clean_6[["age"]], na.rm = TRUE)` and `r max(elt_w1_clean_6[["age"]], na.rm = TRUE)` years of age (see figure 5). The majority of educators were identified as female (74%).  
 
 ```{r echo=FALSE, warning=FALSE, fig.height= 4, fig.width=6, fig.cap="Educator's Age by gender", fig.align="center"}
 

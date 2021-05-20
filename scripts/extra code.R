@@ -83,3 +83,22 @@ final_elt_w1 <- left_join(elt_w1_clean_5, elt_w1_scales, by = c("school_id", "re
          c("participant_role_6_text" = "participant_role_6_text.x"))
 
 # note: I tried using the the gsub() function to remove the .x, but it didn't work: gsub(".x", "", colnames(final_elt_w1))
+
+# Joe's feedback: A good rule of thumb is that if you find yourself copy/pasting code 3+ times, you can write a function. Or, with the code chunk starting on line 243, you can probably do all of these at once. Something like this might work:
+
+test <- elt_w1_clean_3 %>% 
+  select(id, starts_with("q132_1"), starts_with("q132_2"), starts_with("q132_3"), starts_with("q132_4"), -q132_4_text, -q132_3_text) %>% 
+  pivot_longer(
+    cols = starts_with("q132"),
+    names_to = c("item", "language", "response"),
+    names_sep = "_",
+    values_to = "language_comfort",
+    values_drop_na = TRUE) %>% 
+  filter(language_comfort == 1) %>%
+  mutate(language_comfort = as.numeric(language_comfort)) # not sure if this will work because there is a duplicated response.
+
+test %>%
+  pivot_wider(names_from = language, values_from = response, values_fn = length) # this is counting the responses, not giving the response option. 
+
+# Try to make all of your reported stats responsive to the data (e.g., line 82, the Educator's characteristics section, internal consistencies, etc.). This will especially help when you use this code for the other two reports.
+# I fixed what i could, but I don't know if I can take percentages using inline code. 

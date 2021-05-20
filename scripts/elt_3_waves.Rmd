@@ -1,0 +1,164 @@
+---
+title: "elt_3_waves"
+author: "Alejandra Garcia Isaza"
+date: "5/20/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(rio)
+library(here)
+library(tidyverse)
+library(haven)
+library(janitor)
+library(knitr)
+library(surveytoolbox)
+library(sjPlot)
+library(kableExtra)
+library(psych)
+
+```
+
+## WAVE 1
+
+# Loading the data
+```{r}
+w1_raw_elt <- read_sav(here("nopublish", "ELT W1 ERC 11.11.2020.sav"))
+```
+
+# Initial cleaning
+```{r}
+elt_w1_clean <- w1_raw_elt %>% 
+  clean_names() %>% # function that formats variables' names
+  select(-1:-8, -10:-17, -202) %>% # selecting out columns with metadata
+  rename(c("id" = "pj")) %>% # renaming id variable.
+  arrange(id) # ordering participants ids in descending order
+
+# fixing wrong id
+elt_w1_clean <- elt_w1_clean %>%
+  mutate(id = case_when(response_id == "R_6EELe7Uuwi9W7zX" ~ "254",
+                        TRUE ~ as.character(id))) %>%
+  arrange(id)
+```
+
+# Fixing wrong condition assignment and school id
+```{r}
+elt_w1_clean_2 <- elt_w1_clean %>%
+  mutate(school_id = str_sub(id, 1, 1), # new school id variable
+         condition = case_when(
+           school_id == "1" | school_id == "3" | school_id == "5" ~ "1",
+           school_id == "2" | school_id == "4" | school_id == "6" ~ "2")) %>% # new condition variable
+  select(school_id, condition, everything()) %>%
+  add_column(wave = 1, .before = 9) %>% # new wave variable
+  select(- school) # selecting out (i.e. deleting) original faulty school variable
+```
+
+# Adding value labels and recoding response option in q68
+```{r}
+elt_w1_clean_3 <- elt_w1_clean_2 %>%
+  mutate(condition = as.numeric(condition),
+         condition = set_vall(condition, c("control" = 1, "intervention" = 2)),
+         school_id = as.numeric(school_id),
+         school_id = set_vall(school_id, c("cascade" = 1, "prairie_mountain" = 2, "kelly" = 3, "ata" = 4, "briggs" = 5, "agnes_stewart" = 6)),
+         q68 = ifelse(q68 == 5, 99, q68),
+         q68 = set_varl(q68, "When I communicate with Latino families, I keep in mind that many Latino parents may not understand how to navigate the educational system in this
+country."),
+         q68 = set_vall(q68, c("Strongly Disagree" = 1, "Disagree" = 2, "Agree" = 3, "Strongly Agree" = 4, "No response" = 99)))
+```
+
+```{r}
+# maester dataset
+view_df(elt_w1_clean_3)
+```
+
+# Collapsing spreaded out language variables
+```{r}
+lang_vars <- elt_w1_clean_3 %>% 
+  select(id, starts_with("q132_1"), starts_with("q132_2"), starts_with("q132_3"), starts_with("q132_4"), -q132_4_text, -q132_3_text) %>% 
+  pivot_longer(
+    cols = starts_with("q132"),
+    names_to = c("item", "language", "response"),
+    names_sep = "_",
+    values_to = "language_comfort",
+    values_drop_na = TRUE) %>% 
+  filter(language_comfort == 1) %>%
+  mutate(language_comfort = as.numeric(language_comfort))
+
+# id 454 chose options 1 and 2.
+lang_vars <- lang_vars %>% 
+  distinct(id, language, .keep_all = TRUE) # Option 1, "not at all comfortable" was chosen because the duplicate was the second option.  
+
+# renaming vars
+lang_vars <- lang_vars %>% 
+  pivot_wider(names_from = language, values_from = response) %>%
+  rename(c("english_comfort" = "1"),
+         c("spanish_comfort" = "2"),
+         c("other1_lang_comfort" = "3"),
+         c("other2_lang_comfort" = "4")) %>%
+  select(-item, -language_comfort)
+
+# renaming input var in master dataset
+lang_inputs <- elt_w1_clean_3 %>%
+  select(id, q132_3_text, q132_4_text) %>%
+  rename(c("other1_lang" = "q132_3_text"), 
+         c("other2_lang" = "q132_4_text"))
+
+# joining renamed master dataset with all language variables now collapsed to "recover" id 153 data
+all_lang_vars <- left_join(lang_inputs, lang_vars) %>%
+select(id, english_comfort, spanish_comfort, other1_lang, other1_lang_comfort, other2_lang, everything())
+```
+
+# Adding value and var labels to joined dataset 
+```{r}
+# creating dataset that joins master dataset with reordered and collapsed lang vars
+elt_w1_clean_4 <- left_join(elt_w1_clean_3, all_lang_vars) %>%
+  mutate(english_comfort = as.numeric(english_comfort),
+         english_comfort = set_vall(english_comfort, c("not at all comfortable" = 1, "somewhat comfortable" = 2, "comfortable" = 3, "very comfortable" = 4, "no response" = 99)),
+         spanish_comfort = as.numeric(spanish_comfort),
+         spanish_comfort = set_vall(spanish_comfort, c("not at all comfortable" = 1, "somewhat comfortable" = 2, "comfortable" = 3, "very comfortable" = 4, "no response" = 99)),
+         other1_lang_comfort = as.numeric(other1_lang_comfort),
+         other1_lang_comfort = set_vall(other1_lang_comfort, c("not at all comfortable" = 1, "somewhat comfortable" = 2, "comfortable" = 3, "very comfortable" = 4, "no response" = 99)),
+         other2_lang_comfort = as.numeric(other2_lang_comfort),
+         other2_lang_comfort = set_vall(other2_lang_comfort, c("not at all comfortable" = 1, "somewhat comfortable" = 2, "comfortable" = 3, "very comfortable" = 4, "no response" = 99))) %>%
+  select(-starts_with("q132_")) # deleting all previous language variables that were included in new variables  
+```
+
+# Renaming demo vars
+```{r}
+elt_w1_clean_5 <- elt_w1_clean_4 %>%
+  rename(c("age" = "q127_1_text"), 
+         c("birth_country" = "q128"),
+         c("another_birth_country_text" = "q128_2_text"),
+         c("age_first_moved_us" = "q129_1_text"),
+         c("white" = "q130_1"),
+         c("hispanic_latino_spanish" = "q130_2"),
+         c("black_african_american" = "q130_3"),
+         c("asian" = "q130_4"),
+         c("american_indian_alaska_native" = "q130_5"),
+         c("indigenous_americas" = "q130_6"),
+         c("middle_eastern_north_african" = "q130_7"),
+         c("native_hawaiian_pacific_islander" = "q130_8"),
+         c("race_ethnicity_other" = "q130_9"),
+         c("race_ethnicity_no_response" = "q130_99"),
+         c("indigenous_americas_text" = "q130_6_text"),
+         c("race_ethnicity_other_text" = "q130_9_text"),
+         c("gender_id" = "q131"),
+         c("years_in_position" = "q133"),
+         c("years_in_school" = "q134"),
+         c("equity_leadership" = "q135_1"),
+         c("cultural_responsiveness" = "q135_2"),
+         c("restorative_practices" = "q135_3"),
+         c("diversity" = "q135_4"),
+         c("ell" = "q135_5"),
+         c("cont_ed_other" = "q135_6"),
+         c("cont_ed_na" = "q135_88"),
+         c("cont_ed_no_response" = "q135_99"),
+         c("cont_ed_other_text" = "q135_6_text")) %>%
+  mutate(age = as.numeric(age)) %>% # making variable numeric for QUAN analyses
+  select(-q127, -q129, -q131_3_text) # selecting out because they did not have meaningful info
+```
+
+
+
