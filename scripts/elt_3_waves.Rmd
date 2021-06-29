@@ -21,7 +21,7 @@ library(psych)
 
 ```
 
-## WAVE 1
+################## WAVE 1 ##################
 
 # Loading the data
 ```{r}
@@ -85,7 +85,7 @@ get_dupes(lang_vars, id, language)
 
 # id 454 chose options 1 and 2.
 lang_vars <- lang_vars %>% 
-  distinct(id, language, .keep_all = TRUE) # Option 1, "not at all comfortable" was chosen because the duplicate was the second option.  
+  distinct(id, language, .keep_all = TRUE) # Option 1, "not at all comfortable" was chosen because the {distinct} function keeps the first row 
 
 # renaming vars
 lang_vars <- lang_vars %>% 
@@ -157,14 +157,12 @@ elt_w1_clean_5 <- elt_w1_clean_4 %>%
   select(-q127, -q129, -q131_3_text) # selecting out because they did not have meaningful info
 ```
 
-
 ```{r}
 # final cleaned dataset wave 1
 view_df(elt_w1_clean_5)
 ```
 
-
-## WAVE 2
+################## WAVE 2 ##################
 
 # Loading the data
 ```{r}
@@ -226,9 +224,11 @@ lang_vars_w2 <- elt_w2_clean_3 %>%
 # checking for dupplicated ids
 get_dupes(lang_vars_w2, id, language)
 
-# id 155 chose options 1 and 99 for other 1.
-lang_vars_w2 <- lang_vars_w2 %>% 
-  distinct(id, language, .keep_all = TRUE) # Option 1, "not at all comfortable" was chosen because the duplicate was the second option.  
+# id 155 chose options 1 and 99 for other 1. Due to pattern of response (not chosing any other language (-99)), it appears as if a better response was 99 = no response.
+
+lang_vars_w2 = lang_vars_w2[-c(15),] # deleting row 15 that corresponds to response option 1 of id 155.
+
+get_dupes(lang_vars_w2, id, language) # no more duplicates. 
 
 # renaming vars
 lang_vars_w2 <- lang_vars_w2 %>% 
@@ -250,19 +250,76 @@ all_lang_vars_w2 <- left_join(lang_inputs_w2, lang_vars_w2) %>%
 select(id, english_comfort, spanish_comfort, other1_lang, other1_lang_comfort, other2_lang, everything())
 ```
 
-# need to identify which variables is the one that id 155 is duplicated in. Explore in general this! 
-
-
-
-
-
-
-
-
-
-
-
+# Adding value and var labels to joined dataset 
 ```{r}
-view_df(elt_w2_clean_3)
+# creating dataset that joins master dataset with reordered and collapsed lang vars
+elt_w2_clean_4 <- left_join(elt_w2_clean_3, all_lang_vars_w2) %>%
+  mutate(english_comfort = as.numeric(english_comfort),
+         english_comfort = set_vall(english_comfort, c("not at all comfortable" = 1, "somewhat comfortable" = 2, "comfortable" = 3, "very comfortable" = 4, "no response" = 99)),
+         spanish_comfort = as.numeric(spanish_comfort),
+         spanish_comfort = set_vall(spanish_comfort, c("not at all comfortable" = 1, "somewhat comfortable" = 2, "comfortable" = 3, "very comfortable" = 4, "no response" = 99)),
+         other1_lang_comfort = as.numeric(other1_lang_comfort),
+         other1_lang_comfort = set_vall(other1_lang_comfort, c("not at all comfortable" = 1, "somewhat comfortable" = 2, "comfortable" = 3, "very comfortable" = 4, "no response" = 99)),
+         other2_lang_comfort = as.numeric(other2_lang_comfort),
+         other2_lang_comfort = set_vall(other2_lang_comfort, c("not at all comfortable" = 1, "somewhat comfortable" = 2, "comfortable" = 3, "very comfortable" = 4, "no response" = 99))) %>%
+  select(-starts_with("q132_")) # deleting all previous language variables that were included in new variables  
 ```
 
+# Renaming demo vars
+```{r}
+elt_w2_clean_5 <- elt_w2_clean_4 %>%
+  rename(c("age" = "q127_1_text"), 
+         c("birth_country" = "q128"),
+         c("another_birth_country_text" = "q128_2_text"),
+         c("age_first_moved_us" = "q129_1_text"),
+         c("white" = "q130_1"),
+         c("hispanic_latino_spanish" = "q130_2"),
+         c("black_african_american" = "q130_3"),
+         c("asian" = "q130_4"),
+         c("american_indian_alaska_native" = "q130_5"),
+         c("indigenous_americas" = "q130_6"),
+         c("middle_eastern_north_african" = "q130_7"),
+         c("native_hawaiian_pacific_islander" = "q130_8"),
+         c("race_ethnicity_other" = "q130_9"),
+         c("race_ethnicity_no_response" = "q130_99"),
+         c("indigenous_americas_text" = "q130_6_text"),
+         c("race_ethnicity_other_text" = "q130_9_text"),
+         c("gender_id" = "q131"),
+         c("years_in_position" = "q133"),
+         c("years_in_school" = "q134"),
+         c("equity_leadership" = "q135_1"),
+         c("cultural_responsiveness" = "q135_2"),
+         c("restorative_practices" = "q135_3"),
+         c("diversity" = "q135_4"),
+         c("ell" = "q135_5"),
+         c("cont_ed_other" = "q135_6"),
+         c("cont_ed_na" = "q135_88"),
+         c("cont_ed_no_response" = "q135_99"),
+         c("cont_ed_other_text" = "q135_6_text")) %>%
+  mutate(age = as.numeric(age)) %>% # making variable numeric for QUAN analyses
+  select(-q127, -q129, -q131_3_text) # selecting out because they did not have meaningful info
+```
+
+```{r}
+# final cleaned dataset wave 2
+view_df(elt_w2_clean_5)
+```
+
+################## WAVE 3 ##################
+
+# Loading the data
+```{r}
+w3_raw_elt <- read_sav(here("nopublish", "ELT W3 ERC 11.11.2020.sav"))
+```
+
+# Initial cleaning
+```{r}
+elt_w2_clean <- w2_raw_elt %>% 
+  clean_names() %>% # function that formats variables' names
+  select(-1:-8, -10:-17, -202) %>% # selecting out columns with metadata
+  rename(c("id" = "pj")) %>% # renaming id variable.
+  arrange(id) # ordering participants ids in descending order
+
+# checking for dupplicated ids
+get_dupes(elt_w2_clean, id)
+```
