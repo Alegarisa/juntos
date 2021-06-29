@@ -157,9 +157,15 @@ elt_w1_clean_5 <- elt_w1_clean_4 %>%
   select(-q127, -q129, -q131_3_text) # selecting out because they did not have meaningful info
 ```
 
+# ------ Notes on W1 dataset -------
+# Participant id 257 was duplicated and there was no id 254. This was fixed.
+# Participant id 153 answers are empty after q50. Raw metadata indicates they didn't finish the survey. 
+# # Total participants in wave n = 43
+# ------------------------------------
+
 ```{r}
 # final cleaned dataset wave 1
-view_df(elt_w1_clean_5)
+view_df(elt_w1_clean_5) # 43 observations, 168 variables
 ```
 
 ################## WAVE 2 ##################
@@ -300,9 +306,15 @@ elt_w2_clean_5 <- elt_w2_clean_4 %>%
   select(-q127, -q129, -q131_3_text) # selecting out because they did not have meaningful info
 ```
 
+# ------- Notes on W2 dataset -------- 
+# participant id 355 missing: participant filled out survey in paper and it got lost. 
+# participant id 453 missing: completed only w1 assessments, dropped out by W2.
+# Total participants in wave n = 41
+# ------------------------------------
+
 ```{r}
 # final cleaned dataset wave 2
-view_df(elt_w2_clean_5)
+view_df(elt_w2_clean_5) # 41 observations, 168 variables
 ```
 
 ################## WAVE 3 ##################
@@ -314,12 +326,115 @@ w3_raw_elt <- read_sav(here("nopublish", "ELT W3 ERC 11.11.2020.sav"))
 
 # Initial cleaning
 ```{r}
-elt_w2_clean <- w2_raw_elt %>% 
+elt_w3_clean <- w3_raw_elt %>% 
   clean_names() %>% # function that formats variables' names
-  select(-1:-8, -10:-17, -202) %>% # selecting out columns with metadata
+  select(-1:-8, -10:-17, -23, -203) %>% # selecting out columns with metadata & column with id info
   rename(c("id" = "pj")) %>% # renaming id variable.
-  arrange(id) # ordering participants ids in descending order
+  arrange(id) %>% # ordering participants ids in descending order
+  filter(response_id != "R_3HRecxW6xkgqTYk") # deleting row of data filled in accidentally 
 
 # checking for dupplicated ids
-get_dupes(elt_w2_clean, id)
+get_dupes(elt_w3_clean, id) # no duplicates here
+
+```
+# This dataset has variables in a different order than waves 1 and 2. Fixing this here: 
+```{r}
+d1 <- elt_w3_clean %>% 
+  select(1:6, 60:185)
+
+d2 <- elt_w3_clean %>% 
+  select(1, 2, 7:59)
+
+elt_w3_clean_1 <- full_join(d1, d2)
+```
+# Fixing wrong condition assignment and school id
+```{r}
+# this wave also had the wrong condition assignment
+elt_w3_clean_2 <- elt_w3_clean_1 %>%
+  mutate(school_id = str_sub(id, 1, 1), # new school id variable
+         condition = case_when(
+           school_id == "1" | school_id == "3" | school_id == "5" ~ "1",
+           school_id == "2" | school_id == "4" | school_id == "6" ~ "2")) %>% # new condition variable
+  select(school_id, condition, everything()) %>%
+  add_column(wave = 3, .before = 9) %>% # new wave variable
+  select(- school) # selecting out (i.e. deleting) original faulty school variable
+```
+
+# Adding value labels and recoding response option in q68
+```{r}
+# this wave also had q68 with the wrong responce code
+elt_w3_clean_3 <- elt_w3_clean_2 %>%
+  mutate(condition = as.numeric(condition),
+         condition = set_vall(condition, c("control" = 1, "intervention" = 2)),
+         school_id = as.numeric(school_id),
+         school_id = set_vall(school_id, c("cascade" = 1, "prairie_mountain" = 2, "kelly" = 3, "ata" = 4, "briggs" = 5, "agnes_stewart" = 6)),
+         q68 = ifelse(q68 == 5, 99, q68),
+         q68 = set_varl(q68, "When I communicate with Latino families, I keep in mind that many Latino parents may not understand how to navigate the educational system in this
+country."),
+         q68 = set_vall(q68, c("Strongly Disagree" = 1, "Disagree" = 2, "Agree" = 3, "Strongly Agree" = 4, "No response" = 99)))
+```
+
+# Collapsing spreaded out language variables
+```{r}
+lang_vars_w3 <- elt_w3_clean_3 %>% 
+  select(id, starts_with("q132_1"), starts_with("q132_2"), starts_with("q132_3"), starts_with("q132_4"), -q132_4_text, -q132_3_text) %>% 
+  pivot_longer(
+    cols = starts_with("q132"),
+    names_to = c("item", "language", "response"),
+    names_sep = "_",
+    values_to = "language_comfort",
+    values_drop_na = TRUE) %>% 
+  filter(language_comfort == 1) %>%
+  mutate(language_comfort = as.numeric(language_comfort))
+
+# checking for dupplicated ids
+get_dupes(lang_vars_w3, id, language)
+
+# id 251 chose options 2 and 3 for language 2 = spanish 
+# id 452 chose options 3 and 4 for language 1 = english 
+# id 452 chose options 3 and 4 for language 2 = spanish
+# because there is no way to know which one was the real intention, I'll let the {distinct} function keep the first row.
+
+lang_vars_w3 <- lang_vars_w3 %>% 
+  distinct(id, language, .keep_all = TRUE) 
+
+
+get_dupes(lang_vars_w3, id, language) # no more duplicates. 
+
+# renaming vars
+lang_vars_w3 <- lang_vars_w3 %>% 
+  pivot_wider(names_from = language, values_from = response) %>%
+  rename(c("english_comfort" = "1"),
+         c("spanish_comfort" = "2"),
+         c("other1_lang_comfort" = "3"),
+         c("other2_lang_comfort" = "4")) %>%
+  select(-item, -language_comfort)
+
+# renaming input var in elt_w1_clean_3 dataset
+lang_inputs_w3 <- elt_w3_clean_3 %>%
+  select(id, q132_3_text, q132_4_text) %>%
+  rename(c("other1_lang" = "q132_3_text"), 
+         c("other2_lang" = "q132_4_text"))
+
+# joining renamed elt_w1_clean_3 dataset with all language variables now collapsed to "recover" id 153 data
+all_lang_vars_w3 <- left_join(lang_inputs_w3, lang_vars_w3) %>%
+select(id, english_comfort, spanish_comfort, other1_lang, other1_lang_comfort, other2_lang, everything())
+```
+
+###### note: check that correct datsets are being used in each wave of data before proceeding. #####
+
+
+
+
+
+# ------- Notes on W3 dataset -------- 
+# participant id 250 missing: replaced by participant id 258
+# participant id 453 missing: completed only w1 assessments, dropped out by W2.
+# participant id 458 missing: left school, dropped study. 
+# Total participants in wave n = 41
+# ------------------------------------
+
+```{r}
+# final cleaned dataset wave 3
+view_df(elt_w3_clean_3) # 41 observations, 168 variables
 ```
