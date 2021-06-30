@@ -102,3 +102,15 @@ test %>%
 
 # Try to make all of your reported stats responsive to the data (e.g., line 82, the Educator's characteristics section, internal consistencies, etc.). This will especially help when you use this code for the other two reports.
 # I fixed what i could, but I don't know if I can take percentages using inline code. 
+# 
+# 
+
+
+
+# selecting id vars to be able to join later
+elt_w1_clean_6_id <- elt_w1_clean_5 %>%
+  select(1:3)
+
+elt_w1_clean_6_vars <- elt_w1_clean_5 %>%
+  select(4:167)
+

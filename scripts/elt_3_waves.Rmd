@@ -125,7 +125,10 @@ elt_w1_clean_4 <- left_join(elt_w1_clean_3, all_lang_vars) %>%
 # Renaming demo vars
 ```{r}
 elt_w1_clean_5 <- elt_w1_clean_4 %>%
-  rename(c("age" = "q127_1_text"), 
+  rename(c("role" = "participant_role"), 
+         c("role_classi" = "participant_role_5_text"),
+         c("role_certif" = "participant_role_6_text"),
+         c("age" = "q127_1_text"), 
          c("birth_country" = "q128"),
          c("another_birth_country_text" = "q128_2_text"),
          c("age_first_moved_us" = "q129_1_text"),
@@ -154,7 +157,7 @@ elt_w1_clean_5 <- elt_w1_clean_4 %>%
          c("cont_ed_no_response" = "q135_99"),
          c("cont_ed_other_text" = "q135_6_text")) %>%
   mutate(age = as.numeric(age)) %>% # making variable numeric for QUAN analyses
-  select(-q127, -q129, -q131_3_text) # selecting out because they did not have meaningful info
+  select(-q127, -q129, -q131_3_text, -response_id) # selecting out because they did not have meaningful info & response_id bec. no longer needed
 ```
 
 # ------ Notes on W1 dataset -------
@@ -164,8 +167,19 @@ elt_w1_clean_5 <- elt_w1_clean_4 %>%
 # ------------------------------------
 
 ```{r}
+# adding "e1" to each variable name: "e" stands for elt, "1" for wave 1. 
+names(elt_w1_clean_5) <- paste(names(elt_w1_clean_5), "e1", sep = "_")
+
+elt_w1_clean_6 <- elt_w1_clean_5 %>%
+  rename(c("school_id" = "school_id_e1"), 
+         c("condition" = "condition_e1"),
+         c("id" = "id_e1")) # renaming these variables to be able to join later
+```
+
+
+```{r}
 # final cleaned dataset wave 1
-view_df(elt_w1_clean_5) # 43 observations, 168 variables
+view_df(elt_w1_clean_6) # 43 observations, 167 variables
 ```
 
 ################## WAVE 2 ##################
@@ -274,7 +288,10 @@ elt_w2_clean_4 <- left_join(elt_w2_clean_3, all_lang_vars_w2) %>%
 # Renaming demo vars
 ```{r}
 elt_w2_clean_5 <- elt_w2_clean_4 %>%
-  rename(c("age" = "q127_1_text"), 
+  rename(c("role" = "participant_role"), 
+         c("role_classi" = "participant_role_5_text"),
+         c("role_certif" = "participant_role_6_text"),
+         c("age" = "q127_1_text"), 
          c("birth_country" = "q128"),
          c("another_birth_country_text" = "q128_2_text"),
          c("age_first_moved_us" = "q129_1_text"),
@@ -303,7 +320,7 @@ elt_w2_clean_5 <- elt_w2_clean_4 %>%
          c("cont_ed_no_response" = "q135_99"),
          c("cont_ed_other_text" = "q135_6_text")) %>%
   mutate(age = as.numeric(age)) %>% # making variable numeric for QUAN analyses
-  select(-q127, -q129, -q131_3_text) # selecting out because they did not have meaningful info
+  select(-q127, -q129, -q131_3_text, -response_id) # selecting out because they did not have meaningful info & response_id bec. no longer needed
 ```
 
 # ------- Notes on W2 dataset -------- 
@@ -313,8 +330,19 @@ elt_w2_clean_5 <- elt_w2_clean_4 %>%
 # ------------------------------------
 
 ```{r}
-# final cleaned dataset wave 2
-view_df(elt_w2_clean_5) # 41 observations, 168 variables
+# adding "e2" to each variable name: "e" stands for elt, "2" for wave 2. 
+names(elt_w2_clean_5) <- paste(names(elt_w2_clean_5), "e2", sep = "_")
+
+elt_w2_clean_6 <- elt_w2_clean_5 %>%
+  rename(c("school_id" = "school_id_e2"), 
+         c("condition" = "condition_e2"),
+         c("id" = "id_e2")) # renaming these variables to be able to join later
+```
+
+
+```{r}
+# final cleaned dataset wave 1
+view_df(elt_w2_clean_6) # 43 observations, 167 variables
 ```
 
 ################## WAVE 3 ##################
@@ -337,6 +365,7 @@ elt_w3_clean <- w3_raw_elt %>%
 get_dupes(elt_w3_clean, id) # no duplicates here
 
 ```
+
 # This dataset has variables in a different order than waves 1 and 2. Fixing this here: 
 ```{r}
 d1 <- elt_w3_clean %>% 
@@ -347,6 +376,7 @@ d2 <- elt_w3_clean %>%
 
 elt_w3_clean_1 <- full_join(d1, d2)
 ```
+
 # Fixing wrong condition assignment and school id
 ```{r}
 # this wave also had the wrong condition assignment
@@ -421,11 +451,58 @@ all_lang_vars_w3 <- left_join(lang_inputs_w3, lang_vars_w3) %>%
 select(id, english_comfort, spanish_comfort, other1_lang, other1_lang_comfort, other2_lang, everything())
 ```
 
-###### note: check that correct datsets are being used in each wave of data before proceeding. #####
+# Adding value and var labels to joined dataset 
+```{r}
+# creating dataset that joins master dataset with reordered and collapsed lang vars
+elt_w3_clean_4 <- left_join(elt_w3_clean_3, all_lang_vars_w3) %>%
+  mutate(english_comfort = as.numeric(english_comfort),
+         english_comfort = set_vall(english_comfort, c("not at all comfortable" = 1, "somewhat comfortable" = 2, "comfortable" = 3, "very comfortable" = 4, "no response" = 99)),
+         spanish_comfort = as.numeric(spanish_comfort),
+         spanish_comfort = set_vall(spanish_comfort, c("not at all comfortable" = 1, "somewhat comfortable" = 2, "comfortable" = 3, "very comfortable" = 4, "no response" = 99)),
+         other1_lang_comfort = as.numeric(other1_lang_comfort),
+         other1_lang_comfort = set_vall(other1_lang_comfort, c("not at all comfortable" = 1, "somewhat comfortable" = 2, "comfortable" = 3, "very comfortable" = 4, "no response" = 99)),
+         other2_lang_comfort = as.numeric(other2_lang_comfort),
+         other2_lang_comfort = set_vall(other2_lang_comfort, c("not at all comfortable" = 1, "somewhat comfortable" = 2, "comfortable" = 3, "very comfortable" = 4, "no response" = 99))) %>%
+  select(-starts_with("q132_")) # deleting all previous language variables that were included in new variables  
+```
 
-
-
-
+# Renaming demo vars
+```{r}
+elt_w3_clean_5 <- elt_w3_clean_4 %>%
+  rename(c("role" = "participant_role"), 
+         c("role_classi" = "participant_role_5_text"),
+         c("role_certif" = "participant_role_6_text"),
+         c("age" = "q127_1_text"), 
+         c("birth_country" = "q128"),
+         c("another_birth_country_text" = "q128_2_text"),
+         c("age_first_moved_us" = "q129_1_text"),
+         c("white" = "q130_1"),
+         c("hispanic_latino_spanish" = "q130_2"),
+         c("black_african_american" = "q130_3"),
+         c("asian" = "q130_4"),
+         c("american_indian_alaska_native" = "q130_5"),
+         c("indigenous_americas" = "q130_6"),
+         c("middle_eastern_north_african" = "q130_7"),
+         c("native_hawaiian_pacific_islander" = "q130_8"),
+         c("race_ethnicity_other" = "q130_9"),
+         c("race_ethnicity_no_response" = "q130_99"),
+         c("indigenous_americas_text" = "q130_6_text"),
+         c("race_ethnicity_other_text" = "q130_9_text"),
+         c("gender_id" = "q131"),
+         c("years_in_position" = "q133"),
+         c("years_in_school" = "q134"),
+         c("equity_leadership" = "q135_1"),
+         c("cultural_responsiveness" = "q135_2"),
+         c("restorative_practices" = "q135_3"),
+         c("diversity" = "q135_4"),
+         c("ell" = "q135_5"),
+         c("cont_ed_other" = "q135_6"),
+         c("cont_ed_na" = "q135_88"),
+         c("cont_ed_no_response" = "q135_99"),
+         c("cont_ed_other_text" = "q135_6_text")) %>%
+  mutate(age = as.numeric(age)) %>% # making variable numeric for QUAN analyses
+  select(-q127, -q129, -q131_3_text, -response_id) # selecting out because they did not have meaningful info & response_id bec. no longer needed
+```
 
 # ------- Notes on W3 dataset -------- 
 # participant id 250 missing: replaced by participant id 258
@@ -435,6 +512,32 @@ select(id, english_comfort, spanish_comfort, other1_lang, other1_lang_comfort, o
 # ------------------------------------
 
 ```{r}
-# final cleaned dataset wave 3
-view_df(elt_w3_clean_3) # 41 observations, 168 variables
+# adding "e3" to each variable name: "e" stands for elt, "3" for wave 3. 
+names(elt_w3_clean_5) <- paste(names(elt_w3_clean_5), "e3", sep = "_")
+
+elt_w3_clean_6 <- elt_w3_clean_5 %>%
+  rename(c("school_id" = "school_id_e3"), 
+         c("condition" = "condition_e3"),
+         c("id" = "id_e3")) # renaming these variables to be able to join later
 ```
+
+```{r}
+# final cleaned dataset wave 1
+view_df(elt_w3_clean_6) # 43 observations, 167 variables
+```
+
+# joining all 3 elt waves
+```{r}
+join_w1_w2 <- full_join(elt_w1_clean_6, elt_w2_clean_6)
+
+elt_all_waves <- full_join(join_w1_w2, elt_w3_clean_6)
+```
+
+
+```{r}
+view_df(elt_all_waves)
+```
+
+
+
+
