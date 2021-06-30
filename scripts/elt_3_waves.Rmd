@@ -540,6 +540,10 @@ elt_all_waves <- full_join(join_w1_w2, elt_w3_clean_6) %>%
 view_df(elt_all_waves)
 ```
 
+# exporting dataset to SPSS
+```{r}
+elt_all_waves %>%
+  haven::write_sav(here("nopublish", "elt_all_waves.sav")) 
+```
 
-
-
+# note: check if it makes sense to move wave variable to after 3 id vars. 

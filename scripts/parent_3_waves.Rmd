@@ -1,0 +1,60 @@
+---
+title: "parent_3_waves"
+author: "Alejandra Garcia Isaza"
+date: "6/30/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(rio)
+library(here)
+library(tidyverse)
+library(haven)
+library(janitor)
+library(knitr)
+library(surveytoolbox)
+library(sjPlot)
+library(kableExtra)
+library(psych)
+
+```
+
+################## WAVE 1 ##################
+
+# Loading the data
+```{r}
+p_w1_raw <- read_sav(here("nopublish", "7b. Juntos Parent W1-SPAN_February 10, 2021_10.24.sav"))
+
+p_w1_raw <- p_w1_raw %>% 
+  arrange(ID_1_TEXT) %>% # ordering participants ids
+  janitor::clean_names() %>% # cleaning names
+  select(-id) %>% 
+  rename(c("id" = "id_1_text"))
+```
+
+# Checking duplicated ids
+```{r}
+data.frame(table(p_w1_raw$id)) # 29 ids are duplicated (ids 415 and 418 has 3 instances each)
+
+dupes <- p_w1_raw %>%
+  select(id, response_id) %>%
+  arrange(id)
+```
+
+# initial cleaning
+```{r}
+p_w1_clean <- p_w1_raw %>% 
+  select(-1:-8, -10:-17, -19, -20) %>%
+  filter(id != "999") %>% # deleting 2 test rows
+  filter(response_id != "R_31L6rXjsdcuBaz0") %>% # deleting 1 duped row "false start" (id 312)
+  mutate(id = case_when(response_id == "R_12ch5JnOHKHRgre" ~ "408", # id 418 (top) recoded as 408
+                        response_id == "R_uaijWwHdl8sIOmB" ~ "317", # had a pj before id #
+                        TRUE ~ as.character(id))) %>%
+  arrange(id)
+
+data.frame(table(p_w1_clean$id)) # duplicated ids match two-parent families, id 415 is a family of 3
+```
+
+
