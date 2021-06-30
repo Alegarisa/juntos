@@ -530,7 +530,9 @@ view_df(elt_w3_clean_6) # 43 observations, 167 variables
 ```{r}
 join_w1_w2 <- full_join(elt_w1_clean_6, elt_w2_clean_6)
 
-elt_all_waves <- full_join(join_w1_w2, elt_w3_clean_6)
+elt_all_waves <- full_join(join_w1_w2, elt_w3_clean_6) %>%
+  arrange(id) # all checksout. Ready to export dataset to SPSS file. 
+  
 ```
 
 
