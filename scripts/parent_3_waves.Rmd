@@ -18,7 +18,7 @@ library(surveytoolbox)
 library(sjPlot)
 library(kableExtra)
 library(psych)
-
+library(sjmisc)
 ```
 
 ################## WAVE 1 ##################
@@ -123,15 +123,54 @@ num_adults <- num_adults %>%
   select(-item, -response) 
 
 p_w1_clean_4 <- left_join(p_w1_clean_3, num_adults) %>%
-  select(-291:-296)
+  select(-291:-296) %>%
+  mutate(adults_home = as.numeric(adults_home),
+         adults_home = set_vall(adults_home, c("1" = 1, "2" = 2, "3" = 3, "4" = 4, "mas de 5, ¿cuántas?" = 5, "refuse to answer" = 99)),
+         adults_home = set_varl(adults_home, "Número de adultos (más de 18 años): - Selected Choice")) %>%
+  move_columns(adults_home, .before = "adults_home_text")
 ```
 
-#note: check other variables that may need collapsing and evaluate if all tghis work was worth it. Maybe just need to rename the vars and no more = no collapsing. 
+# renaming demo vars
+```{r}
+p_w1_clean_5 <- p_w1_clean_4 %>%
+  rename(c("lang_english" = "q170_1"),
+         c("lang_spanish" = "q170_2"),
+         c("lang_indigenous" = "q170_3"),
+         c("lang_other" = "q170_4"),
+         c("lang_refuse_answer" = "q170_99"),
+         c("lang_indigenous_text" = "q170_3_text"),
+         c("lang_other_text" = "q170_4_text"),
+         c("lang_brokering" = "q171"),
+         c("spanish_comfort_home" = "q172_1"),
+         c("spanish_comfort_school" = "q172_2"),
+         c("spanish_comfort_youth_school" = "q172_3"),
+         c("spanish_comfort_work" = "q172_4"),
+         c("spanish_comfort_friends" = "q172_5"),
+         c("spanish_comfort_general" = "q172_6"),
+         c("english_comfort_home" = "q173_1"),
+         c("english_comfort_school" = "q173_2"),
+         c("english_comfort_youth_school" = "q173_3"),
+         c("english_comfort_work" = "q173_4"),
+         c("english_comfort_friends" = "q173_5"),
+         c("english_comfort_general" = "q173_6"),
+         c("pub_assist" = "q212"),
+         c("pub_assist_snap" = "q212a_1"),
+         c("pub_assist_frpl" = "q212a_2"),
+         c("pub_assist_tanf" = "q212a_3"),
+         c("pub_assist_unemployment" = "q212a_4"),
+         c("pub_assist_disability" = "q212a_5"),
+         c("pub_assist_social_sec" = "q212a_6"),
+         c("pub_assist_health_insu" = "q212a_7"),
+         c("pub_assist_wic" = "q212a_18"),
+         c("pub_assist_food_box" = "q212a_19"),
+         c("pub_assist_other" = "q212a_10"),
+         c("pub_assist_no_response" = "q212a_99"))
 
-# If it makes sense, put adults_home and adults_home_text at the end. Check why output ommitted. 
+```
 
+# note: double check these renaming 
 
 ```{r}
-view_df(p_w1_clean_4) 
+view_df(p_w1_clean_5) # it appears that there are no questions about age, gender id, race/ethnicity. 
 ```
 
