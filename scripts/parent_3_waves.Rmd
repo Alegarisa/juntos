@@ -43,7 +43,7 @@ dupes <- p_w1_raw %>%
   arrange(id)
 ```
 
-# Further cleaning
+# Further cleaning & dealing with duplicates
 ```{r}
 p_w1_clean <- p_w1_raw %>% 
   select(-1:-8, -10:-17, -19, -20) %>% # selecting out columns with metadata
@@ -80,6 +80,7 @@ p_w1_clean_3 <- p_w1_clean_2 %>%
          school_id = set_vall(school_id, c("cascade" = 1, "prairie_mountain" = 2, "kelly" = 3, "ata" = 4, "briggs" = 5, "agnes_stewart" = 6)))
 ```
 
+# Creating individual id variable
 ```{r}
 p_w1_clean_3 <- p_w1_clean_3 %>% 
   mutate(participant = ifelse(response_id == "R_1ON5POXTzIXrIeb", 4, participant), # changing partic. type to correspond to records
@@ -195,3 +196,41 @@ p_w1_clean_6 <- p_w1_clean_5 %>%
 view_df(p_w1_clean_6) # it appears that there are no questions about age, gender id, race/ethnicity. 
 ```
 
+################## WAVE 2 ##################
+
+# Loading the data & initial cleaning
+```{r}
+p_w2_raw <- read_sav(here("nopublish", "7bb. Juntos Parent W2-SPAN_February 10, 2021_10.25.sav"))
+
+p_w2_raw <- p_w2_raw %>% 
+  arrange(ID_1_TEXT) %>% # ordering participants ids
+  janitor::clean_names() %>% # cleaning names
+  select(-id) %>% 
+  rename(c("id" = "id_1_text"))
+
+p_w2_raw %>%
+  filter(finished == 0)
+
+p_w2_raw %>%
+  filter(id == 308)
+
+p_w1_clean_6 %>%
+  filter(family_id == 308)
+```
+
+# Checking duplicated ids
+```{r}
+data.frame(table(p_w2_raw$id)) # 29 ids are duplicated (ids 415 and 418 has 3 instances each)
+
+dupes <- p_w2_raw %>%
+  select(id, response_id) %>%
+  arrange(id)
+```
+
+ids: 112 after q145 empty. Is this the same person that started twice or two different parents? The pattern of responses is identical. In W1 it appears as if there were a mom and a dad. 
+
+id 113: no responses at all: qualtrics var progress: 3%. 
+
+308: 2 false starts, 2 completed, but in attempt 3 after q_12_2 is filled with -99 throughout. Is this one parent or two parents? 	R_UMEbJn4yl8Wc0wx is the one with completed data. This id corresponds to just 1 mom in w1. 
+
+new variable: 217_4_text? 
