@@ -1,0 +1,47 @@
+---
+title: "youth_3_waves"
+author: "Alejandra Garcia Isaza"
+date: "7/7/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(rio)
+library(here)
+library(tidyverse)
+library(haven)
+library(janitor)
+library(knitr)
+library(surveytoolbox)
+library(sjPlot)
+library(kableExtra)
+library(psych)
+library(sjmisc)
+```
+
+################## WAVE 1 ##################
+
+# Loading the data & initial cleaning
+```{r}
+y_w1_raw <- read_sav(here("nopublish", "Youth W1  SPAN_February 10, 2021_10.31.sav"))
+
+
+y_w1_raw <- y_w1_raw %>% 
+  arrange(H1_1_TEXT) %>% # ordering participants ids
+  janitor::clean_names() %>% # cleaning names
+  select(-h1) %>% 
+  rename(c("id" = "h1_1_text"))
+```
+
+```{r}
+y_w1_raw %>%
+  filter(finished == 0) # 508 completely empty (2 records, on ecomplete?) 624 99% complete
+```
+
+```{r}
+data.frame(table(y_w1_raw$id))
+```
+
+id 508 only duplicated and is because one is incomplete. 
