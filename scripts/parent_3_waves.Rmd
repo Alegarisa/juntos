@@ -258,7 +258,7 @@ id 415 is a 3 parent family.
 
 ids 601: is triplicated: 2 moms, 1 dad. In w1 there is 1 mom, 1 dad. 
 
-id 201, 204, 206, 207, 216, 302, 310, 408, 414, 418, 501, 503, 505, 506, 607, 608, 610, 613, 614, 615, : two parent fams in w1 and w2.
+ids 201, 204, 206, 207, 216, 302, 310, 408, 414, 418, 501, 503, 505, 506, 607, 608, 610, 613, 614, 615, : two parent fams in w1 and w2.
 
 new variable: 217_4_text? 
 
@@ -291,8 +291,55 @@ p_w3_raw <- full_join(p_w3_raw_a, p_w3_raw_b) %>%
   arrange(id)
 
 ```
+
 ```{r}
 p_w3_raw %>%
   filter(finished == 0) # 310 completely empty (no other with complete) & 613 completely empty with 2 other completes 
 ```
+
+# Checking duplicated ids
+```{r}
+data.frame(table(p_w3_raw$id)) # 24 ids have 2 or more instances each (ids 408, 415, 613 have 3 instances each)
+
+dupes <- p_w3_raw %>%
+  select(id, response_id) %>%
+  arrange(id)
+```
+
+```{r}
+# id 308
+p_w3_raw %>%
+  filter(id == 107)
+```
+
+# notes on w3
+
+id 107 is duplicated, appears as 2 moms. In w1 and w2 there is just one 107 that is a mom.
+
+ids 109, 110 duplicated: both have a mom and dad, also on w1. But there is no 109 mom and any 110 parent in w2. 
+
+id 113 duplicated: mom & dad. No dad on w2. mom & dad on w1. 
+
+id 207 only a mom, no dad on w3. But mom & dad in w1 and w2. Dropped?
+
+id 310 only a dad, no mom on w3. But mom & dad in w1 and w2. Dropped?
+
+id 405 duplicated. It says "imported". Mom & dad in w1, no 405 in w2. 
+
+id 408 triplicated: 2 dads 1 mom. One of the dads says "imported". In w1 & w2 there is mom & dad. 
+
+id 415 three-parent family. Second mom properly coded as other and stepmom. 
+
+id 503+ duplicated: mom & dad. doesn't say "imported". I think this one is "new" data from page 2 of w3. 
+
+id 605 duplicated. It says "imported". In w1 and w2 there is just one 605 that is a mom.
+
+id 610+ duplicated: mom & dad. doesn't say "imported". I think this one is "new" data from page 2 of w3. 
+
+id 613+ triplicated: 1 mom & 2 dads. In w1 & w2 there is mom & dad.
+
+id 614 is missing the mom. In w1 & w2 there is mom & dad. Dropped?
+
+
+ids 201, 204, 206, 216, 302, 414, 418, 501, 503+, 506, 601(tripli in w3), 607, 608, 610+, 613+, 615: two parent fams in w1, w2 and w3.
 
