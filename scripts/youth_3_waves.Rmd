@@ -32,16 +32,147 @@ y_w1_raw <- y_w1_raw %>%
   arrange(H1_1_TEXT) %>% # ordering participants ids
   janitor::clean_names() %>% # cleaning names
   select(-h1) %>% 
-  rename(c("id" = "h1_1_text"))
-```
+  rename(c("id" = "h1_1_text"),
+         c("wave" = "h5"))
 
-```{r}
 y_w1_raw %>%
-  filter(finished == 0) # 508 completely empty (2 records, on ecomplete?) 624 99% complete
+  filter(finished == 0) # 508 completely empty (2 records, one complete) 624 99% complete
+
+data.frame(table(y_w1_raw$id)) # 508 duplicated: one false start, one completed.
 ```
+
+# Further cleaning
+```{r}
+y_w1_clean <- y_w1_raw %>% 
+  select(-1:-8, -10:-17, -20, -21) %>%
+  filter(response_id != "R_2wMlBAGtO7lzpRo") %>% # deleting 1 duped row "false start" (id 508)
+  arrange(id)
+
+duplicated(y_w1_clean$id)
+```
+
+# Fixing wrong condition assignment and school id
+```{r}
+y_w1_clean_2 <- y_w1_clean %>%
+  mutate(school_id = str_sub(id, 1, 1),
+         condition = case_when(
+           school_id == "1" | school_id == "3" | school_id == "5" ~ "1",
+           school_id == "2" | school_id == "4" | school_id == "6" ~ "2"
+         )) %>%
+  select(school_id, condition, everything()) %>%
+  select(- h8) # deleting school var that has wrong assignment
+```
+
+# Adding value labels, making vars numeric, and recoding response option in q38
+```{r}
+y_w1_clean_3 <- y_w1_clean_2 %>%
+  mutate(condition = as.numeric(condition),
+         condition = set_vall(condition, c("control" = 1, "intervention" = 2)),
+         school_id = as.numeric(school_id),
+         school_id = set_vall(school_id, c("cascade" = 1, "prairie_mountain" = 2, "kelly" = 3, "ata" = 4, "briggs" = 5, "agnes_stewart" = 6)),
+         q38 = ifelse(q38 == 99, 88, q38),
+         q38 = set_varl(q38, "In the last 3 months, how frequently has at least one of your parents/guardians… …attended a parent group meeting."),
+         q38 = set_vall(q38, c("Never" = 1, "Rarely" = 2, "Sometimes" = 3, "Often" = 4, "I don't know" = 88))) # q38 didn't have a 99 = no response option. 
+```
+
 
 ```{r}
-data.frame(table(y_w1_raw$id))
+# at school (should be 101_1)
+q101_1_1 #yes
+q101_1_0 #no
+q101_1_99 #refuse to answer
+
+# other than school (should be 101_2)
+q101_2_1 #yes
+q101_2_0 #no
+q101_2_99 #refuse to answer
+
+q101b #how stressful 
+
+stress <- y_w1_clean_3 %>% 
+  select(id, starts_with("q101_1"), starts_with("q102_2")) %>% 
+  pivot_longer(
+    cols = starts_with("q10"),
+    names_to = c("item", "place", "response"),
+    names_sep = "_",
+    values_to = "stress_lev",
+    values_drop_na = TRUE) %>% 
+  filter(stress_lev == 1) %>%
+  mutate(stress_lev = as.numeric(stress_lev))
+
+get_dupes(stress, id, place)
+
+# id 506 chose yes and no
+stress_2 <- stress %>% 
+  distinct(id, place, .keep_all = TRUE) # Option 1 = yes, was chosen because the {distinct} function keeps the first row 
+
+# renaming vars
+stress_3 <- stress_2 %>% 
+  pivot_wider(names_from = place, values_from = response) %>%
+  rename(c("101_1" = "1"),
+         c("101_2" = "2")) %>%
+  select(-item, -stress_lev) %>%
+  pivot_longer(
+    cols = starts_with("101_"),
+    names_to = c("place"),
+    values_to = "response",
+    values_drop_na = TRUE)
+
+stress_4 <- stress_3 %>%
+  pivot_wider(names_from = place, values_from = response)
+
+
+# test <- left_join(y_w1_clean_3, stress_3)
 ```
 
-id 508 only duplicated and is because one is incomplete. 
+# note: evaluate if it makes sense doing all these because (I think) I have to do all this process with each variable. 
+
+# Renaming demo vars
+```{r}
+y_w1_clean_5 <- y_w1_clean_3 %>% # not y_w1_clean_4 for consistency w parent & educator
+  rename(c("lang_english" = "q92_1"),
+         c("lang_spanish" = "q92_2"),
+         c("lang_indigenous" = "q92_3"),
+         c("lang_other" = "q92_4"),
+         c("lang_no_response" = "q92_99"),
+         c("lang_indigenous_text" = "q92_3_text"),
+         c("lang_other_text" = "q92_4_text"),
+         c("spanish_comfort_home" = "q93"),
+         c("spanish_comfort_school" = "q94"),
+         c("spanish_comfort_friends" = "q95"),
+         c("spanish_comfort_general" = "q96"),
+         c("english_comfort_home" = "q97"),
+         c("english_comfort_school" = "q98"),
+         c("english_comfort_friends" = "q99"),
+         c("english_comfort_general" = "q100"),
+         c("gender_id" = "q231"),
+         c("white" = "q232_1"),
+         c("hispanic_latino_spanish" = "q232_2"),
+         c("indigenous_americas" = "q232_3"),
+         c("black_african_american" = "q232_4"),
+         c("asian" = "q232_5"),
+         c("american_indian_alaska_native" = "q232_6"),
+         c("middle_eastern_north_african" = "q232_7"),
+         c("native_hawaiian_pacific_islander" = "q232_8"),
+         c("race_ethnicity_other" = "q232_9"),
+         c("race_ethnicity_no_response" = "q232_99"),
+         c("indigenous_americas_text" = "q232_3_text"),
+         c("race_ethnicity_other_text" = "q232_9_text"),
+         c("age" = "q233"), 
+         c("birth_country" = "q234"),
+         c("another_birth_country_text" = "q234_2_text"),
+         c("age_first_moved_us" = "q235_1_text")) %>%
+  select(-q235, -response_id) # deleted: q235 because they did not have meaningful info & response_id bec. no longer needed
+```
+
+
+```{r}
+view_df(y_w1_clean_3)
+```
+
+# ------ Notes on W1 dataset -------
+# Participant id 508 was the only duplicated id and it was because one record was a "false start". 
+# Participant id 612 appeared as if belonged to school 2 = prairie, this was incorrect and was fixed. 
+# q38 didn't have a 99 = no response option so it didn't make sense to add it ex post facto. Prob. a survey coding error. 
+# Total participants in wave n = 94
+# ------------------------------------
