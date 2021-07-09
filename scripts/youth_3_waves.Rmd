@@ -100,7 +100,7 @@ stress <- y_w1_clean_3 %>%
   filter(stress_lev == 1) %>%
   mutate(stress_lev = as.numeric(stress_lev))
 
-get_dupes(stress, id, place)
+get_dupes(stress, id, place, item)
 
 # id 506 chose yes and no
 stress_2 <- stress %>% 
@@ -120,7 +120,6 @@ stress_3 <- stress_2 %>%
 
 stress_4 <- stress_3 %>%
   pivot_wider(names_from = place, values_from = response)
-
 
 # test <- left_join(y_w1_clean_3, stress_3)
 ```

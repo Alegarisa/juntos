@@ -114,3 +114,47 @@ elt_w1_clean_6_id <- elt_w1_clean_5 %>%
 elt_w1_clean_6_vars <- elt_w1_clean_5 %>%
   select(4:167)
 
+
+
+--------------------------------------------------------------------------------
+# trying to collapse some youth variables -- didn't work
+  stress_test <- y_w1_clean_3 %>% 
+  select(id, starts_with("q101_1"), starts_with("q102_2"), 
+         starts_with("q102_1"), starts_with("q102_2"), 
+         starts_with("q103_1"), starts_with("q103_2"), 
+         starts_with("q104_1"), starts_with("q104_2"),
+         starts_with("q105_1"), starts_with("q105_2"),
+         starts_with("q106_1"), starts_with("q106_2"),
+         starts_with("q107_1"), starts_with("q107_2")) %>% 
+  pivot_longer(
+    cols = starts_with("q10"),
+    names_to = c("item", "place", "response"),
+    names_sep = "_",
+    values_to = "stress_lev",
+    values_drop_na = TRUE) %>% 
+  filter(stress_lev == 1) %>%
+  mutate(stress_lev = as.numeric(stress_lev))
+
+get_dupes(stress_test, id, place, item)
+
+stress_test_2 <- stress_test %>% 
+  distinct(id, place, item, .keep_all = TRUE)
+
+get_dupes(stress_test_2, id, place, item)
+
+# renaming vars
+stress_test_3 <- stress_test_2 %>% 
+  pivot_wider(names_from = place, values_from = response) %>%
+  rename(c("10_school" = "1"),
+         c("10_other" = "2")) %>%
+  select(-item, -stress_lev) %>%
+  pivot_longer(
+    cols = starts_with("10_"),
+    names_to = c("place"),
+    values_to = "response",
+    values_drop_na = TRUE)
+
+stress_test_stress_4 <- stress_test_3 %>%
+  pivot_wider(names_from = place, values_from = response) # this makes lists. Also, the var names gets lost. 
+--------------------------------------------------------------------------------
+  
