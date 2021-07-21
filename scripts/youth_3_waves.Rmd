@@ -124,7 +124,7 @@ stress_4 <- stress_3 %>%
 # test <- left_join(y_w1_clean_3, stress_3)
 ```
 
-# note: evaluate if it makes sense doing all these because (I think) I have to do all this process with each variable. 
+# note: evaluate if it makes sense doing all these because  I have to do all this process with each pair of variables (102_1, 102_2, 103_1, 103_2 ... 107_1, 107_2). 
 
 # Renaming demo vars
 ```{r}
@@ -175,3 +175,43 @@ view_df(y_w1_clean_3)
 # q38 didn't have a 99 = no response option so it didn't make sense to add it ex post facto. Prob. a survey coding error. 
 # Total participants in wave n = 94
 # ------------------------------------
+
+################## WAVE 2 ##################
+
+# Loading the data & initial cleaning
+```{r}
+y_w2_raw <- read_sav(here("nopublish", "Youth W2 SPAN_February 10, 2021_10.32.sav"))
+
+
+y_w2_raw <- y_w2_raw %>% 
+  arrange(H1_1_TEXT) %>% # ordering participants ids
+  janitor::clean_names() %>% # cleaning names
+  select(-h1) %>% 
+  rename(c("id" = "h1_1_text"),
+         c("wave" = "h5"))
+
+y_w2_raw %>%
+  filter(finished == 0) # 412 completely empty; 405 duplicated: one with 47% and other with 80% complete 
+
+data.frame(table(y_w2_raw$id)) # 106, 313, 314, 405 (tripli), 408, 412
+```
+
+```{r}
+
+y_w2_clean <- y_w2_raw %>% 
+  select(-1:-8, -10:-17, -20, -21) %>%
+  filter(response_id != "R_20My7Nw91c2Kh6r") %>% # deleting duped row "false start" (id 405, with 47%)
+  filter(response_id != "R_3jebHOrmpEvVusr") %>% # deleting duped row "false start" (id 405, with 80%)
+  filter(response_id != "R_2Y5PBgkaoarXoW5") %>% # deleting duped row "false start" (id 412, with 2%)
+  filter(response_id != "R_12LVKPebRTdZRF3") %>% # deleting row bec. filled with -99 throughout
+  arrange(id)
+
+y_w2_clean %>%
+  filter(id == 106|id == 313|id == 314)
+```
+
+id 106 duplicated: one is from wave 1 and the other from wave 2.
+
+id 313 duplicated
+
+id 314 duplicated
