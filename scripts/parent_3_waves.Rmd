@@ -210,37 +210,61 @@ p_w2_raw <- p_w2_raw %>%
 
 p_w2_raw %>%
   filter(finished == 0)
-
-# id 112
-p_w2_raw %>%
-  filter(id == 112)
-
-p_w1_clean_6 %>%
-  filter(family_id == 112)
-
-# id 113
-p_w2_raw %>%
-  filter(id == 113)
-
-p_w1_clean_6 %>%
-  filter(family_id == 113)
-
-# id 308
-p_w2_raw %>%
-  filter(id == 308)
-
-p_w1_clean_6 %>%
-  filter(family_id == 308)
 ```
 
 # Checking duplicated ids
 ```{r}
 data.frame(table(p_w2_raw$id)) # 26 ids have 2 or more instances each (ids 415 and 418 have 3 instances each)
 
-dupes <- p_w2_raw %>%
-  select(id, response_id) %>%
-  arrange(id)
 ```
+
+```{r}
+# Checking duplicates with Eli
+
+# id 108
+p_w1_clean_6 %>%
+  filter(family_id == 108)
+
+p_w2_raw %>%
+  filter(id == 108)
+
+# id 112
+p_w1_clean_6 %>%
+  filter(family_id == 112)
+
+p_w2_raw %>%
+  filter(id == 112)
+
+# id 113
+p_w1_clean_6 %>%
+  filter(family_id == 113)
+
+p_w2_raw %>%
+  filter(id == 113)
+
+# id 308
+p_w1_clean_6 %>%
+  filter(family_id == 308)
+
+p_w2_raw %>%
+  filter(id == 308)
+
+# id 314
+p_w1_clean_6 %>%
+  filter(family_id == 314)
+
+p_w2_raw %>%
+  filter(id == 314)
+
+# id 601
+p_w1_clean_6 %>%
+  filter(family_id == 601)
+
+p_w2_raw %>%
+  filter(id == 601)
+
+```
+
 
 # notes on w2
 
