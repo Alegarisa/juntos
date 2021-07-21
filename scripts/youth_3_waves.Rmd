@@ -190,20 +190,23 @@ y_w2_raw <- y_w2_raw %>%
   rename(c("id" = "h1_1_text"),
          c("wave" = "h5"))
 
-y_w2_raw %>%
-  filter(finished == 0) # 412 completely empty; 405 duplicated: one with 47% and other with 80% complete 
-
 data.frame(table(y_w2_raw$id)) # 106, 313, 314, 405 (tripli), 408, 412
+
+y_w2_raw %>%
+  filter(finished == 0) # 405 duplicated: one with 47% and other with 80% complete; 412 completely empty; remaining with 99% complete 
+
 ```
 
 ```{r}
+y_w2_raw %>%
+  filter(id == 106|id == 313|id == 314|id == 405| id == 408| id == 412)
 
 y_w2_clean <- y_w2_raw %>% 
   select(-1:-8, -10:-17, -20, -21) %>%
   filter(response_id != "R_20My7Nw91c2Kh6r") %>% # deleting duped row "false start" (id 405, with 47%)
   filter(response_id != "R_3jebHOrmpEvVusr") %>% # deleting duped row "false start" (id 405, with 80%)
   filter(response_id != "R_2Y5PBgkaoarXoW5") %>% # deleting duped row "false start" (id 412, with 2%)
-  filter(response_id != "R_12LVKPebRTdZRF3") %>% # deleting row bec. filled with -99 throughout
+  filter(response_id != "R_12LVKPebRTdZRF3") %>% # deleting row bec. filled with -99 throughout (id 408)
   arrange(id)
 
 y_w2_clean %>%
@@ -215,3 +218,46 @@ id 106 duplicated: one is from wave 1 and the other from wave 2.
 id 313 duplicated
 
 id 314 duplicated
+
+id 999? (R_1CHCJIPFkuEHBH2)
+
+id JCG? (R_SCw7VH3ueceflUl)
+
+
+################## WAVE 3 ##################
+
+# Loading the data & initial cleaning
+```{r}
+y_w3_raw <- read_sav(here("nopublish", "Youth W3 SPAN_February 10, 2021_11.05.sav"))
+
+
+y_w3_raw <- y_w3_raw %>% 
+  arrange(H1_1_TEXT) %>% # ordering participants ids
+  janitor::clean_names() %>% # cleaning names
+  select(-h1) %>% 
+  rename(c("id" = "h1_1_text"),
+         c("wave" = "h5"))
+
+data.frame(table(y_w3_raw$id)) # 405 (tripli), 613, 620
+
+y_w3_raw %>%
+  filter(finished == 0) # 405 2 "false starts" one 99%, other 4%; 613 completely empty, 2%; 620 71% complete; remaining 99% complete
+
+```
+
+```{r}
+y_w3_raw %>%
+  filter(id == 405|id == 613|id == 620)
+
+y_w3_clean <- y_w3_raw %>% 
+  select(-1:-8, -10:-17, -20, -21) %>%
+  filter(response_id != "R_10ryStLMAuTyIpH") %>% # deleting duped row "false start" (id 405, with 99%)
+  filter(response_id != "R_PzESZy9gZPQEb9D") %>% # deleting duped row "false start" (id 405, with 4%)
+  filter(response_id != "R_1rkc9GzcBpTf5Ap") %>% # deleting duped row "false start"  (id 613, with 2%)
+  filter(response_id != "R_2RayAqcviYXNSM6") %>% # deleting duped row "false start"  (id 620, with 71%)
+  arrange(id)
+
+duplicated(y_w3_clean$id) # no duplicates on wave 3. 
+```
+
+id 603 appears as if belongs to school 2 = prairie
