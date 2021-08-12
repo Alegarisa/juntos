@@ -213,15 +213,52 @@ y_w2_clean %>%
   filter(id == 106|id == 313|id == 314)
 ```
 
+```{r}
+# id 106
+y_w1_clean_3 %>%
+  filter(id == 106)
+
+y_w2_raw %>%
+  filter(id == 106)
+
+# id 313
+y_w1_clean_3 %>%
+  filter(id == 313)
+
+y_w2_raw %>%
+  filter(id == 313)
+
+# id 314
+y_w1_clean_3 %>%
+  filter(id == 314)
+
+y_w2_raw %>%
+  filter(id == 314)
+```
+
+
 id 106 duplicated: one is from wave 1 and the other from wave 2.
+
+R_1o4JcWGSoGCYx8w = data from id 106 = from wave 1 --> need to send this data point to wave 1.  
+R_1n6evLXEU4dKorq = data from id 106 = from wave 2 --> keep it in this dataset (w2). 
+
+--
 
 id 313 duplicated
 
+R_VU96u3fLkvWZQtP is true 313
+R_yBDOsopku8j9smR is 311
+--
+
 id 314 duplicated
 
-id 999? (R_1CHCJIPFkuEHBH2)
+R_5pckz7xWKcHSapH is true 314
+R_3m44tVSOd22OdTN is 312
 
-id JCG? (R_SCw7VH3ueceflUl)
+
+id 999? (R_1CHCJIPFkuEHBH2) = test run, delete row. 
+
+id JCG? (R_SCw7VH3ueceflUl) = belongs to id 109. Assessor error inputting id. 
 
 
 ################## WAVE 3 ##################
