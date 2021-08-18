@@ -1,0 +1,77 @@
+---
+title: "Notes on duplicated ids"
+output: html_notebook
+---
+
+When reviewing duplicated ids in parent's w2, I used the following code to explore if id was present in both w1 and w2:
+
+```{r}
+# id 108
+p_w1_clean_6 %>%
+  filter(id == 108)
+p_w2_raw %>%
+  filter(id == 108)
+```
+
+Then I checked with Eli and he reviewed the attendance and call logs. These were the notes:
+
+# notes on w2
+
+id 108 is duplicated, appears as 2 moms. In w1 there is just one 108 that is a mom. 
+R_37vhYjz8eRmGcWR = is id 108
+R_1rCXE5pBSje0twj = is id 109
+
+--
+
+ids: 112 after q145 empty. Is this the same person that started twice or two different parents?  The pattern of responses is identical. Or was it duplicated for some reason? In W1 it appears as if there were a mom and a dad. This means that the dad dropped from w1 to w2? ---> which row to delete?
+
+dad and mom appear to have dropped by w2: negative experience with assessor, no success after multiple attemps. Mom dropped in midst of w2.
+
+about duplicative: R_2sdrLRMKZvR9fwO is the duplicative = delete this row. 
+
+There is no id 112 in w3, so they appear to have dropped completely from study. 
+
+Given circumstances, do we want this data? Ask Heather if deleting row because is incomplete data. 
+
+--
+
+id 113: no responses at all: qualtrics var progress: 3%. Participant dropped? In w1 there are mom and dad. ---> delete row?
+
+this was a false start. Family dropped (classical attrition) no response after 50 calls. = delete row. 
+--
+
+ids 308: 4 instances = 2 false starts, 2 completed, but in attempt 3 after q_12_2 is filled with -99 throughout. Is this one parent or two parents? 	R_UMEbJn4yl8Wc0wx is the one with completed data. This id corresponds to just 1 mom in w1. 
+
+R_1EQFk2EbJW61nhf = false start: delete row
+R_XMroI3biv8jxEVb = false start: delete row
+R_3PZzUFRxLeeW6GJ = false start: delete row
+
+R_UMEbJn4yl8Wc0wx = complete data. keep only this row. 
+
+--
+
+ids 314 is duplicated, appears as 2 moms. In w1 there is just one 314 that is a mom.
+
+R_1omSIb1Wdy6hIkW is the true 314 mom 
+R_2EpkLxRpA7GW0oE is 312 mom
+
+--
+
+id 415 is a 3 parent family. 
+R_1PRjrvEzZRgtKKD = stepmom
+R_2b2T5ywwHkmb0d7 = dad
+R_2e9e8oXgMz4MiDt = biomom
+--
+
+ids 601: is triplicated: 2 moms, 1 dad. In w1 there is 1 mom, 1 dad. 
+
+R_2sZpDvTZRNJfl7Z = 601 mom
+R_O6DQfVORSAtnWbT = 601 dad
+
+R_vNctgxUZcfcMwFj = says is w3. Eli couldn't find it as belonging to any other participant's id in w2. (check if this response id exists in w3). 
+--
+
+ids 201, 204, 206, 207, 216, 302, 310, 408, 414, 418, 501, 503, 505, 506, 607, 608, 610, 613, 614, 615: logs confirms that these are two-parents fams. Also these are two parent fams in w1 and w2.
+
+--
+new variable: 217_4_text? The question in this variable was completely changed by w2, levels also changed (no 99 and added a 4 for year money).

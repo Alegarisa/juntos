@@ -208,110 +208,45 @@ p_w2_raw <- p_w2_raw %>%
   select(-id) %>% 
   rename(c("id" = "id_1_text"))
 
+```
+
+# Checking incomplete rows & duplicated ids
+```{r}
 p_w2_raw %>%
   filter(finished == 0)
 
 p_w2_raw %>%
   filter(finished == 1)
-```
 
-# Checking duplicated ids
-```{r}
 data.frame(table(p_w2_raw$id)) # 26 ids have 2 or more instances each (ids 415 and 418 have 3 instances each)
 
 ```
 
+# Further cleaning & dealing with duplicates
 ```{r}
-# Checking duplicates with Eli
+p_w2_clean <- p_w2_raw %>% 
+  select(-1:-8, -10:-17, -19, -20) %>% # selecting out columns with metadata
+  filter(response_id != "R_2sdrLRMKZvR9fwO", # deleting duped row "false start" (id 112) - this family dropped amid w2
+         response_id != "R_2zoPGHCXUdvsDgd", # deleting duped row "false start" (id 113)
+         response_id != "R_1EQFk2EbJW61nhf", # deleting duped row "false start" (id 308)
+         response_id != "R_XMroI3biv8jxEVb", # deleting duped row "false start" (id 308)
+         response_id != "R_3PZzUFRxLeeW6GJ", # deleting duped row "false start" (id 308) 
+         response_id != "R_vNctgxUZcfcMwFj") %>% # deleting row bec. it belongs to w3 (id 601)
+  mutate(id = case_when(response_id == "R_1rCXE5pBSje0twj" ~ "109", # id 108 (top one) recoded as 109
+                        response_id == "R_2EpkLxRpA7GW0oE" ~ "312", # id 314 (bottom one) recoded as 312
+                        TRUE ~ as.character(id))) %>%
+  arrange(id)
 
-# id 108
-p_w1_clean_6 %>%
-  filter(family_id == 108)
-
-p_w2_raw %>%
-  filter(id == 108)
-
-# id 112
-p_w1_clean_6 %>%
-  filter(family_id == 112)
-
-p_w2_raw %>%
-  filter(id == 112)
-
-# id 113
-p_w1_clean_6 %>%
-  filter(family_id == 113)
-
-p_w2_raw %>%
-  filter(id == 113)
-
-# id 308
-p_w1_clean_6 %>%
-  filter(family_id == 308)
-
-p_w2_raw %>%
-  filter(id == 308)
-
-# id 314
-p_w1_clean_6 %>%
-  filter(family_id == 314)
-
-p_w2_raw %>%
-  filter(id == 314)
-
-# id 601
-p_w1_clean_6 %>%
-  filter(family_id == 601)
-
-p_w2_raw %>%
-  filter(id == 601)
-
+data.frame(table(p_w2_clean$id)) # duplicated ids match two-parent families, id 415 is a family of 3. Need confirmation of 109 and 601. 
 ```
-
-```{r}
-view_df(p_w2_raw)
-```
-
 
 # notes on w2
 
-id 108 is duplicated, appears as 2 moms. In w1 there is just one 108 that is a mom. 
-R_37vhYjz8eRmGcWR = is id 108
-R_1rCXE5pBSje0twj = is id 109
+id 112 after q145 empty. 
 
---
-
-ids: 112 after q145 empty. Is this the same person that started twice or two different parents?  The pattern of responses is identical. Or was it duplicated for some reason? In W1 it appears as if there were a mom and a dad. This means that the dad dropped from w1 to w2? ---> which row to delete?
-
-dad and mom appear to have dropped by w2: negative experience with assessor, no success after multiple attemps. Mom dropped in midst of w2.
-
-about duplicative: R_2sdrLRMKZvR9fwO is the duplicative = delete this row. 
-
-There is no id 112 in w3, so they appear to have dropped completely from study. 
-
-Given circumstances, do we want this data? Ask Heather if deleting row because is incomplete data. 
-
---
-
-id 113: no responses at all: qualtrics var progress: 3%. Participant dropped? In w1 there are mom and dad. ---> delete row?
-
-this was a false start. Family dropped (classical attrition) no response after 50 calls. = delete row. 
---
-
-ids 308: 4 instances = 2 false starts, 2 completed, but in attempt 3 after q_12_2 is filled with -99 throughout. Is this one parent or two parents? 	R_UMEbJn4yl8Wc0wx is the one with completed data. This id corresponds to just 1 mom in w1. 
-
-R_1EQFk2EbJW61nhf = false start: delete row
-R_XMroI3biv8jxEVb = false start: delete row
-R_3PZzUFRxLeeW6GJ = false start: delete row
-
-R_UMEbJn4yl8Wc0wx = complete data. keep only this row. 
-
---
-
-ids 314 is duplicated, appears as 2 moms. In w1 there is just one 314 that is a mom.
-
-R_1omSIb1Wdy6hIkW is the true 314 mom 
-R_2EpkLxRpA7GW0oE is 312 mom
+- dad and mom appear to have dropped by w2: negative experience with assessor, no success after multiple attemps. Mom dropped in midst of w2.
+- There is no id 112 in w3, so they appear to have dropped completely from study. 
+- Given circumstances, do we want this data? --> Ask Heather 
 
 --
 
@@ -321,18 +256,10 @@ R_2b2T5ywwHkmb0d7 = dad
 R_2e9e8oXgMz4MiDt = biomom
 --
 
-ids 601: is triplicated: 2 moms, 1 dad. In w1 there is 1 mom, 1 dad. 
-
-R_2sZpDvTZRNJfl7Z = 601 mom
-R_O6DQfVORSAtnWbT = 601 dad
-
-R_vNctgxUZcfcMwFj = says is w3. Eli couldn't find it as belonging to any other participant's id in w2. (check if this response id exists in w3). 
---
-
-ids 201, 204, 206, 207, 216, 302, 310, 408, 414, 418, 501, 503, 505, 506, 607, 608, 610, 613, 614, 615: logs confirms that these are two-parents fams. Also these are two parent fams in w1 and w2.
+need to confirm with Eli if 109 and 601 are two-parent families. ids 201, 204, 206, 207, 216, 302, 310, 408, 414, 418, 501, 503, 505, 506, 607, 608, 610, 613, 614, 615: logs confirms that these are two-parents fams. Also these are two parent fams in w1 and w2.
 
 --
-new variable: 217_4_text? The question in this variable was completely changed by w2, levels also changed (no 99 and added a 4 for year money). 
+new variable: 217_4_text? The question in this variable was completely changed by w2, levels also changed (no 99 and added a 4 for yearly money). 
 
 -------------------------------------------------------------------------------------------------------------------------------
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
