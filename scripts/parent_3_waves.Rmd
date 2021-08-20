@@ -88,7 +88,7 @@ p_w1_clean_3 <- p_w1_clean_3 %>%
          participant = as.numeric(participant),
          participant = set_vall(participant, c("mom" = 1, "dad" = 2, "tutor legal" = 3, "other, specify" = 4)),
          participant_id = paste0(id, "_", participant), .before = 5) %>% # new var as unique identifier
-  rename(c("family_id" = "id")) # 125 participants, 92 moms, 32 dads, 1 grandparent. 28 families
+  rename(c("family_id" = "id")) # 125 participants, 91 moms, 32 dads, 1 stepmom, 1 grandparent. 96 total families
 ```
 
 # renaming vars to correspond to value labels and collapsing spreaded out variable
@@ -237,32 +237,91 @@ p_w2_clean <- p_w2_raw %>%
                         TRUE ~ as.character(id))) %>%
   arrange(id)
 
-data.frame(table(p_w2_clean$id)) # duplicated ids match two-parent families, id 415 is a family of 3. Need confirmation of 109 and 601. 
+data.frame(table(p_w2_clean$id)) # duplicated ids match two-parent families, id 415 is a family of 3. Maybe get confirmation about 109 and 601, they are 2-parent fams in w1, though. 
+```
+
+# Fixing wrong condition assignment and school id
+```{r}
+# fixing wrong assignment
+p_w2_clean_2 <- p_w2_clean %>%
+  mutate(school_id = str_sub(id, 1, 1),
+         condition = case_when(
+           school_id == "1" | school_id == "3" | school_id == "5" ~ "1",
+           school_id == "2" | school_id == "4" | school_id == "6" ~ "2"
+         )) %>%
+  select(school_id, condition, everything()) %>%
+  select(- school) # selecting out (i.e. deleting) original faulty school variable
+
+```
+
+# Adding value labels and making vars numeric 
+```{r}
+p_w2_clean_3 <- p_w2_clean_2 %>%
+  mutate(condition = as.numeric(condition),
+         condition = set_vall(condition, c("control" = 1, "intervention" = 2)),
+         school_id = as.numeric(school_id),
+         school_id = set_vall(school_id, c("cascade" = 1, "prairie_mountain" = 2, "kelly" = 3, "ata" = 4, "briggs" = 5, "agnes_stewart" = 6)))
+```
+
+# Creating individual id variable
+```{r}
+p_w2_clean_3 <- p_w2_clean_3 %>% 
+  mutate(participant = ifelse(response_id == "R_1PRjrvEzZRgtKKD", 4, participant), # changing partic. type to correspond to records
+         participant_4_text = ifelse(response_id == "R_1PRjrvEzZRgtKKD", "stepmom", participant_4_text), 
+         participant = as.numeric(participant),
+         participant = set_vall(participant, c("mom" = 1, "dad" = 2, "tutor legal" = 3, "other, specify" = 4)),
+         participant_id = paste0(id, "_", participant), .before = 5) %>% # new var as unique identifier
+  rename(c("family_id" = "id")) # 108 participants, 82 moms, 25 dads, 1 stepmom. 84 families
+```
+
+# renaming vars to correspond to value labels and collapsing spreaded out variable
+```{r}
+# item that asks about # of adults in home was spreaded out and had an unusual coding.
+p_w2_clean_3 <- p_w2_clean_3 %>%
+  rename(c("q211_1" = "q211_2"),
+         c("q211_2" = "q211_99"),
+         c("q211_3" = "q211_4"),
+         c("q211_4" = "q211_5"),
+         c("q211_5" = "q211_6"),
+         c("q211_99" = "q211_7"),
+         c("adults_home_text" = "q211_6_text"))
+
+# collapsing variable
+num_adults_w2 <- p_w2_clean_3 %>% 
+  select(participant_id, starts_with("q211_"), -adults_home_text) %>%
+  pivot_longer(
+    cols = starts_with("q211"),
+    names_to = c("item", "adults_home"),
+    names_sep = "_",
+    values_to = "response",
+    values_drop_na = TRUE) %>% 
+  filter(response == 1) %>%
+  mutate(response = as.numeric(response))
+
+get_dupes(num_adults_w2, participant_id)
+
+# id 502_1 chose options 2 and 4
+
+# Option 2, "2" will be chosen because the {distinct} function keeps the first row. Also it can be argued that there are 2 adults in each household and not 4 and 5, respectively. 
+
+num_adults_w2 <- num_adults_w2 %>% 
+  distinct(participant_id, .keep_all = TRUE) %>% 
+  select(-item, -response) 
+
+# not completely sure why it goes down to 124 in the num_adults_w2? 
+
+
+```
+
+```{r}
+view_df(p_w2_clean_3)
 ```
 
 # notes on w2
 
-id 112 after q145 empty. 
-
-- dad and mom appear to have dropped by w2: negative experience with assessor, no success after multiple attemps. Mom dropped in midst of w2.
-- There is no id 112 in w3, so they appear to have dropped completely from study. 
-- Given circumstances, do we want this data? --> Ask Heather 
-
---
-
-id 415 is a 3 parent family. 
-R_1PRjrvEzZRgtKKD = stepmom
-R_2b2T5ywwHkmb0d7 = dad
-R_2e9e8oXgMz4MiDt = biomom
---
-
-need to confirm with Eli if 109 and 601 are two-parent families. ids 201, 204, 206, 207, 216, 302, 310, 408, 414, 418, 501, 503, 505, 506, 607, 608, 610, 613, 614, 615: logs confirms that these are two-parents fams. Also these are two parent fams in w1 and w2.
-
---
 new variable: 217_4_text? The question in this variable was completely changed by w2, levels also changed (no 99 and added a 4 for yearly money). 
 
--------------------------------------------------------------------------------------------------------------------------------
---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
 
 ################## WAVE 3 ##################
 

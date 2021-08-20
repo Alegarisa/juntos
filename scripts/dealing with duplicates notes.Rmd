@@ -31,7 +31,7 @@ about duplicative: R_2sdrLRMKZvR9fwO is the duplicative = delete this row.
 
 There is no id 112 in w3, so they appear to have dropped completely from study. 
 
-Given circumstances, do we want this data? Ask Heather if deleting row because is incomplete data. 
+Given circumstances, do we want this data? --> Heather said: yes, keep row and let the missing data be missing. 
 
 --
 
@@ -73,5 +73,16 @@ R_vNctgxUZcfcMwFj = says is w3. Eli couldn't find it as belonging to any other p
 
 ids 201, 204, 206, 207, 216, 302, 310, 408, 414, 418, 501, 503, 505, 506, 607, 608, 610, 613, 614, 615: logs confirms that these are two-parents fams. Also these are two parent fams in w1 and w2.
 
+Need to confirm if 109 and 601 are two-parent families? They are 2-parent fams in w1, though. 
+
 --
 new variable: 217_4_text? The question in this variable was completely changed by w2, levels also changed (no 99 and added a 4 for year money).
+
+-- 
+to check how many moms/dad/other and # of families I used:
+```{r}
+nrow(distinct(p_w2_clean_3, family_id))
+
+data.frame(table(p_w2_clean_3$family_id))
+```
+But not sure how to know the number of two-parent families. 
