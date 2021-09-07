@@ -68,7 +68,6 @@ p_w1_clean_2 <- p_w1_clean %>%
          )) %>%
   select(school_id, condition, everything()) %>%
   select(- school) # selecting out (i.e. deleting) original faulty school variable
-
 ```
 
 # Adding value labels and making vars numeric 
@@ -88,7 +87,9 @@ p_w1_clean_3 <- p_w1_clean_3 %>%
          participant = as.numeric(participant),
          participant = set_vall(participant, c("mom" = 1, "dad" = 2, "tutor legal" = 3, "other, specify" = 4)),
          participant_id = paste0(id, "_", participant), .before = 5) %>% # new var as unique identifier
-  rename(c("family_id" = "id")) # 125 participants, 91 moms, 32 dads, 1 stepmom, 1 grandparent. 96 total families
+  rename(c("family_id" = "id")) 
+
+view_df(p_w1_clean_3)
 ```
 
 # renaming vars to correspond to value labels and collapsing spreaded out variable
@@ -119,6 +120,7 @@ get_dupes(num_adults, participant_id)
 
 # id 114_1 chose options 2 and 4
 # id 214_1 chose options 2 and 5
+
 # Option 2, "2" will be chosen because the {distinct} function keeps the first row. Also it can be argued that there are 2 adults in each household and not 4 and 5, respectively. 
 
 num_adults <- num_adults %>% 
@@ -171,7 +173,22 @@ p_w1_clean_5 <- p_w1_clean_4 %>%
          c("pub_assist_other" = "q212a_10"),
          c("pub_assist_refuse_answer" = "q212a_99")) %>%
   select(-response_id) # response_id no longer needed
+```
 
+# Number of participants in Wave 1
+```{r}
+# 125 total participants in w1, from which...
+
+p_w1_clean_5 %>%
+  filter(participant == 1) # 91 were moms
+
+p_w1_clean_5 %>%
+  filter(participant == 2) # 32 were dads
+
+p_w1_clean_5 %>%
+  filter(participant == 4) # 2 were "other" (1 stepmom, 1 grandparent)
+
+unique(p_w1_clean_5$family_id) # 96 unique id values, thus 96 families in W1. 
 ```
 
 # ------ Notes on W1 dataset -------
@@ -182,18 +199,20 @@ p_w1_clean_5 <- p_w1_clean_4 %>%
 # ------------------------------------
 
 ```{r}
-# adding "p1" to each variable name: "p" stands for parent, "1" for wave 1. 
-names(p_w1_clean_5) <- paste(names(p_w1_clean_5), "p1", sep = "_")
-
-p_w1_clean_6 <- p_w1_clean_5 %>%
-  rename(c("school_id" = "school_id_p1"), 
-         c("condition" = "condition_p1"),
-         c("family_id" = "family_id_p1"),
-         c("participant_id" = "participant_id_p1")) # renaming these variables to be able to join later
+view_df(p_w1_clean_5) # it appears that there are no questions about age, gender id, race/ethnicity. 
 ```
 
 ```{r}
-view_df(p_w1_clean_6) # it appears that there are no questions about age, gender id, race/ethnicity. 
+# adding "p1" to each variable name: "p" stands for parent, "1" for wave 1. 
+# names(p_w1_clean_5) <- paste(names(p_w1_clean_5), "p1", sep = "_")
+# 
+# p_w1_clean_6 <- p_w1_clean_5 %>%
+#   rename(c("school_id" = "school_id_p1"), 
+#          c("condition" = "condition_p1"),
+#          c("family_id" = "family_id_p1"),
+#          c("participant_id" = "participant_id_p1")) # renaming these variables to be able to join later
+# 
+# view_df(p_w1_clean_6)
 ```
 
 ################## WAVE 2 ##################
@@ -207,7 +226,6 @@ p_w2_raw <- p_w2_raw %>%
   janitor::clean_names() %>% # cleaning names
   select(-id) %>% 
   rename(c("id" = "id_1_text"))
-
 ```
 
 # Checking incomplete rows & duplicated ids
@@ -219,7 +237,6 @@ p_w2_raw %>%
   filter(finished == 1)
 
 data.frame(table(p_w2_raw$id)) # 26 ids have 2 or more instances each (ids 415 and 418 have 3 instances each)
-
 ```
 
 # Further cleaning & dealing with duplicates
@@ -230,15 +247,16 @@ p_w2_clean <- p_w2_raw %>%
          response_id != "R_2zoPGHCXUdvsDgd", # deleting duped row "false start" (id 113)
          response_id != "R_1EQFk2EbJW61nhf", # deleting duped row "false start" (id 308)
          response_id != "R_XMroI3biv8jxEVb", # deleting duped row "false start" (id 308)
-         response_id != "R_3PZzUFRxLeeW6GJ", # deleting duped row "false start" (id 308) 
-         response_id != "R_vNctgxUZcfcMwFj") %>% # deleting row bec. it belongs to w3 (id 601)
+         response_id != "R_3PZzUFRxLeeW6GJ") %>% # deleting duped row "false start" (id 308) 
   mutate(id = case_when(response_id == "R_1rCXE5pBSje0twj" ~ "109", # id 108 (top one) recoded as 109
                         response_id == "R_2EpkLxRpA7GW0oE" ~ "312", # id 314 (bottom one) recoded as 312
                         TRUE ~ as.character(id))) %>%
   arrange(id)
 
-data.frame(table(p_w2_clean$id)) # duplicated ids match two-parent families, id 415 is a family of 3. Maybe get confirmation about 109 and 601, they are 2-parent fams in w1, though. 
+data.frame(table(p_w2_clean$id)) # duplicated ids match two-parent families, id 415 is a family of 3. Get confirmation about 109 and 601, they are 2-parent fams in w1, though. 
 ```
+
+############ HERE ########
 
 # Fixing wrong condition assignment and school id
 ```{r}
@@ -251,7 +269,6 @@ p_w2_clean_2 <- p_w2_clean %>%
          )) %>%
   select(school_id, condition, everything()) %>%
   select(- school) # selecting out (i.e. deleting) original faulty school variable
-
 ```
 
 # Adding value labels and making vars numeric 
@@ -309,8 +326,6 @@ num_adults_w2 <- num_adults_w2 %>%
   select(-item, -response) 
 
 # not completely sure why it goes down to 124 in the num_adults_w2? 
-
-
 ```
 
 ```{r}
@@ -319,6 +334,46 @@ view_df(p_w2_clean_3)
 
 # notes on w2
 
+# wave correct?
+```{r}
+# response_id != "R_vNctgxUZcfcMwFj") %>% # deleting row bec. it belongs to w3 (id 601) & there is already a mom and dad 
+  
+p_w1_clean %>%
+  filter(id == 601)
+
+p_w2_clean %>%
+  filter(id == 601)
+
+p_w3_raw %>%
+  select(-1:-8, -10:-17, -19, -20) %>%
+  filter(id == 601)
+```
+
+In wave 1:
+R_UG9FQ6VvanpWwwN	id 601	dad, wave 1
+R_1Lwe3h7XQeF5hyj	id 601  mom, wave 1
+
+In wave 2: 
+R_2sZpDvTZRNJfl7Z	id 601	mom, wave 2
+R_O6DQfVORSAtnWbT	id 601	dad, wave 2
+R_vNctgxUZcfcMwFj	id 601  mom, wave 3
+
+In wave 3: 
+R_3LhFdFrq0SFkkKI	601	dad, wave 3	
+R_20lyHTLoqvQ4Rpz	601 mom, wave 3
+
+R_vNctgxUZcfcMwFj	id 601  mom, wave 3
+R_20lyHTLoqvQ4Rpz	601 mom, wave 3 
+these 2 rows are very similar, but identical. Not sure what to do. 
+
+# wave correct?
+R_2qyriEL0QoD8Kln	id 604 in wave 1, says wave = 1
+
+R_6FiHWtagxFiXgbf	id 604 in wave 2, says wave = 1
+
+The data in these rows differs substantially. Was it assessor error? Maybe they inputed the wrong wave, but this data did belong to id 604 in wave 2? 
+
+# new variable
 new variable: 217_4_text? The question in this variable was completely changed by w2, levels also changed (no 99 and added a 4 for yearly money). 
 
 ----------------------------------------------------------------------------------------------------
@@ -347,7 +402,6 @@ p_w3_raw_b <- p_w3_raw_b %>%
 
 p_w3_raw <- full_join(p_w3_raw_a, p_w3_raw_b) %>% 
   arrange(id)
-
 ```
 
 ```{r}
