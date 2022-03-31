@@ -1,10 +1,10 @@
 ---
-title: "parent_3_waves"
+title: "parent w1"
 author: "Alejandra Garcia Isaza"
-date: "6/30/2021"
+date: "3/31/2022"
 output: html_document
 ---
-Note on March 31, 2022: I copied the code below from "parent_3_waves.Rmd" which I think is the doc I was working on for cleaning. Here I will only work on parents wave 1 (baseline) for dissertation and will update progress made here to the three waves Rmd. 
+Note on March 31, 2022: I copied the code below from "parent_3_waves.Rmd" which I think is the doc I was working on the latest for cleaning. Here I will only work on parents wave 1 (baseline) for dissertation and will update progress made here to the three waves Rmd to continue cleaning.
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -89,13 +89,11 @@ p_w1_clean_3 <- p_w1_clean_3 %>%
          participant = set_vall(participant, c("mom" = 1, "dad" = 2, "tutor legal" = 3, "other, specify" = 4)),
          participant_id = paste0(id, "_", participant), .before = 5) %>% # new var as unique identifier
   rename(c("family_id" = "id")) 
-
-view_df(p_w1_clean_3)
 ```
 
-# renaming vars to correspond to value labels and collapsing spreaded out variable
+# renaming vars to correspond to value labels 
 ```{r}
-# item that asks about # of adults in home was spreaded out and had an unusual coding.
+# item that asks about # of adults in home is spreaded out and had an unusual coding.
 p_w1_clean_3 <- p_w1_clean_3 %>%
   rename(c("q211_1" = "q211_2"),
          c("q211_2" = "q211_99"),
@@ -103,93 +101,27 @@ p_w1_clean_3 <- p_w1_clean_3 %>%
          c("q211_4" = "q211_5"),
          c("q211_5" = "q211_6"),
          c("q211_99" = "q211_7"),
-         c("adults_home_text" = "q211_6_text"))
-
-# collapsing variable
-num_adults <- p_w1_clean_3 %>% 
-  select(participant_id, starts_with("q211_"), -adults_home_text) %>%
-  pivot_longer(
-    cols = starts_with("q211"),
-    names_to = c("item", "adults_home"),
-    names_sep = "_",
-    values_to = "response",
-    values_drop_na = TRUE) %>% 
-  filter(response == 1) %>%
-  mutate(response = as.numeric(response))
-
-get_dupes(num_adults, participant_id)
-
-# id 114_1 chose options 2 and 4
-# id 214_1 chose options 2 and 5
-
-# Option 2, "2" will be chosen because the {distinct} function keeps the first row. Also it can be argued that there are 2 adults in each household and not 4 and 5, respectively. 
-
-num_adults <- num_adults %>% 
-  distinct(participant_id, .keep_all = TRUE) %>% 
-  select(-item, -response) 
-
-p_w1_clean_4 <- left_join(p_w1_clean_3, num_adults) %>%
-  select(-291:-296) %>%
-  mutate(adults_home = as.numeric(adults_home),
-         adults_home = set_vall(adults_home, c("1" = 1, "2" = 2, "3" = 3, "4" = 4, "mas de 5, ¿cuántas?" = 5, "refuse to answer" = 99)),
-         adults_home = set_varl(adults_home, "Número de adultos (más de 18 años): - Selected Choice")) %>%
-  move_columns(adults_home, .before = "adults_home_text")
+         c("q211_6_text" = "q211_6_text"))
 ```
 
-# renaming demo vars
 ```{r}
-p_w1_clean_5 <- p_w1_clean_4 %>%
-  rename(c("lang_english" = "q170_1"),
-         c("lang_spanish" = "q170_2"),
-         c("lang_indigenous" = "q170_3"),
-         c("lang_other" = "q170_4"),
-         c("lang_refuse_answer" = "q170_99"),
-         c("lang_indigenous_text" = "q170_3_text"),
-         c("lang_other_text" = "q170_4_text"),
-         c("youth_lang_broker" = "q171"),
-         c("spanish_comfort_home" = "q172_1"),
-         c("spanish_comfort_school" = "q172_2"),
-         c("spanish_comfort_youth_school" = "q172_3"),
-         c("spanish_comfort_work" = "q172_4"),
-         c("spanish_comfort_friends" = "q172_5"),
-         c("spanish_comfort_general" = "q172_6"),
-         c("english_comfort_home" = "q173_1"),
-         c("english_comfort_school" = "q173_2"),
-         c("english_comfort_youth_school" = "q173_3"),
-         c("english_comfort_work" = "q173_4"),
-         c("english_comfort_friends" = "q173_5"),
-         c("english_comfort_general" = "q173_6"),
-         c("minors_home" = "q211a"),
-         c("minors_home_text" = "q211a_6_text"),
-         c("pub_assist" = "q212"),
-         c("pub_assist_snap" = "q212a_1"),
-         c("pub_assist_frpl" = "q212a_2"),
-         c("pub_assist_tanf" = "q212a_3"),
-         c("pub_assist_unemployment" = "q212a_4"),
-         c("pub_assist_disability" = "q212a_5"),
-         c("pub_assist_social_sec" = "q212a_6"),
-         c("pub_assist_health_insu" = "q212a_7"),
-         c("pub_assist_wic" = "q212a_18"),
-         c("pub_assist_food_box" = "q212a_19"),
-         c("pub_assist_other" = "q212a_10"),
-         c("pub_assist_refuse_answer" = "q212a_99")) %>%
-  select(-response_id) # response_id no longer needed
+view_df(p_w1_clean_3)
 ```
 
 # Number of participants in Wave 1
 ```{r}
 # 125 total participants in w1, from which...
 
-p_w1_clean_5 %>%
+p_w1_clean_3 %>%
   filter(participant == 1) # 91 were moms
 
-p_w1_clean_5 %>%
+p_w1_clean_3 %>%
   filter(participant == 2) # 32 were dads
 
-p_w1_clean_5 %>%
+p_w1_clean_3 %>%
   filter(participant == 4) # 2 were "other" (1 stepmom, 1 grandparent)
 
-unique(p_w1_clean_5$family_id) # 96 unique id values, thus 96 families in W1. 
+unique(p_w1_clean_3$family_id) # 96 unique id values, thus 96 families in W1. 
 ```
 
 # ------ Notes on W1 dataset -------
@@ -199,20 +131,24 @@ unique(p_w1_clean_5$family_id) # 96 unique id values, thus 96 families in W1.
 # # Total participants in wave n = 125
 # ------------------------------------
 
+# keeping only parent & student linked data
 ```{r}
-view_df(p_w1_clean_5) # it appears that there are no questions about age, gender id, race/ethnicity. 
-```
+p_w1_clean_3 %>%
+  filter(family_id == "106")
 
-```{r}
-# adding "p1" to each variable name: "p" stands for parent, "1" for wave 1. 
-# names(p_w1_clean_5) <- paste(names(p_w1_clean_5), "p1", sep = "_")
-# 
-# p_w1_clean_6 <- p_w1_clean_5 %>%
-#   rename(c("school_id" = "school_id_p1"), 
-#          c("condition" = "condition_p1"),
-#          c("family_id" = "family_id_p1"),
-#          c("participant_id" = "participant_id_p1")) # renaming these variables to be able to join later
-# 
-# view_df(p_w1_clean_6)
-```
+p_w1_clean_3 %>%
+  filter(participant_id == "301_2")# participant dropped from study and is -99 throughout. Id not present in w2 and w3.
 
+p_w1_clean_3 %>%
+  filter(family_id == "504")
+
+# no id 106 (es lu), 301 (dropped), 504 (La Mi Ca) in students, but present in parents 
+# no id 623 in parents (not even in home visit), but present in students
+  
+# p_w1_clean_4 <- p_w1_clean_3 %>%
+#   filter(family_id != 301)# deleted bec participant dropped from study and is -99 throughout. Id not present in w2 and w3.
+
+# not finished
+
+```
+next step from 04.01.22: check student wave 1 for ids 106 and 504. 

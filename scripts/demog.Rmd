@@ -31,6 +31,13 @@ p_w1_demo <- p_w1_demo_raw %>%
   rename(c("id" = "q41_1_text"))
 ```
 
+# Checking duplicated ids
+```{r}
+data.frame(table(p_w1_demo$id)) # dupped in hv 112 --> because mom & dad completed home visit
+
+```
+
+
 ```{r}
 view_df(p_w1_demo)
 
