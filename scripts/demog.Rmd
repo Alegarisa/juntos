@@ -1,0 +1,139 @@
+---
+title: "demog"
+author: "Alejandra Garcia Isaza"
+date: "1/29/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(rio)
+library(here)
+library(tidyverse)
+library(haven)
+library(janitor)
+library(knitr)
+library(surveytoolbox)
+library(sjPlot)
+library(kableExtra)
+library(psych)
+library(sjmisc)
+```
+
+```{r}
+p_w1_demo_raw <- read_sav(here("nopublish", "Juntos HV Parent #1 Survey_August 20, 2018_11.37.sav"))
+
+p_w1_demo <- p_w1_demo_raw %>% 
+  select(-1:-17) %>%
+  arrange(Q41_1_TEXT) %>% # ordering participants ids
+  janitor::clean_names() %>% # cleaning names
+  rename(c("id" = "q41_1_text"))
+```
+
+```{r}
+view_df(p_w1_demo)
+
+p_w1_demo$q4_3_text
+```
+
+
+```{r}
+# continue renaming later
+
+# p_w1_demo_2 <- p_w1_demo %>%
+#   select(-h1_1, -h1_2, -h1_3, -q41, -q2, -q4_1, -q4_2, -q4_3, -q5_1, -q5_2, -q5_3, -q6, -q7_1, -q7_2, -q8_1, -q8_2) %>%
+#   rename(c("date_visit" = "h1_1_text"),
+#          c("wave" = "h1_2_text"),
+#          c("place_visit" = "h1_3_text"),
+#          c("name_parent" = "q2_1_text"),
+#          c("bd_month" = "q4_1_text"),
+#          c("bd_date" = "q4_2_text"),
+#          c("bd_year" = "q4_3_text"),
+#          c("birth_state" = "q5_1_text"),
+#          c("birth_country" = "q5_2_text"),
+#          c("age_arriv_us" = "q6_1_text"),
+#          c("recent_arriv_us_month" = "q7_1_text"),
+#          c("recent_arriv_us_year" = "q7_2_text"),
+#          c("tot_years_us" = "q8_1_text"),
+#          c("tot_months_us" = "q8_2_text"),
+#          c("tot_months_us" = "q8_2_text")) 
+```
+
+# Descriptives 
+
+```{r}
+# function to take proportions
+prop_fun <- function(df, var) {
+  df %>%
+    group_by({{var}}) %>%
+    summarize(n = n()) %>%
+    mutate(prop = round(n/sum(n), 2))
+}
+
+prop_fun(elt_w1_clean_6, white)
+
+prop_fun(elt_w1_clean_6, hispanic_latino_spanish)
+
+prop_fun(elt_w1_clean_6, black_african_american)
+
+prop_fun(elt_w1_clean_6, american_indian_alaska_native)
+
+prop_fun(elt_w1_clean_6, indigenous_americas)
+
+prop_fun(elt_w1_clean_6, race_ethnicity_other)
+```
+
+```{r}
+p_w1_demo_2 <- p_w1_demo %>%
+  filter(id != "316") %>% # this mom dropped, no w1 or w2
+  mutate(bl_year = 2018) %>%
+  mutate(q4_3_text = as.numeric(q4_3_text)) %>%
+  mutate(par_age = bl_year - q4_3_text) %>%
+  mutate(q8_1_text = as.numeric(q8_1_text)) %>%
+  mutate(q3 = as.numeric(q3)) %>%
+  mutate(q17_1_text = as.numeric(q17_1_text)) %>%
+  mutate(q18 = as.numeric(q18)) 
+
+
+
+mean(p_w1_demo_2$par_age) # 40 years of age
+min(p_w1_demo_2$par_age) # minimum age of 28
+max(p_w1_demo_2$par_age) # max age of 76
+
+mean(p_w1_demo_2$q8_1_text, na.rm = TRUE) # 17 years of age in the us 
+min(p_w1_demo_2$q8_1_text, na.rm = TRUE) # minimum years of 4
+max(p_w1_demo_2$q8_1_text, na.rm = TRUE) # max years of 35
+
+p_w1_demo_2$q5_2_text # 3 parents were born in the US
+
+p_w1_clean_3 %>%
+  filter(family_id == 309)
+
+# id 205 is a dad (prob. divorced from TC mom)
+# id 315 is a single dad
+# id 612 is a dad (appears to be primary for study purposes)
+
+mean(p_w1_demo_2$q17_1_text, na.rm = TRUE) # 12 years of age
+min(p_w1_demo_2$q17_1_text, na.rm = TRUE) # minimum age of 10
+max(p_w1_demo_2$q17_1_text, na.rm = TRUE) # max age of 13
+ 
+```
+
+```{r}
+# nice frequencies table
+p_w1_demo_2 %>% 
+  select(q3, q5_2_text, q6_1_text, q18, q19_3_text, q34_1_text, q35_1, "q36") %>% 
+  gtsummary::tbl_summary()
+```
+
+
+```{r}
+
+v1 <- as.data.frame(table(p_w1_demo_2$q36)) %>%
+  arrange(Var1) %>%
+  mutate(prop = round(Freq/sum(Freq), 4)) %>%
+  mutate(percent = prop*100) # these are percentages of ed levels
+
+sum(v1$percent)
+```

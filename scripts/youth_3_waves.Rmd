@@ -162,6 +162,8 @@ y_w1_clean_5 <- y_w1_clean_3 %>% # not y_w1_clean_4 for consistency w parent & e
          c("another_birth_country_text" = "q234_2_text"),
          c("age_first_moved_us" = "q235_1_text")) %>%
   select(-q235, -response_id) # deleted: q235 because they did not have meaningful info & response_id bec. no longer needed
+
+unique(y_w1_clean_5$id) # 94 students
 ```
 
 

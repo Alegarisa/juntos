@@ -1,0 +1,353 @@
+---
+title: "parent"
+author: "Alejandra Garcia Isaza"
+date: "2/11/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(rio)
+library(here)
+library(tidyverse)
+library(haven)
+
+library(surveytoolbox)
+library(sjPlot)
+```
+
+```{r}
+p_w1_raw <- haven::read_sav(here("nopublish", "7b. Juntos Parent W1-SPAN_February 10, 2021_10.24.sav"))
+
+p_w1_raw <- p_w1_raw %>% 
+  arrange(ID_1_TEXT) %>% # ordering participants ids
+  janitor::clean_names() %>% # cleaning names
+  select(-id) %>% 
+  rename(c("id" = "id_1_text"))
+
+p_w1_raw
+```
+
+
+```{r}
+# checking duplicated Id
+sum(duplicated(p_w1_raw$id)) # 31 duplicated ids
+
+length(unique(p_w1_raw$id)) # 97 unique values
+
+data.frame(table(p_w1_raw$id))
+
+
+sum(duplicated(p_w1_raw$response_id)) # no duplicated response_id
+
+length(unique(p_w1_raw$response_id)) # 128 unique values
+
+data.frame(table(p_w1_raw$response_id))
+
+dupes <- p_w1_raw %>%
+  select(id, response_id) %>%
+  arrange(id)
+
+```
+
+
+```{r}
+p_w1_clean <- p_w1_raw %>% 
+  select(-1:-8, -10:-17, -19, -20) %>%
+  filter(id != "999") %>% # deleting 2 test rows
+  filter(response_id != "R_31L6rXjsdcuBaz0") %>% # deleting 1 duped row "false start" (id 312)
+  mutate(id = case_when(response_id == "R_12ch5JnOHKHRgre" ~ "408", # id 418 (top) recoded as 408
+                               response_id == "R_uaijWwHdl8sIOmB" ~ "317", # had a pj before id #
+                        TRUE ~ as.character(id))) %>%
+  arrange(id)
+
+p_w1_clean
+```
+
+```{r}
+# checking deplicates
+sum(duplicated(p_w1_clean$id)) # 29 duplicated ids
+
+length(unique(p_w1_clean$id)) # 96 unique values
+
+data.frame(table(p_w1_clean$id)) # duplicated ids match two-parent families
+```
+
+```{r}
+# fixing wrong assignment
+p_w1_clean_2 <- p_w1_clean %>%
+  mutate(school_id = str_sub(id, 1, 1),
+         condition = case_when(
+           school_id == "1" | school_id == "3" | school_id == "5" ~ "1",
+           school_id == "2" | school_id == "4" | school_id == "6" ~ "2"
+         )) %>%
+  select(school_id, condition, everything()) %>%
+  select(- school)
+
+p_w1_clean_2
+```
+
+```{r}
+# making variables numeric and adding labels  
+p_w1_clean_3 <- p_w1_clean_2 %>%
+  mutate(condition = as.numeric(condition),
+         condition = set_vall(condition, c("control" = 1, "intervention" = 2)),
+         school_id = as.numeric(school_id),
+         school_id = set_vall(school_id, c("cascade" = 1, "prairie_mountain" = 2, "kelly" = 3, "ata" = 4, "briggs" = 5, "agnes_stewart" = 6))) # this worked!!!
+
+p_w1_clean_3
+
+view_df(p_w1_clean_3) # nice plot that serves as codebook
+```
+
+
+```{r}
+# exporting to .sav to check proper coding of condition and labels
+# p_w1_clean_3 %>%
+#   haven::write_sav(here("nopublish", "p_w1_clean_3.sav")) # it worked, the .sav file has all 125 participants with the proper scale and the proper level labels. 
+```
+
+# create new var to separate moms from dads
+- check across data waves and be consistent as who we chose to be the primary caregiver. 
+
+Options:
+- primary parent var, secondary parent var. 1 = primary, 0 = secondary. 
+- Maybe create two datafiles, one with primary parents. Create: id#_f; id#_m, id#_y
+
+```{r}
+# creating individual ids for each participant
+
+p_w1_clean_4 <- p_w1_clean_3 %>% 
+  mutate(participant = ifelse(response_id == "R_1ON5POXTzIXrIeb", 5, participant),
+         participant = as.numeric(participant),
+         participant = set_vall(participant, c("mom" = 1, "dad" = 2, "tutor legal" = 3, "other, specify" = 4, "step_mom" = 5)),
+         participant_id = paste0(id, "_", participant), .before = 5) %>%
+  rename(c("family_id" = "id")) # 125 participants, 92 moms, 32 dads, 1 grandparent. 28 families
+  
+view_df(p_w1_clean_4)
+
+```
+
+
+```{r}
+# collapsing spread variables
+
+# number of people live at home: variable 290 (q211_2) to variable 296 (q211_6_text) the values are all 1, so need to change that, but potentially problematic because _# doesn't coincide with response choice. 
+
+```
+
+
+```{r}
+# renaming demo vars
+
+p_w1_clean_5 <- p_w1_clean_4 %>%
+  rename(c("lang_english" = "q170_1"),
+         c("lang_spanish" = "q170_2"),
+         c("lang_indigenous" = "q170_3"),
+         c("lang_other" = "q170_4"),
+         c("lang_no_response" = "q170_99"),
+         c("lang_indigenous_text" = "q170_3_text"),
+         c("lang_other_text" = "q170_4_text"),
+         c("lang_brokering" = "q171"),
+         c("spanish_comfort_home" = "q172_1"),
+         c("spanish_comfort_school" = "q172_2"),
+         c("spanish_comfort_youth_school" = "q172_3"),
+         c("spanish_comfort_work" = "q172_4"),
+         c("spanish_comfort_friends" = "q172_5"),
+         c("spanish_comfort_general" = "q172_6"),
+         c("english_comfort_home" = "q173_1"),
+         c("english_comfort_school" = "q173_2"),
+         c("english_comfort_youth_school" = "q173_3"),
+         c("english_comfort_work" = "q173_4"),
+         c("english_comfort_friends" = "q173_5"),
+         c("english_comfort_general" = "q173_6"),
+         c("pub_assist" = "q212"),
+         c("pub_assist_snap" = "q212a_1"),
+         c("pub_assist_frpl" = "q212a_2"),
+         c("pub_assist_tanf" = "q212a_3"),
+         c("pub_assist_unemployment" = "q212a_4"),
+         c("pub_assist_disability" = "q212a_5"),
+         c("pub_assist_social_sec" = "q212a_6"),
+         c("pub_assist_health_insu" = "q212a_7"),
+         c("pub_assist_wic" = "q212a_18"),
+         c("pub_assist_food_box" = "q212a_19"),
+         c("pub_assist_other" = "q212a_10"),
+         c("pub_assist_no_response" = "q212a_99"))
+
+view_df(p_w1_clean_5) # it appears that there are no questions about age, gender id, race/ethnicity. 
+
+
+```
+
+
+```{r}
+# exporting to .sav to check proper coding of condition and labels
+# p_w1_clean_5 %>%
+#   haven::write_sav(here("nopublish", "p_w1_clean_5.sav"))
+
+```
+
+
+# missing values
+
+77 = no aplica
+88 = no se
+99 = refuse to answer
+-99 = seen but unanswered
+
+```{r}
+# recoding missing values as N/A with function
+
+# vector with missing values in dataset
+missing_vals <- c(77, 88, 99, -99)
+
+# function that returns true if values in vector are equal to missing_vals. The function takes a vector x, and specified values of missing data
+recode_missing <- function(x, missing_vals = c(77, 88, 99, -99)) {
+  test <- x %in% missing_vals
+  ifelse(test, NA, x)
+}
+
+# function that recodes missing values to NA. The function takes a dataframe with variables with missing data, and specified values of missing data
+recode_missing_df <- function(df, missing_vals = c(77, 88, 99, -99)) {
+  modify(df, ~recode_missing(.x, missing_vals)) # here uses the function created above
+}
+
+p_w1_clean_6 <- recode_missing_df(p_w1_clean_5) 
+
+# view_df(p_w1_clean_6) # notice that applying this strips out labels
+```
+
+
+# Scales
+
+## parent-teacher contact --> NOT using these (# alpha = .55, poor consistency)
+q18 frq of contact youth teacher (1-4, never - frquently) #maybe beh issues
+q19 frq of contact other staff (1-4, never - frquently) #maybe beh issues
+
+## satisfaction parent-teacher contact --> NOT using these.
+q20 satisfaction level of contact teacher & other staff (1-4, unsatis - satis) 
+
+## parent-youth academic support
+q23 - q30 (1-4, disagree - agree) higher score, more support
+
+## parent involvement with school and ed system 
+q31 effort to know school staff and admin (1-4, disagree - agree) more better
+q32 effort to know at least 1 teach (1-4, disagree - agree) more better
+q33 effort to understand school rules & policies (1-4, disagree - agree) more better 
+q34 effort to know my rights (1-4, disagree - agree) more better 
+q35 effort to learn ed system (1-4, disagree - agree) more better 
+q36 effort to understand diff bet GED & others (1-4, disagree - agree) more better 
+q37 effort to be involved in school-based activities (1-4, disagree - agree) more better 
+q38 effort to talk w/other parents to get info & resources (1-4, disagree - agree) more better 
+q39 effort to talk with other parent to get support (1-4, disagree - agree) more better 
+q40 effort to understand pathway to college (1-4, disagree - agree) more better 
+q41 effort to make it to pta meets (1-4, disagree - agree) more better 
+
+## parent self-efficacy
+q42 confident how school works (1-4, disagree - agree) more better
+q43 can convey worries & qs to school staff (1-4, disagree - agree) more better
+q44 can work with school to solve youth probs (1-4, disagree - agree) more better
+q45 am helping my youth do good in school (1-4, disagree - agree) more better
+q46 am helping my youth to prepare for future (1-4, disagree - agree) more better
+
+## parent-school relationship
+q47 - q53 (1-4, disagree - agree) higher score, better rel
+
+## parent endorsement of school (parent endorsement scale from PTIM-P measure)
+q54 - q57 (1-4, disagree - agree) higher score, more endorsement
+
+## to me these items may address several constructs --> NOT using these.
+q58 - q61 (parent self-efficacy, school climate, oportunities for PI) 
+q62 can have open & honest talk with teach (1-4, disagree - agree) more better
+q63 can work with teach to solve youth probs (1-4, disagree - agree) more better
+
+## parent-teacher relationship
+q64 at least one teach care about my youth (1-4, disagree - agree) more better
+q65 at least one teach wants to know me (1-4, disagree - agree) more better
+q66 at least one teach i feel comf talking about my youth (1-4, disagree - agree) more better
+q67 at least one teach i can ask/suggest about my youth (1-4, disagree - agree) more better
+
+## parent-student conversations about school --> NOT using these.
+q68 - q81
+
+## homework involvement --> NOT using these.
+q82-q99
+
+## youth prep for high school and beyond (?) --> NOT using these.
+q100 - q110
+
+## social support --> NOT using these.
+q111 - q115
+
+##  parent-youth relationship 
+q116 - q121 (higher score, better relationship)
+
+## parent-youth difficult conversations --> NOT using these.
+q122 - q127
+
+## limits, consequences & reinforcement --> NOT using these.
+q128 - 136 (3 need to be reverse coded)
+
+## monitoring --> NOT using these.
+q137 - q144
+
+## SDQ (Strengths and Difficulties Questionnaire) --> NOT using these.
+q145 - q169
+
+# Common guidelines for evaluating Cronbach's Alpha
+.00 to .69 = Poor
+.70 to .79 = Fair 
+.80 to .89 = Good 
+.90 to .99 = Excellent/Strong
+
+```{r}
+####### internal consistency ######
+
+library(psych)
+
+par_acad_supp <- data.frame(p_w1_clean_6[,39:46]) #q23 - q30
+alpha(par_acad_supp) # alpha = .82 --> good consistency
+
+par_inv_school <- data.frame(p_w1_clean_6[,47:57]) #q31-q41
+alpha(par_inv_school) # alpha = .87 --> good consistency
+
+par_self_effic <- data.frame(p_w1_clean_6[,58:62]) #q42-q46
+alpha(par_self_effic) # alpha = .80 --> good consistency
+
+par_school_rel <- data.frame(p_w1_clean_6[,63:69]) #q47-q53 
+alpha(par_school_rel) # alpha = .84 --> good consistency
+
+par_endorse <- data.frame(p_w1_clean_6[,70:73]) #q54-q57
+alpha(par_endorse) # alpha = .87 --> good consistency
+
+par_teach_rel <- data.frame(p_w1_clean_6[,80:83]) #q64-q67
+alpha(par_teach_rel) # alpha = .86 --> good consistency
+
+par_youth_rel <- data.frame(p_w1_clean_6[,133:138]) #q116-q121
+alpha(par_youth_rel) # alpha = .90 --> excellent consistency
+
+```
+
+
+```{r}
+####### scales ######
+
+p_w1_scales <- p_w1_clean_6 %>%
+  rowwise() %>% 
+  mutate(parent_academic_supp = mean(c(q23, q24, q25, q26, q27, q28, q29, q30), na.rm = TRUE),
+         parent_involv_school = mean(c(q31, q32, q33, q34, q35, q36, q37, q38, q39, q40, q41), na.rm = TRUE),
+         parent_self_efficacy = mean(c(q42, q43, q44, q45, q46), na.rm = TRUE),
+         parent_school_rel = mean(c(q47, q48, q49, q50, q51, q52, q53), na.rm = TRUE),
+         parent_endorse_school = mean(c(q54, q55, q56, q57), na.rm = TRUE),
+         parent_teach_rel = mean(c(q64, q65, q66, q67), na.rm = TRUE),
+         parent_youth_rel = mean(c(q116, q117, q118, q119, q120, q121), na.rm = TRUE)) %>%
+  select(1:6, 320:326)
+
+final_p_w1 <- left_join(p_w1_clean_5, p_w1_scales)
+
+view_df(final_p_w1)
+```
+
+
+# incorporate figues and tables 

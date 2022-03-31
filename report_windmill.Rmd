@@ -5,8 +5,8 @@ author: "Alejandra Garcia Isaza"
 date: "March 2021"
 output: 
   pagedreport::paged_windmill:
-    front_img: "../juntos/front.PNG"
-    logo: "../juntos/ceqp_logo.svg"
+    front_img: "../juntos/images/front.PNG"
+    logo: "../juntos/images/ceqp_logo.svg"
     img_to_dark: TRUE
     logo_to_white: FALSE
 knit: pagedown::chrome_print
@@ -41,7 +41,7 @@ The six participating schools belonged to three different school districts in th
 
 ```{r echo=FALSE, out.width="50%", fig.align="center"}
 
-knitr::include_graphics("../juntos/ceqp_logo.PNG")
+knitr::include_graphics("../juntos/images/ceqp_logo.PNG")
 ```
 
 \pagebreak
@@ -57,13 +57,13 @@ In the appendix section, data analysts interested in using this dataset will fin
 
 ```{r echo=FALSE, out.width="75%", fig.align="center"}
 
-knitr::include_graphics("../juntos/CEQP_final_panel_3.jpg")
+knitr::include_graphics("../juntos/images/CEQP_final_panel_3.jpg")
 ```
 
 
 ```{r echo=FALSE, out.width="75%", fig.align="center"}
 
-knitr::include_graphics("../juntos/CEQP_final_panel_6.jpg")
+knitr::include_graphics("../juntos/images/CEQP_final_panel_6.jpg")
 ```
 
 # Data Cleaning procedures {-}
@@ -163,7 +163,7 @@ The images below are screenshots of the same raw data SPSS file downloaded direc
 
 ```{r echo=FALSE, out.width="75%", fig.cap="Value labels button on.", fig.align="center"}
 
-knitr::include_graphics("../juntos/val_lab_on.PNG")
+knitr::include_graphics("../juntos/images/val_lab_on.PNG")
 ```
 
 \pagebreak
@@ -172,7 +172,7 @@ This changed when the *value labels* button was "off". In the image below, the f
 
 ```{r echo=FALSE, out.width="75%", fig.cap="Value labels button off", fig.align="center"}
 
-knitr::include_graphics("../juntos/val_lab_off.PNG")
+knitr::include_graphics("../juntos/images/val_lab_off.PNG")
 ```
 
 This survey coding error meant that the `school` variable's value labels properly corresponded to the participants' ids, but the variable's values did not. Instead of recoding the values, I decided to create a new variable called `school_id` and delete the flawed original variable `school`. 
@@ -221,7 +221,7 @@ In this dataset, several multiple choice variables that were originally meant to
 
 ```{r echo=FALSE, out.width="75%", fig.cap="Qualtrics survey development", fig.align="center"}
 
-knitr::include_graphics("../juntos/multi_answ.PNG")
+knitr::include_graphics("../juntos/images/multi_answ.PNG")
 ```
 
 
@@ -229,7 +229,7 @@ When this happens, participants could select mutually exclusive options, like th
 
 ```{r echo=FALSE, out.width="50%", fig.cap="Qualtrics survey preview", fig.align="center"}
 
-knitr::include_graphics("../juntos/multi_answ_look.PNG")
+knitr::include_graphics("../juntos/images/multi_answ_look.PNG")
 ```
 
 \pagebreak
