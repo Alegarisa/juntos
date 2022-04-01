@@ -134,21 +134,25 @@ unique(p_w1_clean_3$family_id) # 96 unique id values, thus 96 families in W1.
 # keeping only parent & student linked data
 ```{r}
 p_w1_clean_3 %>%
-  filter(family_id == "106")
+  filter(family_id == "106") # participant data complete, W1 student data is on W2 dataset
 
 p_w1_clean_3 %>%
   filter(participant_id == "301_2")# participant dropped from study and is -99 throughout. Id not present in w2 and w3.
 
 p_w1_clean_3 %>%
-  filter(family_id == "504")
+  filter(family_id == "504") # participant data complete, but no student data for wave 1
 
-# no id 106 (es lu), 301 (dropped), 504 (La Mi Ca) in students, but present in parents 
-# no id 623 in parents (not even in home visit), but present in students
+
   
-# p_w1_clean_4 <- p_w1_clean_3 %>%
-#   filter(family_id != 301)# deleted bec participant dropped from study and is -99 throughout. Id not present in w2 and w3.
+p_w1_clean_4 <- p_w1_clean_3 %>%
+  filter(family_id != 301) %>% # deleted bec participant dropped from study and is -99 throughout. Id not present in w2 and w3.
+  filter(family_id != 504) %>% # deleted because no corresponding youth data on W1, despite logs indicating youth completed W1 and W2.
+  arrange(participant_id) # this is the cleaned complete parent wave 1 dataset
 
-# not finished
+data.frame(table(p_w1_clean_4$family_id)) 
+
+unique(p_w1_clean_4$family_id) # 94 parents
+
 
 ```
-next step from 04.01.22: check student wave 1 for ids 106 and 504. 
+
