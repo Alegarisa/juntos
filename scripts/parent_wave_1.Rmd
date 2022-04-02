@@ -153,6 +153,34 @@ data.frame(table(p_w1_clean_4$family_id))
 
 unique(p_w1_clean_4$family_id) # 94 parents
 
+```
 
+# Number of participants in Wave 1 (with matching youth ids)
+```{r}
+# 123 total participants in w1, from which...
+
+p_w1_clean_4 %>%
+  filter(participant == 1) # 90 were moms
+
+p_w1_clean_4 %>%
+  filter(participant == 2) # 31 were dads
+
+p_w1_clean_4 %>%
+  filter(participant == 4) # 2 were "other" (1 stepmom, 1 grandparent)
+
+unique(p_w1_clean_4$family_id) # 96 unique id values, thus 96 families in W1. 
+```
+
+
+
+
+```{r}
+y_w1_clean_5_test <- y_w1_clean_5 %>%
+  rename(family_id = id)
+```
+
+
+```{r}
+parent_youth_w1 <- left_join(p_w1_clean_4, y_w1_clean_5_test, by = "family_id")
 ```
 
