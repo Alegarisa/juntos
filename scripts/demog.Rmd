@@ -25,23 +25,39 @@ library(sjmisc)
 p_w1_demo_raw <- read_sav(here("nopublish", "Juntos HV Parent #1 Survey_August 20, 2018_11.37.sav"))
 
 p_w1_demo <- p_w1_demo_raw %>% 
-  select(-1:-17) %>%
+  select(-1:-8, -10:-17) %>%
   arrange(Q41_1_TEXT) %>% # ordering participants ids
   janitor::clean_names() %>% # cleaning names
-  rename(c("id" = "q41_1_text"))
+  rename(c("family_id" = "q41_1_text"))
 ```
 
 # Checking duplicated ids
 ```{r}
-data.frame(table(p_w1_demo$id)) # dupped in hv 112 --> because mom & dad completed home visit
+data.frame(table(p_w1_demo$family_id)) # dupped in hv 112 --> because mom & dad completed home visit
 
+p_w1_demo_1 <- p_w1_demo %>%
+  filter(response_id != "R_OqAvS74XqgfShMZ") # id 112 dad
+
+p_w1_demo_1 <- p_w1_demo_1 %>%
+  select(family_id, q1, q2, q3, q4_1_text, q4_1_text, q4_2_text, q4_3_text, q5_1_text, q5_2_text, q6_1_text, q7_1_text, q7_2_text, q8_1_text, q8_2_text, q9, q10, q11, q16_1_text, q16_2_text, q16_3_text, q17_1_text, q18, q19_1_text, q19_2_text, q19_3_text, q22_1_text, q23, q25, q29, q34_1_text, q34_2_text, q35_1:q35_9, q35_9_text, q36) # selecting only informative
 ```
 
 
 ```{r}
-view_df(p_w1_demo)
+view_df(p_w1_demo_1)
+```
 
-p_w1_demo$q4_3_text
+```{r}
+# adding "hv1" to each variable name: "hv" stands for home visit, "1" for number 1.
+names(p_w1_demo_1) <- paste(names(p_w1_demo_1), "hv1", sep = "_")
+
+p_w1_demo_2 <- p_w1_demo_1 %>%
+  rename(c("family_id" = "family_id_hv1")) # renaming these variables to be able to join later
+
+view_df(p_w1_demo_2)
+
+# home_visit_1 %>%
+#   haven::write_sav(here("nopublish", "p_w1_demo_2.sav")) 
 ```
 
 

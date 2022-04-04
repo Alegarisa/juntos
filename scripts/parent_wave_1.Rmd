@@ -140,10 +140,8 @@ p_w1_clean_3 %>%
   filter(participant_id == "301_2")# participant dropped from study and is -99 throughout. Id not present in w2 and w3.
 
 p_w1_clean_3 %>%
-  filter(family_id == "504") # participant data complete, but no student data for wave 1
+  filter(family_id == "504") # parent participant data complete, but no student data for wave 1 (I found youth response id tied to id 504 in call logs for W1. Logs indicate youth completed W1 and W2. Remains a mistery what happended to wave 1 youth data.)
 
-
-  
 p_w1_clean_4 <- p_w1_clean_3 %>%
   filter(family_id != 301) %>% # deleted bec participant dropped from study and is -99 throughout. Id not present in w2 and w3.
   filter(family_id != 504) %>% # deleted because no corresponding youth data on W1, despite logs indicating youth completed W1 and W2.
@@ -152,7 +150,6 @@ p_w1_clean_4 <- p_w1_clean_3 %>%
 data.frame(table(p_w1_clean_4$family_id)) 
 
 unique(p_w1_clean_4$family_id) # 94 parents
-
 ```
 
 # Number of participants in Wave 1 (with matching youth ids)
@@ -168,19 +165,43 @@ p_w1_clean_4 %>%
 p_w1_clean_4 %>%
   filter(participant == 4) # 2 were "other" (1 stepmom, 1 grandparent)
 
-unique(p_w1_clean_4$family_id) # 96 unique id values, thus 96 families in W1. 
+unique(p_w1_clean_4$family_id) # 94 unique id values, thus 94 families in W1. 
+```
+
+# filtering primary caregiver only
+```{r}
+p_w1_clean_5 <- p_w1_clean_4 %>%
+  distinct(family_id, .keep_all = TRUE)
+```
+
+# cleaning names for joining
+```{r}
+# adding "p1" to each variable name: "p" stands for parent, "1" for wave 1.
+names(p_w1_clean_5) <- paste(names(p_w1_clean_5), "p1", sep = "_")
+
+p_w1_clean_6 <- p_w1_clean_5 %>%
+  rename(c("school_id" = "school_id_p1"),
+         c("condition" = "condition_p1"),
+         c("family_id" = "family_id_p1"),
+         c("participant_id" = "participant_id_p1")) %>% # renaming these variables to be able to join later
+  select(-response_id_p1)
+
+view_df(p_w1_clean_6)
+
+# parent_w1 %>%
+#   haven::write_sav(here("nopublish", "p_w1_clean_6.sav")) 
+```
+
+# joining parent wave 1 with home visit #1
+note: the code below requires to have the home visit data loaded
+```{r}
+parent_w1_hv1 <- left_join(p_w1_clean_6, p_w1_demo_2, by = "family_id")
+
+view_df(parent_w1_hv1)
 ```
 
 
-
-
 ```{r}
-y_w1_clean_5_test <- y_w1_clean_5 %>%
-  rename(family_id = id)
-```
-
-
-```{r}
-parent_youth_w1 <- left_join(p_w1_clean_4, y_w1_clean_5_test, by = "family_id")
+# parent_youth_w1 <- left_join(p_w1_clean_4, y_w1_clean_5_test, by = "family_id")
 ```
 
