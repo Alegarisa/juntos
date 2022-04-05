@@ -39,7 +39,7 @@ p_w1_demo_1 <- p_w1_demo %>%
   filter(response_id != "R_OqAvS74XqgfShMZ") # id 112 dad
 
 p_w1_demo_1 <- p_w1_demo_1 %>%
-  select(family_id, q1, q2, q3, q4_1_text, q4_1_text, q4_2_text, q4_3_text, q5_1_text, q5_2_text, q6_1_text, q7_1_text, q7_2_text, q8_1_text, q8_2_text, q9, q10, q11, q16_1_text, q16_2_text, q16_3_text, q17_1_text, q18, q19_1_text, q19_2_text, q19_3_text, q22_1_text, q23, q25, q29, q34_1_text, q34_2_text, q35_1:q35_9, q35_9_text, q36) # selecting only informative
+  select(family_id, q1, q3, q4_1_text, q4_1_text, q4_2_text, q4_3_text, q5_1_text, q5_2_text, q6_1_text, q7_1_text, q7_2_text, q8_1_text, q8_2_text, q9, q10, q11, q16_1_text, q16_2_text, q16_3_text, q17_1_text, q18, q19_1_text, q19_2_text, q19_3_text, q22_1_text, q23, q25, q29, q34_1_text, q34_2_text, q35_1:q35_9, q35_9_text, q36) # selecting only informative
 ```
 
 

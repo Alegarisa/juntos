@@ -194,14 +194,20 @@ view_df(p_w1_clean_6)
 
 # joining parent wave 1 with home visit #1
 note: the code below requires to have the home visit data loaded
+note2: the joined data below has the HV #1 data from step parent with id 415_4 who was the person interviewed, but the W1 assessment belongs to bio mom (415_1). All parents from this family participated and completed W1, w2, and possibly W3 assessments. 
 ```{r}
 parent_w1_hv1 <- left_join(p_w1_clean_6, p_w1_demo_2, by = "family_id")
 
 view_df(parent_w1_hv1)
 ```
 
-
+# joining parent_w1_hv1 with matching youth wave 1 dataset
 ```{r}
-# parent_youth_w1 <- left_join(p_w1_clean_4, y_w1_clean_5_test, by = "family_id")
+parent_hv1_youth_w1 <- left_join(parent_w1_hv1, y_w1_clean_6)
+
+view_df(parent_hv1_youth_w1)
+
+# parent_hv1_youth_w1 %>%
+#   haven::write_sav(here("nopublish", "parent_hv1_youth_w1.sav")) # dataset created on April 5, 2022
 ```
 

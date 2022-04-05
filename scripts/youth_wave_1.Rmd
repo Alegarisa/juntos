@@ -196,4 +196,19 @@ data.frame(table(y_w1_clean_5$id)) # no dupped ids
 unique(y_w1_clean_5$id) # 94 youth
 ```
 
+# cleaning names for joining
+```{r}
+# adding "y1" to each variable name: "y" stands for youth, "1" for wave 1.
+names(y_w1_clean_5) <- paste(names(y_w1_clean_5), "y1", sep = "_")
 
+y_w1_clean_6 <- y_w1_clean_5 %>%
+  rename(c("school_id" = "school_id_y1"),
+         c("condition" = "condition_y1"),
+         c("family_id" = "id_y1")) %>% # renaming these variables to be able to join later
+  select(-response_id_y1)
+
+view_df(y_w1_clean_6)
+
+# youth_w1 %>%
+#   haven::write_sav(here("nopublish", "y_w1_clean_6.sav")) 
+```
