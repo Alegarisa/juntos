@@ -1,0 +1,220 @@
+---
+title: "parent_wave_2"
+author: "Alejandra Garcia Isaza"
+date: '2022-08-26'
+output: html_document
+---
+
+Note on August 26, 2022: I copied the code below from "parent_3_waves.Rmd" which I think is the doc I was working on the latest for cleaning. Here I will only work on parents wave 2 (post-intervention).
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(rio)
+library(here)
+library(tidyverse)
+library(haven)
+library(janitor)
+library(knitr)
+library(surveytoolbox)
+library(sjPlot)
+library(kableExtra)
+library(psych)
+library(sjmisc)
+```
+
+################## WAVE 2 ##################
+
+# Loading the data & initial cleaning
+```{r}
+p_w2_raw <- read_sav(here("nopublish", "7bb. Juntos Parent W2-SPAN_February 10, 2021_10.25.sav"))
+
+p_w2_raw <- p_w2_raw %>% 
+  arrange(ID_1_TEXT) %>% # ordering participants ids
+  janitor::clean_names() %>% # cleaning names
+  select(-id) %>% 
+  rename(c("id" = "id_1_text"))
+```
+
+# Checking incomplete rows & duplicated ids
+```{r}
+p_w2_raw %>%
+  filter(finished == 0)
+
+p_w2_raw %>%
+  filter(finished == 1)
+
+data.frame(table(p_w2_raw$id)) # 26 ids have 2 or more instances each (ids 415 and 418 have 3 instances each)
+```
+
+# Further cleaning & dealing with duplicates
+```{r}
+p_w2_clean <- p_w2_raw %>% 
+  select(-1:-8, -10:-17, -19, -20) %>% # selecting out columns with metadata
+  filter(response_id != "R_2sdrLRMKZvR9fwO", # deleting duped row "false start" (id 112) - this family dropped amid w2
+         response_id != "R_2zoPGHCXUdvsDgd", # deleting duped row "false start" (id 113)
+         response_id != "R_1EQFk2EbJW61nhf", # deleting duped row "false start" (id 308)
+         response_id != "R_XMroI3biv8jxEVb", # deleting duped row "false start" (id 308)
+         response_id != "R_3PZzUFRxLeeW6GJ") %>% # deleting duped row "false start" (id 308) 
+  mutate(id = case_when(response_id == "R_1rCXE5pBSje0twj" ~ "109", # id 108 (top one) recoded as 109
+                        response_id == "R_2EpkLxRpA7GW0oE" ~ "312", # id 314 (bottom one) recoded as 312
+                        TRUE ~ as.character(id))) %>%
+  arrange(id)
+
+data.frame(table(p_w2_clean$id)) # duplicated ids match two-parent families, id 415 is a family of 3. Get confirmation about 109 and 601, they are 2-parent fams in w1, though. 
+```
+
+# Fixing wrong condition assignment and school id
+```{r}
+# fixing wrong assignment
+p_w2_clean_2 <- p_w2_clean %>%
+  mutate(school_id = str_sub(id, 1, 1),
+         condition = case_when(
+           school_id == "1" | school_id == "3" | school_id == "5" ~ "1",
+           school_id == "2" | school_id == "4" | school_id == "6" ~ "2"
+         )) %>%
+  select(school_id, condition, everything()) %>%
+  select(- school) # selecting out (i.e. deleting) original faulty school variable
+```
+
+# Adding value labels and making vars numeric 
+```{r}
+p_w2_clean_3 <- p_w2_clean_2 %>%
+  mutate(condition = as.numeric(condition),
+         condition = set_vall(condition, c("control" = 1, "intervention" = 2)),
+         school_id = as.numeric(school_id),
+         school_id = set_vall(school_id, c("cascade" = 1, "prairie_mountain" = 2, "kelly" = 3, "ata" = 4, "briggs" = 5, "agnes_stewart" = 6)))
+```
+
+# Creating individual id variable
+```{r}
+p_w2_clean_3 <- p_w2_clean_3 %>% 
+  mutate(participant = ifelse(response_id == "R_1PRjrvEzZRgtKKD", 4, participant), # changing partic. type to correspond to records
+         participant_4_text = ifelse(response_id == "R_1PRjrvEzZRgtKKD", "stepmom", participant_4_text), 
+         participant = ifelse(response_id == "R_2SCy44y5QaDXggq", 4, participant), # changing partic. type to abuela to correspond to W1
+         participant_4_text = ifelse(response_id == "R_2SCy44y5QaDXggq", "abuela", participant_4_text),
+         participant = as.numeric(participant),
+         participant = set_vall(participant, c("mom" = 1, "dad" = 2, "tutor legal" = 3, "other, specify" = 4)),
+         participant_id = paste0(id, "_", participant), .before = 5) %>% # new var as unique identifier
+  rename(c("family_id" = "id"))
+```
+
+
+# renaming vars to correspond to value labels
+```{r}
+# item that asks about # of adults in home was spreaded out and had an unusual coding.
+p_w2_clean_3 <- p_w2_clean_3 %>%
+  rename(c("q211_1" = "q211_2"),
+         c("q211_2" = "q211_99"),
+         c("q211_3" = "q211_4"),
+         c("q211_4" = "q211_5"),
+         c("q211_5" = "q211_6"),
+         c("q211_99" = "q211_7"),
+         c("adults_home_text" = "q211_6_text"))
+```
+
+```{r}
+view_df(p_w2_clean_3)
+```
+
+
+# Number of participants in Wave 2
+```{r}
+# 109 total parent participants in w2, from which...
+
+p_w2_clean_3 %>%
+  filter(participant == 1) # 82 were moms
+
+p_w2_clean_3 %>%
+  filter(participant == 2) # 25 were dads
+
+p_w2_clean_3 %>%
+  filter(participant == 4) # 2 were "other" (1 stepmom, 1 abuela) 
+
+unique(p_w2_clean_3$family_id) # 84 unique id values, thus 84 families in W2. 
+```
+```{r}
+data.frame(table(p_w2_clean_3$family_id)) # 415 family of 3: checks-out; 601 triplicated, still figuring it out (08.26.22)
+```
+
+
+# notes on w2 meeting with Eli on 08.26.22
+id 109: in dataset appears as a 2 parent (1 mom, 1 dad) -- Eli confirms that 109 is a family of 2, mome and dad, however the qualtrics code doesn't match from logs: (SV_0i9InOoo0RH6o9T) to what we have in dataset (R_z1iP1gjIGExS3Pr)
+
+# In wave 1 (logs):
+R_1Lwe3h7XQeF5hyj	id 601  mom, wave 1
+R_UG9FQ6VvanpWwwN	id 601	dad, wave 1
+
+# In wave 2 (logs): 
+R_2sZpDvTZRNJfl7Z	id 601	mom, wave 2 = real mom
+R_O6DQfVORSAtnWbT	id 601	dad, wave 2 = real dad 
+
+R_vNctgxUZcfcMwFj	id 601  mom, wave 3 = the theory was that this row leaked from w3, but id 601 in W3 already has two id associated with 601. This still needs to be figured out. ## hence action plan is delete from wave 2 ##
+
+# In wave 3 (logs): 
+R_2QRPBKfzZwFDAaT id 601	mom, confirmed
+R_3LhFdFrq0SFkkKI id 601	dad, confirmed
+
+# From Eli (08.26.22)
+R_2QRPBKfzZwFDAaT W3 601 Mom from email from JCG
+
+# From notes I had before 08.26.22 
+R_3LhFdFrq0SFkkKI	601	dad, wave 3	(in wave 3 log)
+R_20lyHTLoqvQ4Rpz	601 mom, wave 3 (not sure where this came from)
+
+R_vNctgxUZcfcMwFj	id 601  mom --> mistery what this response id belongs to
+R_20lyHTLoqvQ4Rpz	601 mom, wave 3  --> mistery what this response id belongs to
+these 2 rows are very similar, but not identical = Eli & I think that it is the same data, but assessor error (08.26.22: not sure where we were looking, these two ids do not appear on logs) 
+
+# Deleting row R_vNctgxUZcfcMwFj	id 601
+```{r}
+
+p_w2_clean_3 %>%
+  filter(response_id == "R_vNctgxUZcfcMwFj") # will be deleting from wave 2 as it does not appear anywhere in logs
+
+p_w2_clean_3 %>%
+  filter(response_id == "R_20lyHTLoqvQ4Rpz") # does not appear in dataset or in logs
+
+p_w2_clean_3 <- p_w2_clean_3 %>%
+  filter(response_id != "R_vNctgxUZcfcMwFj")
+```
+
+# Number of participants in Wave 2 (AFTER DELETION)
+```{r}
+# 108 total parent participants in w2, from which...
+
+p_w2_clean_3 %>%
+  filter(participant == 1) # 81 were moms
+
+p_w2_clean_3 %>%
+  filter(participant == 2) # 25 were dads
+
+p_w2_clean_3 %>%
+  filter(participant == 4) # 2 were "other" (1 stepmom, 1 abuela) 
+
+unique(p_w2_clean_3$family_id) # 84 unique id values, thus 84 families in W2. 
+```
+tO DO: SIDE BY SIDE COMPARE WAVE 1 AND WAVE 2 TO SEE IF ID WITH 2 PARTICIPANTS COINCIDE WITH 2 PARENT-FAMILIES IN WAVE 1 AND WAVE 2 AND THEN EXPORT TO SPSS FILE
+
+```{r}
+# all_parent_wave2 %>%
+#   haven::write_sav(here("nopublish", "all_parent_wave2.sav")) 
+```
+
+
+
+
+HERE
+
+
+## previous notes:
+
+# wave correct?
+R_2qyriEL0QoD8Kln	id 604 in wave 1, says wave = 1
+
+R_6FiHWtagxFiXgbf	id 604 in wave 2, says wave = 1. CHANGE to wave 2, assesor mistakenly put wave 1 and should have put wave 2.  
+
+# new variable
+new variable: 217_4_text? The question in this variable was completely changed by w2, levels also changed (no 99 and added a 4 for yearly money). 
+
+----------------------------------------------------------------------------------------------------
