@@ -44,25 +44,48 @@ p_w2_raw %>%
 p_w2_raw %>%
   filter(finished == 1)
 
-data.frame(table(p_w2_raw$id)) # 26 ids have 2 or more instances each (ids 415 and 418 have 3 instances each)
+data.frame(table(p_w2_raw$id)) # 26 ids have 2 or more instances each (id 308 has 4 instances, ids 415 and 601 has 3 instances)
 ```
+
+# checking rows of incorrect waves 
+```{r}
+p_w2_raw %>% 
+  filter(wave == 3) # id 601 "R_vNctgxUZcfcMwFj" belongs to w3 -- mom -- appears as 100% and true data
+
+p_w2_raw %>% 
+  filter(wave == 1)  # id 604 "R_6FiHWtagxFiXgbf" says w1 -- mom -- appears as 100% and true data, but logs indicate response_id is from w2. Action: change to w2. 
+```
+
+
 
 # Further cleaning & dealing with duplicates
 ```{r}
 p_w2_clean <- p_w2_raw %>% 
   select(-1:-8, -10:-17, -19, -20) %>% # selecting out columns with metadata
-  filter(response_id != "R_2sdrLRMKZvR9fwO", # deleting duped row "false start" (id 112) - this family dropped amid w2
+  filter(response_id != "R_2sdrLRMKZvR9fwO", # deleting duped row "false start" (id 112) - progress 64% (this family dropped amid w2)
          response_id != "R_2zoPGHCXUdvsDgd", # deleting duped row "false start" (id 113)
          response_id != "R_1EQFk2EbJW61nhf", # deleting duped row "false start" (id 308)
-         response_id != "R_XMroI3biv8jxEVb", # deleting duped row "false start" (id 308)
-         response_id != "R_3PZzUFRxLeeW6GJ") %>% # deleting duped row "false start" (id 308) 
+         response_id != "R_XMroI3biv8jxEVb", # deleting duped row -appears as 100 completion, but is -99 throughout- (id 308)
+         response_id != "R_3PZzUFRxLeeW6GJ", # deleting duped row "false start" (id 308) 
+         response_id != "R_vNctgxUZcfcMwFj") %>% # deleting because it says w3 (id 601)
+  mutate(wave = case_when(response_id == "R_6FiHWtagxFiXgbf" ~ "2")) %>% # appears as w1. logs indicate response_id is from w2; hence, changing to w2. 
   mutate(id = case_when(response_id == "R_1rCXE5pBSje0twj" ~ "109", # id 108 (top one) recoded as 109
                         response_id == "R_2EpkLxRpA7GW0oE" ~ "312", # id 314 (bottom one) recoded as 312
                         TRUE ~ as.character(id))) %>%
   arrange(id)
-
-data.frame(table(p_w2_clean$id)) # duplicated ids match two-parent families, id 415 is a family of 3. Get confirmation about 109 and 601, they are 2-parent fams in w1, though. 
 ```
+
+# double-checking
+```{r}
+p_w2_clean %>% 
+  filter(wave == 3) # no rows from w3
+
+p_w2_clean %>% 
+  filter(wave == 1) # no rows from w1
+
+data.frame(table(p_w2_clean$id)) # 23 duplicated ids that match two-parent families in w1. id 415 is a family of 3.  
+```
+
 
 # Fixing wrong condition assignment and school id
 ```{r}
@@ -120,67 +143,6 @@ view_df(p_w2_clean_3)
 
 # Number of participants in Wave 2
 ```{r}
-# 109 total parent participants in w2, from which...
-
-p_w2_clean_3 %>%
-  filter(participant == 1) # 82 were moms
-
-p_w2_clean_3 %>%
-  filter(participant == 2) # 25 were dads
-
-p_w2_clean_3 %>%
-  filter(participant == 4) # 2 were "other" (1 stepmom, 1 abuela) 
-
-unique(p_w2_clean_3$family_id) # 84 unique id values, thus 84 families in W2. 
-```
-```{r}
-data.frame(table(p_w2_clean_3$family_id)) # 415 family of 3: checks-out; 601 triplicated, still figuring it out (08.26.22)
-```
-
-
-# notes on w2 meeting with Eli on 08.26.22
-id 109: in dataset appears as a 2 parent (1 mom, 1 dad) -- Eli confirms that 109 is a family of 2, mome and dad, however the qualtrics code doesn't match from logs: (SV_0i9InOoo0RH6o9T) to what we have in dataset (R_z1iP1gjIGExS3Pr)
-
-# In wave 1 (logs):
-R_1Lwe3h7XQeF5hyj	id 601  mom, wave 1
-R_UG9FQ6VvanpWwwN	id 601	dad, wave 1
-
-# In wave 2 (logs): 
-R_2sZpDvTZRNJfl7Z	id 601	mom, wave 2 = real mom
-R_O6DQfVORSAtnWbT	id 601	dad, wave 2 = real dad 
-
-R_vNctgxUZcfcMwFj	id 601  mom, wave 3 = the theory was that this row leaked from w3, but id 601 in W3 already has two id associated with 601. This still needs to be figured out. ## hence action plan is delete from wave 2 ##
-
-# In wave 3 (logs): 
-R_2QRPBKfzZwFDAaT id 601	mom, confirmed
-R_3LhFdFrq0SFkkKI id 601	dad, confirmed
-
-# From Eli (08.26.22)
-R_2QRPBKfzZwFDAaT W3 601 Mom from email from JCG
-
-# From notes I had before 08.26.22 
-R_3LhFdFrq0SFkkKI	601	dad, wave 3	(in wave 3 log)
-R_20lyHTLoqvQ4Rpz	601 mom, wave 3 (not sure where this came from)
-
-R_vNctgxUZcfcMwFj	id 601  mom --> mistery what this response id belongs to
-R_20lyHTLoqvQ4Rpz	601 mom, wave 3  --> mistery what this response id belongs to
-these 2 rows are very similar, but not identical = Eli & I think that it is the same data, but assessor error (08.26.22: not sure where we were looking, these two ids do not appear on logs) 
-
-# Deleting row R_vNctgxUZcfcMwFj	id 601
-```{r}
-
-p_w2_clean_3 %>%
-  filter(response_id == "R_vNctgxUZcfcMwFj") # will be deleting from wave 2 as it does not appear anywhere in logs
-
-p_w2_clean_3 %>%
-  filter(response_id == "R_20lyHTLoqvQ4Rpz") # does not appear in dataset or in logs
-
-p_w2_clean_3 <- p_w2_clean_3 %>%
-  filter(response_id != "R_vNctgxUZcfcMwFj")
-```
-
-# Number of participants in Wave 2 (AFTER DELETION)
-```{r}
 # 108 total parent participants in w2, from which...
 
 p_w2_clean_3 %>%
@@ -193,28 +155,11 @@ p_w2_clean_3 %>%
   filter(participant == 4) # 2 were "other" (1 stepmom, 1 abuela) 
 
 unique(p_w2_clean_3$family_id) # 84 unique id values, thus 84 families in W2. 
+
+data.frame(table(p_w2_clean_3$family_id)) # confirmed again: 23 duplicated ids that match two-parent families in w1. id 415 is a family of 3.  
 ```
-tO DO: SIDE BY SIDE COMPARE WAVE 1 AND WAVE 2 TO SEE IF ID WITH 2 PARTICIPANTS COINCIDE WITH 2 PARENT-FAMILIES IN WAVE 1 AND WAVE 2 AND THEN EXPORT TO SPSS FILE
 
 ```{r}
-# all_parent_wave2 %>%
-#   haven::write_sav(here("nopublish", "all_parent_wave2.sav")) 
+# p_w2_clean_3 %>%
+#   haven::write_sav(here("nopublish", "all_parent_wave2.sav"))
 ```
-
-
-
-
-HERE
-
-
-## previous notes:
-
-# wave correct?
-R_2qyriEL0QoD8Kln	id 604 in wave 1, says wave = 1
-
-R_6FiHWtagxFiXgbf	id 604 in wave 2, says wave = 1. CHANGE to wave 2, assesor mistakenly put wave 1 and should have put wave 2.  
-
-# new variable
-new variable: 217_4_text? The question in this variable was completely changed by w2, levels also changed (no 99 and added a 4 for yearly money). 
-
-----------------------------------------------------------------------------------------------------

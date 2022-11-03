@@ -86,3 +86,45 @@ nrow(distinct(p_w2_clean_3, family_id))
 data.frame(table(p_w2_clean_3$family_id))
 ```
 But not sure how to know the number of two-parent families. 
+
+## previous notes (undated):
+#############################
+-- wave correct?
+R_2qyriEL0QoD8Kln	id 604 in wave 1, says wave = 1
+
+R_6FiHWtagxFiXgbf	id 604 in wave 2, says wave = 1. CHANGE to wave 2, assesor mistakenly put wave 1 and should have put wave 2.  
+
+-- new variable
+new variable: 217_4_text? The question in this variable was completely changed by w2, levels also changed (no 99 and added a 4 for yearly money). 
+#############################
+
+## August 26 2022 -- meeting with Eli notes --
+#########################
+
+# notes on w2 meeting with Eli on 08.26.22
+id 109: in dataset appears as a 2 parent (1 mom, 1 dad) -- Eli confirms that 109 is a family of 2, mome and dad, however the qualtrics code doesn't match from logs: (SV_0i9InOoo0RH6o9T) to what we have in dataset (R_z1iP1gjIGExS3Pr)
+
+# In wave 1 (logs):
+R_1Lwe3h7XQeF5hyj	id 601  mom, wave 1
+R_UG9FQ6VvanpWwwN	id 601	dad, wave 1
+
+# In wave 2 (logs): 
+R_2sZpDvTZRNJfl7Z	id 601	mom, wave 2 = real mom
+R_O6DQfVORSAtnWbT	id 601	dad, wave 2 = real dad 
+
+R_vNctgxUZcfcMwFj	id 601  mom, wave 3 = the theory was that this row leaked from w3, but id 601 in W3 already has two id associated with 601. This still needs to be figured out. ## hence action plan is delete from wave 2 ##
+
+# In wave 3 (logs): 
+R_2QRPBKfzZwFDAaT id 601	mom, confirmed
+R_3LhFdFrq0SFkkKI id 601	dad, confirmed
+
+# From Eli (08.26.22)
+R_2QRPBKfzZwFDAaT W3 601 Mom from email from JCG
+
+# From notes I had before 08.26.22 
+R_3LhFdFrq0SFkkKI	601	dad, wave 3	(in wave 3 log)
+R_20lyHTLoqvQ4Rpz	601 mom, wave 3 (not sure where this came from)
+
+R_vNctgxUZcfcMwFj	id 601  mom --> mistery what this response id belongs to
+R_20lyHTLoqvQ4Rpz	601 mom, wave 3  --> mistery what this response id belongs to
+these 2 rows are very similar, but not identical = Eli & I think that it is the same data, but assessor error (08.26.22: not sure where we were looking, these two ids do not appear on logs) 
