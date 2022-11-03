@@ -68,7 +68,8 @@ p_w2_clean <- p_w2_raw %>%
          response_id != "R_XMroI3biv8jxEVb", # deleting duped row -appears as 100 completion, but is -99 throughout- (id 308)
          response_id != "R_3PZzUFRxLeeW6GJ", # deleting duped row "false start" (id 308) 
          response_id != "R_vNctgxUZcfcMwFj") %>% # deleting because it says w3 (id 601)
-  mutate(wave = case_when(response_id == "R_6FiHWtagxFiXgbf" ~ "2")) %>% # appears as w1. logs indicate response_id is from w2; hence, changing to w2. 
+  mutate(wave = case_when(response_id == "R_6FiHWtagxFiXgbf" ~ "2",
+                        TRUE ~ as.character(wave))) %>% # appears as w1. logs indicate response_id is from w2; hence, changing to w2. 
   mutate(id = case_when(response_id == "R_1rCXE5pBSje0twj" ~ "109", # id 108 (top one) recoded as 109
                         response_id == "R_2EpkLxRpA7GW0oE" ~ "312", # id 314 (bottom one) recoded as 312
                         TRUE ~ as.character(id))) %>%

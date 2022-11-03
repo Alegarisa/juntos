@@ -1,0 +1,137 @@
+---
+title: "youth_wave_2"
+author: "Alejandra Garcia Isaza"
+date: "11/03/2022"
+output: html_document
+---
+Note on November 3, 2022: I copied the Rmd called "youth_wave_1.Rmd". This document only contains wave 2 youth data. 
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(rio)
+library(here)
+library(tidyverse)
+library(haven)
+library(janitor)
+library(knitr)
+library(surveytoolbox)
+library(sjPlot)
+library(kableExtra)
+library(psych)
+library(sjmisc)
+```
+
+################## WAVE 2 ##################
+
+# Loading the data & initial cleaning
+```{r}
+y_w2_raw <- read_sav(here("nopublish", "Youth W2 SPAN_February 10, 2021_10.32.sav"))
+
+
+y_w2_raw <- y_w2_raw %>% 
+  arrange(H1_1_TEXT) %>% # ordering participants ids
+  janitor::clean_names() %>% # cleaning names
+  select(-h1) %>% 
+  rename(c("id" = "h1_1_text"),
+         c("sex" = "h2"),
+         c("wave" = "h5"),
+         c("int_location" = "h6"),
+         c("int_location_4_text" = "h6_4_text"))
+```
+
+# Checking incomplete rows & duplicated ids
+```{r}
+y_w2_raw %>%
+  filter(finished == 0) # 8 records incomplete, but five are 99% (202, 306, 404, 610, 613), one 80% 405), and two less than 50% (ids 405 % 412)
+
+y_w2_raw %>% 
+  filter(wave == 1) # id 106 "R_1o4JcWGSoGCYx8w" says w1 --> confirmed in logs: this is youth data for w1. Action: need to move to wave 1. 
+
+y_w2_raw %>% 
+  filter(wave == 3) # no rows from w3
+
+data.frame(table(y_w2_raw$id)) # 106(one belongs to w1), 313, 314, 405(tripli), 408(one row -99 throughout prb false start, other row is complete), 412, JCG(assesor error)
+```
+
+
+# Further cleaning -- leaving out rows (false starts and coding errors)
+```{r}
+y_w2_clean <- y_w2_raw %>% 
+  select(-1:-8, -10:-17, -20, -21) %>%
+  filter(response_id != "R_20My7Nw91c2Kh6r") %>% # deleting duped row "false start" (id 405, with 47%)
+  filter(response_id != "R_3jebHOrmpEvVusr") %>% # deleting duped row "false start" (id 405, with 80%)
+    filter(response_id != "R_12LVKPebRTdZRF3") %>% # deleting row bec. filled with -99 throughout (id 408)
+  filter(response_id != "R_2Y5PBgkaoarXoW5") %>% # deleting duped row "false start" (id 412, with 2%)
+  filter(response_id != "R_1CHCJIPFkuEHBH2") %>% # deleting test row (id 999, with 2%)
+  arrange(id)
+
+data.frame(table(y_w2_clean$id)) # 106, 313, 314, JCG
+```
+
+
+```{r}
+y_w2_clean_1 <- y_w2_clean %>% 
+   mutate(id = case_when(response_id == "R_yBDOsopku8j9smR" ~ "311", # id 313 recoded as 311
+                        response_id == "R_3m44tVSOd22OdTN" ~ "312", # id 314 recoded as 312
+                        response_id == "R_SCw7VH3ueceflUl" ~ "109", # id JCG recoded as 109
+                        TRUE ~ as.character(id))) %>%
+  arrange(id)
+
+data.frame(table(y_w2_clean_1$id)) # only 106 is dupped bec one belongs to wave 1
+```
+
+
+# Fixing wrong condition assignment and school id
+```{r}
+y_w2_clean_2 <- y_w2_clean_1 %>%
+  mutate(school_id = str_sub(id, 1, 1),
+         condition = case_when(
+           school_id == "1" | school_id == "3" | school_id == "5" ~ "1",
+           school_id == "2" | school_id == "4" | school_id == "6" ~ "2"
+         )) %>%
+  select(school_id, condition, everything()) %>%
+  select(- h8) # deleting school var that has wrong assignment
+```
+
+# Adding value labels, making vars numeric, and recoding response option in q38
+```{r}
+y_w2_clean_3 <- y_w2_clean_2 %>%
+  mutate(condition = as.numeric(condition),
+         condition = set_vall(condition, c("control" = 1, "intervention" = 2)),
+         school_id = as.numeric(school_id),
+         school_id = set_vall(school_id, c("cascade" = 1, "prairie_mountain" = 2, "kelly" = 3, "ata" = 4, "briggs" = 5, "agnes_stewart" = 6)),
+         q38 = ifelse(q38 == 99, 88, q38),
+         q38 = set_varl(q38, "In the last 3 months, how frequently has at least one of your parents/guardians… …attended a parent group meeting."),
+         q38 = set_vall(q38, c("Never" = 1, "Rarely" = 2, "Sometimes" = 3, "Often" = 4, "I don't know" = 88))) # q38 didn't have a 99 = no response option.
+```
+
+# for joining id 106 that belongs to wave 1 and was mistakenly put in wave 2
+```{r}
+y_w2_clean_4 <- y_w2_clean_3 %>%
+  filter(response_id != "R_1o4JcWGSoGCYx8w") # this is the youth wave 2 cleaned dataset (without row of w1 data from id 106)
+  
+just_106 <- y_w2_clean_3 %>%
+  filter(response_id == "R_1o4JcWGSoGCYx8w") # this is just id 106
+
+# just_106 %>%
+#   haven::write_sav(here("nopublish", "just_106.sav"))
+```
+
+
+```{r}
+unique(y_w2_clean_4$id) # 81 students
+
+data.frame(table(y_w2_clean_4$id)) # no dupes
+```
+
+```{r}
+view_df(y_w2_clean_4)
+```
+
+
+```{r}
+# y_w2_clean_4 %>%
+#   haven::write_sav(here("nopublish", "all_youth_wave2.sav"))
+```
+

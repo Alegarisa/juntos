@@ -6,6 +6,8 @@ output: html_document
 ---
 Note on April 1, 2022: I copied the code below from "youth_3_waves.Rmd" which I think is the doc I was working on the latest for cleaning. Here I will only work on youth wave 1 (baseline) for dissertation and will update progress made here to the three waves Rmd to continue cleaning.
 
+Note on November 3, 2022: I edited this code to complete the cleaning of youth wave 2. 
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
@@ -33,18 +35,26 @@ y_w1_raw <- y_w1_raw %>%
   arrange(H1_1_TEXT) %>% # ordering participants ids
   janitor::clean_names() %>% # cleaning names
   select(-h1) %>% 
-  rename(c("id" = "h1_1_text"),
-         c("wave" = "h5"))
+rename(c("id" = "h1_1_text"),
+         c("sex" = "h2"),
+         c("wave" = "h5"),
+         c("int_location" = "h6"),
+         c("int_location_4_text" = "h6_4_text"))
 ```
 
-# Checking duplicated ids
+# Checking incomplete rows & duplicated ids
 ```{r}
-data.frame(table(y_w1_raw$id)) # id 508 dupped
-
 y_w1_raw %>%
   filter(finished == 0) # 508 completely empty (2 records, one false start, one complete) 624 99% complete
-```
 
+y_w1_raw %>% 
+  filter(wave == 2) # no rows from w2
+
+y_w1_raw %>% 
+  filter(wave == 3) # no rows from w3
+
+data.frame(table(y_w1_raw$id)) # id 508 duped
+```
 
 # Further cleaning
 ```{r}
@@ -84,116 +94,60 @@ y_w1_clean_3 <- y_w1_clean_2 %>%
 ```{r}
 unique(y_w1_clean_3$id) # 94 students
 
-view_df(y_w1_clean_3)
+data.frame(table(y_w1_clean_3$id)) # no dupes
+```
+
+# importing id 106 from youth *wave 2 dataset* to wave 1 dataset
+```{r}
+just_106 <- read_sav(here("nopublish", "just_106.sav"))
+```
+
+# joining id 106 from *wave 2* to wave 1 (where it belongs)
+```{r}
+y_w1_clean_4 <- full_join(y_w1_clean_3, just_106) %>% 
+  arrange(id) # this is the cleaned complete youth wave 1 dataset
+
+data.frame(table(y_w1_clean_4$id)) # no duped ids
+
+unique(y_w1_clean_4$id) # 95 youth
+```
+
+
+```{r}
+view_df(y_w1_clean_4)
+```
+
+
+```{r}
+# y_w1_clean_4 %>%
+#   haven::write_sav(here("nopublish", "all_youth_wave1.sav"))
 ```
 
 # ------ Notes on W1 dataset -------
 # Participant id 508 was the only duplicated id and it was because one record was a "false start". 
 # Participant id 612 appeared as if belonged to school 2 = prairie, this was incorrect and was fixed. 
 # q38 didn't have a 99 = no response option so it didn't make sense to add it ex post facto. Prob. a survey coding error. 
-# Total participants in wave n = 94
+# Total participants in wave n = 95
 # ------------------------------------
 
+##############################################
 # keeping only parent & student linked data
+##############################################
+
 ```{r}
-
-y_w1_clean_3 %>%
-  filter(id == "106") # no id found
-y_w1_clean_3 %>%
-  filter(response_id == "R_1o4JcWGSoGCYx8w") # response id tied to id 106 in call logs. It says that youth completed W1 and W2. Found it: is on wave 2 dataset
-
-y_w1_clean_3 %>%
+y_w1_clean_4 %>%
   filter(id == "301") # no id found in youth dataset, parent (dad) dropped from study
 
-y_w1_clean_3 %>%
-  filter(id == "504") # no id found
-y_w1_clean_3 %>%
-  filter(response_id == "R_2tnelq8IWX0oN9z") # response id tied to id 504 in call logs for W1. Youth completed W1 and W2. Remains a mistery what happended to wave 1 youth data. 
+y_w1_clean_4 %>%
+  filter(id == "504") # no id found in youth dataset
+y_w1_clean_4 %>%
+  filter(response_id == "R_2tnelq8IWX0oN9z") # response id tied to id 504 in call logs for W1. Youth completed W1 and W2. Remains a mystery what happened to wave 1 youth data. 
 
-y_w1_clean_3 %>%
+y_w1_clean_4 %>%
   filter(id == "623") # id present in students (complete data), not in parents bec dad dropped
 
-
-y_w1_clean_4 <- y_w1_clean_3 %>%
-  filter(id != 623)# deleted bec dad never completed W1 and was dropped from study (confirmed in logs).
-```
-
-# moving id 106 from wave 2 dataset to wave 1 dataset
-```{r}
-# Loading the data & initial cleaning
-y_w2_raw <- read_sav(here("nopublish", "Youth W2 SPAN_February 10, 2021_10.32.sav"))
-
-
-y_w2_raw <- y_w2_raw %>% 
-  arrange(H1_1_TEXT) %>% # ordering participants ids
-  janitor::clean_names() %>% # cleaning names
-  select(-h1) %>% 
-  rename(c("id" = "h1_1_text"),
-         c("wave" = "h5"))
-
-# Checking duplicated ids
-data.frame(table(y_w2_raw$id)) # 106, 313, 314, 405 (tripli), 408, 412, JCG (assesor error)
-
-# Further cleaning -- leaving out rows (false starts and coding errors)
-y_w2_clean <- y_w2_raw %>% 
-  select(-1:-8, -10:-17, -20, -21) %>%
-  filter(response_id != "R_20My7Nw91c2Kh6r") %>% # deleting duped row "false start" (id 405, with 47%)
-  filter(response_id != "R_3jebHOrmpEvVusr") %>% # deleting duped row "false start" (id 405, with 80%)
-    filter(response_id != "R_12LVKPebRTdZRF3") %>% # deleting row bec. filled with -99 throughout (id 408)
-  filter(response_id != "R_2Y5PBgkaoarXoW5") %>% # deleting duped row "false start" (id 412, with 2%)
-  filter(response_id != "R_1CHCJIPFkuEHBH2") %>% # deleting test row (id 999, with 2%)
-  arrange(id)
-
-data.frame(table(y_w2_clean$id)) # 106, 313, 314, JCG
-
-y_w2_clean_1 <- y_w2_clean %>% 
-   mutate(id = case_when(response_id == "R_yBDOsopku8j9smR" ~ "311", # id 313 recoded as 311
-                        response_id == "R_3m44tVSOd22OdTN" ~ "312", # id 314 recoded as 312
-                        response_id == "R_SCw7VH3ueceflUl" ~ "109", # id JCG recoded as 109
-                        TRUE ~ as.character(id))) %>%
-  arrange(id)
-
-data.frame(table(y_w2_clean_1$id)) # only 106 is dupped bec one belongs to wave 1
-
-# Fixing wrong condition assignment and school id
-y_w2_clean_2 <- y_w2_clean_1 %>%
-  mutate(school_id = str_sub(id, 1, 1),
-         condition = case_when(
-           school_id == "1" | school_id == "3" | school_id == "5" ~ "1",
-           school_id == "2" | school_id == "4" | school_id == "6" ~ "2"
-         )) %>%
-  select(school_id, condition, everything()) %>%
-  select(- h8) # deleting school var that has wrong assignment
-
-view_df(y_w2_clean_2)
-
-# Adding value labels, making vars numeric, and recoding response option in q38
-y_w2_clean_3 <- y_w2_clean_2 %>%
-  mutate(condition = as.numeric(condition),
-         condition = set_vall(condition, c("control" = 1, "intervention" = 2)),
-         school_id = as.numeric(school_id),
-         school_id = set_vall(school_id, c("cascade" = 1, "prairie_mountain" = 2, "kelly" = 3, "ata" = 4, "briggs" = 5, "agnes_stewart" = 6)),
-         q38 = ifelse(q38 == 99, 88, q38),
-         q38 = set_varl(q38, "In the last 3 months, how frequently has at least one of your parents/guardians… …attended a parent group meeting."),
-         q38 = set_vall(q38, c("Never" = 1, "Rarely" = 2, "Sometimes" = 3, "Often" = 4, "I don't know" = 88))) # q38 didn't have a 99 = no response option.
-
-view_df(y_w2_clean_3)
-
-y_w2_clean_4 <- y_w2_clean_3 %>%
-  filter(response_id != "R_1o4JcWGSoGCYx8w") # this is the youth wave 2 cleaned dataset
-  
-just_106 <- y_w2_clean_3 %>%
-  filter(response_id == "R_1o4JcWGSoGCYx8w") # this is just id 106
-```
-
-# joining id 106 to wave 1 (where it belongs)
-```{r}
-y_w1_clean_5 <- full_join(y_w1_clean_4, just_106) %>% 
-  arrange(id) # this is the cleaned complete youth wave 1 dataset
-
-data.frame(table(y_w1_clean_5$id)) # no dupped ids
-
-unique(y_w1_clean_5$id) # 94 youth
+y_w1_clean_5 <- y_w1_clean_4 %>%
+  filter(id != 623)# deleted bec dad never completed W1 and was dropped from study (confirmed in logs). Students = 94
 ```
 
 # cleaning names for joining
@@ -209,6 +163,6 @@ y_w1_clean_6 <- y_w1_clean_5 %>%
 
 view_df(y_w1_clean_6)
 
-# youth_w1 %>%
+# y_w1_clean_6 %>%
 #   haven::write_sav(here("nopublish", "y_w1_clean_6.sav")) 
 ```

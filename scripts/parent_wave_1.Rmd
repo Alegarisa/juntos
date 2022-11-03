@@ -118,7 +118,7 @@ p_w1_clean_3 %>%
   filter(participant_id == "301_2")# participant dropped from study and is -99 throughout. Id not present in w2 and w3.
 
 p_w1_clean_3 %>%
-  filter(family_id == "504") # parent participant data complete, but no student data for wave 1 (I found youth response id tied to id 504 in call logs for W1. Logs indicate youth completed W1 and W2. Remains a mistery what happended to wave 1 youth data.)
+  filter(family_id == "504") # parent participant data complete, but no student data for wave 1 (I found youth response id tied to id 504 in call logs for W1. Logs indicate youth completed W1 and W2. Remains a mystery what happened to wave 1 youth data.)
 ```
 
 # dataset with all parent data (note 08.26.22: not necesarilly linked with youth)
@@ -143,6 +143,8 @@ all_parent_wave1 %>%
 
 unique(all_parent_wave1$family_id) # 95 unique id values, thus 95 families in W1. 
 ```
+
+
 ```{r}
 view_df(all_parent_wave1)
 # all_parent_wave1 %>%
@@ -156,7 +158,10 @@ view_df(all_parent_wave1)
 # # Total participants in wave n = 124
 # ------------------------------------
 
+##############################################
 # keeping only parent & student linked data
+##############################################
+
 ```{r}
 p_w1_clean_4 <- p_w1_clean_3 %>%
   filter(family_id != 301) %>% # deleted bec participant dropped from study and is -99 throughout. Id not present in w2 and w3.
@@ -227,3 +232,4 @@ note2: the joined data below has the HV #1 data from step parent with id 415_4 w
 #   haven::write_sav(here("nopublish", "parent_hv1_youth_w1.sav")) # dataset created on April 5, 2022
 ```
 
+Note on Nov 3/22: This parent_hv1_youth_w1 doesn't include a renaming of variables h2 (TC sex) & h6 (Interview location), but it's irrelevant. 
