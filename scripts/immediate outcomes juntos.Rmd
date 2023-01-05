@@ -21,9 +21,68 @@ library(psych)
 library(sjmisc)
 ```
 
-# Loading the data
+# Loading the data (wave 1)
 ```{r}
-d_raw_w1 <- read_sav(here("nopublish", "all_parent_wave1.sav"))
-
-d_raw_w2 <- read_sav(here("nopublish", "all_parent_wave2.sav"))
+d_raw_w1 <- read_sav(here("nopublish", "all_parent_wave1.sav")) %>%
+  arrange(participant_id)
 ```
+
+# Loading the data (wave 2)
+```{r}
+d_raw_w2 <- read_sav(here("nopublish", "all_parent_wave2.sav")) %>%
+  arrange(participant_id)
+```
+
+
+# filtering primary caregiver only (wave 1)
+```{r}
+d_w1 <- d_raw_w1 %>%
+  select(-response_id) %>%
+  distinct(family_id, .keep_all = TRUE) # 95 primary caregivers
+```
+
+# filtering primary caregiver only (wave 2)
+```{r}
+d_w2 <- d_raw_w2 %>%
+  select(-response_id) %>%
+  distinct(family_id, .keep_all = TRUE) # 84 primary caregivers
+```
+
+id 110, 113, 209, 405, 407, 419, 508, 509, 612, 619, 620 not present in w2 = 11 primary cargiver participants lost to w2
+
+```{r}
+# adding "p1" to each variable name: "p" stands for parent, "1" for wave 1.
+# names(d_w1) <- paste(names(d_w1), "p1", sep = "_")
+
+d2_w1 <- d_w1 %>%
+  rename(c("school_id" = "school_id_p1"),
+         c("condition" = "condition_p1"),
+         c("family_id" = "family_id_p1"),
+         c("participant_id" = "participant_id_p1"))
+```
+
+```{r}
+# adding "p1" to each variable name: "p" stands for parent, "2" for wave 2.
+# names(d_w2) <- paste(names(d_w2), "p2", sep = "_")
+
+d2_w2 <- d_w2 %>%
+  rename(c("school_id" = "school_id_p2"),
+         c("condition" = "condition_p2"),
+         c("family_id" = "family_id_p2"),
+         c("participant_id" = "participant_id_p2"))
+```
+
+# joining w1 and w2
+```{r}
+parent_w1_w2 <- left_join(d2_w1, d2_w2)
+```
+
+# creating dataset with w1 and w2 for SPSS analysis
+```{r}
+# parent_w1_w2 %>%
+#   haven::write_sav(here("nopublish", "parent_w1_w2.sav"))
+```
+
+TO DO NEXT
+- use code to make -99, 99, 88, 77 to NA
+- create scales?
