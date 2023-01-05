@@ -1,0 +1,29 @@
+---
+title: "immediate outcomes juntos"
+author: "Alejandra Garcia Isaza"
+date: "2023-01-05"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(rio)
+library(here)
+library(tidyverse)
+library(haven)
+library(janitor)
+library(knitr)
+library(surveytoolbox)
+library(sjPlot)
+library(kableExtra)
+library(psych)
+library(sjmisc)
+```
+
+# Loading the data
+```{r}
+d_raw_w1 <- read_sav(here("nopublish", "all_parent_wave1.sav"))
+
+d_raw_w2 <- read_sav(here("nopublish", "all_parent_wave2.sav"))
+```
