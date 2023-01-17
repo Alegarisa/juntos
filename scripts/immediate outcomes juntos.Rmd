@@ -64,7 +64,7 @@ d2_w1 <- d_w1 %>%
 ```
 
 ```{r}
-# adding "p1" to each variable name: "p" stands for parent, "2" for wave 2.
+# adding "p2" to each variable name: "p" stands for parent, "2" for wave 2.
 # names(d_w2) <- paste(names(d_w2), "p2", sep = "_")
 
 d2_w2 <- d_w2 %>%
@@ -74,16 +74,22 @@ d2_w2 <- d_w2 %>%
          c("participant_id" = "participant_id_p2"))
 ```
 
-# joining w1 and w2
+# joining w1 and w2 (PARENT)
 ```{r}
 parent_w1_w2 <- left_join(d2_w1, d2_w2)
 ```
 
-# creating dataset with w1 and w2 for SPSS analysis
+# creating dataset with w1 and w2 for SPSS analysis (PARENT)
 ```{r}
 # parent_w1_w2 %>%
 #   haven::write_sav(here("nopublish", "parent_w1_w2.sav"))
 ```
+
+# loading parent W1 & W2 dataset
+```{r}
+pa_w1_w2 <- read_sav(here("nopublish", "parent_w1_w2.sav"))
+```
+
 
 TO DO NEXT
 - use code to make -99, 99, 88, 77 to NA
@@ -96,9 +102,6 @@ TO DO NEXT
 y_raw_w1 <- read_sav(here("nopublish", "all_youth_wave1.sav")) %>%
   rename(c("family_id" = "id")) %>%
   arrange(family_id)
-
-y_raw_w1 %>%
-  filter(response_id == "R_2tnelq8IWX0oN9z")
 ```
 
 # Loading the data (wave 2)
@@ -106,33 +109,47 @@ y_raw_w1 %>%
 y_raw_w2 <- read_sav(here("nopublish", "all_youth_wave2.sav")) %>%
   rename(c("family_id" = "id")) %>%
   arrange(family_id)
+```
+id 110, 112, 113, 209, 210, 407, 410, 419, 508, 509, 606, 612, 620, 621, 623 not present in w2 = 15 participants lost to w2
 
-y_raw_w2 %>%
-  filter(response_id == "R_2tnelq8IWX0oN9z")
+```{r}
+# adding "y1" to each variable name: "y" stands for youth, "1" for wave 1.
+# names(y_raw_w1) <- paste(names(y_raw_w1), "y1", sep = "_")
+
+y_w1 <- y_raw_w1 %>%
+  select(-response_id_y1) %>%
+  rename(c("school_id" = "school_id_y1"),
+         c("condition" = "condition_y1"),
+         c("family_id" = "family_id_y1")) 
+```
+```{r}
+# adding "y1" to each variable name: "y" stands for youth, "1" for wave 1.
+# names(y_raw_w2) <- paste(names(y_raw_w2), "y2", sep = "_")
+
+y_w2 <- y_raw_w2 %>%
+  select(-response_id_y2) %>%
+  rename(c("school_id" = "school_id_y2"),
+         c("condition" = "condition_y2"),
+         c("family_id" = "family_id_y2")) 
 ```
 
-youth id 110, 112, 113, 209, 210, 407, 410, 504(not in w1, yes in w2), 508, 509, 606, 612, 620, 621, 623, 624 lost to w2. 
+# joining w1 and w2 (YOUTH)
+```{r}
+youth_w1_w2 <- left_join(y_w1, y_w2)
+```
 
-parents the are not present in w2:
+# creating dataset with w1 and w2 for SPSS analysis (YOUTH)
+```{r}
+# youth_w1_w2 %>%
+#   haven::write_sav(here("nopublish", "youth_w1_w2.sav"))
+```
 
-110(not in w2, but yes in w3) --> ASSESSMENT LOG: complete w1 for mom, dad, and tc // no data for w2 // complete mom and dad data, around a year after BL. CONTACT LOGS: assessm. were done in person at family's home --> probably the data was never logged into Qualtrics. 
+# loading YOUTH W1 & W2 dataset
+```{r}
+y_w1_w2 <- read_sav(here("nopublish", "youth_w1_w2.sav"))
+```
 
-113(not in w2, but yes in w3):
-
-209:
-
-405(not in w2, but yes in w3):
-
-
-407:
-419: 
-508: 
-509:
-
-612(not in w2, but yes in w3):
-
-619(not in w2, but yes in w3):
-
-620(not in w2, but yes in w3):
-
-look for excel document I created: "missing ids" on scripts folder
+# joining w1 and w2 parent & youth (ALL)
+```{r}
+fam_w1_w2 <- inner_join(pa_w1_w2, y_w1_w2) # id 504 was not included 
+```
