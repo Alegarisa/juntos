@@ -21,6 +21,8 @@ library(psych)
 library(sjmisc)
 ```
 
+### PARENT ###
+
 # Loading the data (wave 1)
 ```{r}
 d_raw_w1 <- read_sav(here("nopublish", "all_parent_wave1.sav")) %>%
@@ -48,7 +50,7 @@ d_w2 <- d_raw_w2 %>%
   distinct(family_id, .keep_all = TRUE) # 84 primary caregivers
 ```
 
-id 110, 113, 209, 405, 407, 419, 508, 509, 612, 619, 620 not present in w2 = 11 primary cargiver participants lost to w2
+id 110, 113, 209, 405, 407, 419, 508, 509, 612, 619, 620 not present in w2 = 11 primary caregiver participants lost to w2
 
 ```{r}
 # adding "p1" to each variable name: "p" stands for parent, "1" for wave 1.
@@ -86,3 +88,51 @@ parent_w1_w2 <- left_join(d2_w1, d2_w2)
 TO DO NEXT
 - use code to make -99, 99, 88, 77 to NA
 - create scales?
+
+### YOUTH ###
+
+# Loading the data (wave 1)
+```{r}
+y_raw_w1 <- read_sav(here("nopublish", "all_youth_wave1.sav")) %>%
+  rename(c("family_id" = "id")) %>%
+  arrange(family_id)
+
+y_raw_w1 %>%
+  filter(response_id == "R_2tnelq8IWX0oN9z")
+```
+
+# Loading the data (wave 2)
+```{r}
+y_raw_w2 <- read_sav(here("nopublish", "all_youth_wave2.sav")) %>%
+  rename(c("family_id" = "id")) %>%
+  arrange(family_id)
+
+y_raw_w2 %>%
+  filter(response_id == "R_2tnelq8IWX0oN9z")
+```
+
+youth id 110, 112, 113, 209, 210, 407, 410, 504(not in w1, yes in w2), 508, 509, 606, 612, 620, 621, 623, 624 lost to w2. 
+
+parents the are not present in w2:
+
+110(not in w2, but yes in w3) --> ASSESSMENT LOG: complete w1 for mom, dad, and tc // no data for w2 // complete mom and dad data, around a year after BL. CONTACT LOGS: assessm. were done in person at family's home --> probably the data was never logged into Qualtrics. 
+
+113(not in w2, but yes in w3):
+
+209:
+
+405(not in w2, but yes in w3):
+
+
+407:
+419: 
+508: 
+509:
+
+612(not in w2, but yes in w3):
+
+619(not in w2, but yes in w3):
+
+620(not in w2, but yes in w3):
+
+look for excel document I created: "missing ids" on scripts folder
