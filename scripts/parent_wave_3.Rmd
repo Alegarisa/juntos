@@ -1,0 +1,64 @@
+---
+title: "parent_wave_3"
+output: html_document
+date: "2023-01-24"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(rio)
+library(here)
+library(tidyverse)
+library(haven)
+library(janitor)
+library(knitr)
+library(surveytoolbox)
+library(sjPlot)
+library(kableExtra)
+library(psych)
+library(sjmisc)
+```
+
+################## WAVE 3 ##################
+
+# Loading the data & initial cleaning
+```{r}
+# wave 3 was separated in 2 different datasets.
+
+p_w3_raw_a <- read_sav(here("nopublish", "7bb. Juntos Parent W3-SPAN_February 10, 2021_10.26.sav"))
+
+p_w3_raw_a <- p_w3_raw_a %>% 
+  arrange(ID_1_TEXT) %>% # ordering participants ids
+  janitor::clean_names() %>% # cleaning names
+  select(-id) %>% 
+  rename(c("id" = "id_1_text"))
+
+p_w3_raw_b <- read_sav(here("nopublish", "7bb. Juntos Parent W3-SPAN_February 10, 2021_10.27.sav"))
+
+p_w3_raw_b <- p_w3_raw_b %>% 
+  arrange(ID_1_TEXT) %>% # ordering participants ids
+  janitor::clean_names() %>% # cleaning names
+  select(-id) %>% 
+  rename(c("id" = "id_1_text"))
+
+p_w3_raw <- full_join(p_w3_raw_a, p_w3_raw_b) %>% 
+  arrange(id) # 114 rows
+```
+
+
+# Checking incomplete rows & duplicated ids
+```{r}
+p_w3_raw %>%
+  filter(finished == 0) # ids 310 (dad) & 613 (dad) had false starts
+
+p_w3_raw2 <- p_w3_raw %>%
+  filter(response_id != "R_2uUNENaFPEhYnLd") %>% # id 107 has -99 throughout
+  filter(response_id != "R_2eOPgZuGKJkMCyd") %>% # id 310 has NA prob. false start
+  filter(response_id != "R_3ffsDz6qZB2plqr") # id 613 has NA prob. false start
+
+data.frame(table(p_w3_raw2$id)) # 23 ids have 2 or more instances each (ids 408 and 415 has 3 instances each)
+```
+
+
+
