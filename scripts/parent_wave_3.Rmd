@@ -53,12 +53,104 @@ p_w3_raw %>%
   filter(finished == 0) # ids 310 (dad) & 613 (dad) had false starts
 
 p_w3_raw2 <- p_w3_raw %>%
+  select(-1:-8, -10:-17, -19, -20) %>% # selecting out columns with metadata
   filter(response_id != "R_2uUNENaFPEhYnLd") %>% # id 107 has -99 throughout
   filter(response_id != "R_2eOPgZuGKJkMCyd") %>% # id 310 has NA prob. false start
   filter(response_id != "R_3ffsDz6qZB2plqr") # id 613 has NA prob. false start
 
 data.frame(table(p_w3_raw2$id)) # 23 ids have 2 or more instances each (ids 408 and 415 has 3 instances each)
 ```
+# Fixing wrong condition assignment and school id
+```{r}
+# fixing wrong assignment
+p_w3_clean <- p_w3_raw2 %>%
+  mutate(school_id = str_sub(id, 1, 1),
+         condition = case_when(
+           school_id == "1" | school_id == "3" | school_id == "5" ~ "1",
+           school_id == "2" | school_id == "4" | school_id == "6" ~ "2"
+         )) %>%
+  select(school_id, condition, everything()) %>%
+  select(- school) # selecting out (i.e. deleting) original faulty school variable
+```
+# Adding value labels and making vars numeric 
+```{r}
+p_w3_clean_2 <- p_w3_clean %>%
+  mutate(condition = as.numeric(condition),
+         condition = set_vall(condition, c("control" = 1, "intervention" = 2)),
+         school_id = as.numeric(school_id),
+         school_id = set_vall(school_id, c("cascade" = 1, "prairie_mountain" = 2, "kelly" = 3, "ata" = 4, "briggs" = 5, "agnes_stewart" = 6)))
+```
+# Creating individual id variable
+```{r}
+p_w3_clean_3 <- p_w3_clean_2 %>%
+  mutate(participant = set_vall(participant, c("mom" = 1, "dad" = 2, "tutor legal" = 3, "other, specify" = 4)),
+         participant_id = paste0(id, "_", participant), .before = 5) %>% # new var as unique identifier
+  rename(c("family_id" = "id")) %>%
+  arrange(participant_id) 
 
+view_df(p_w3_clean_3)
+```
+# renaming vars to correspond to value labels
+```{r}
+# item that asks about # of adults in home was spreaded out and had an unusual coding.
+p_w3_clean_3 <- p_w3_clean_3 %>%
+  rename(c("q211_1" = "q211_2"),
+         c("q211_2" = "q211_99"),
+         c("q211_3" = "q211_4"),
+         c("q211_4" = "q211_5"),
+         c("q211_5" = "q211_6"),
+         c("q211_99" = "q211_7"),
+         c("adults_home_text" = "q211_6_text"))
+```
 
+# checking duped ids
+```{r}
+# 111 rows of data
 
+data.frame(table(p_w3_clean_3$participant_id)) # id 405 dupped -> 2 dads; id 408 dupped -> 2 dads; id 605 dupped -> 2 moms
+
+p_w3_clean_3 %>%
+  filter(family_id == 405) # 2 dads
+# very similar responses but not identical. Differences on -99, NA, and zeros
+# response_id: R_cXQAULkCQKs9ZWd says "imported" in dataset. virtually identical metadata info. 
+# Logs info: two parent family (mom & dad) on w1, but no evidence of assessment completed for either on w2. 
+
+p_w3_clean_3 %>%
+  filter(participant_id == "408_2") # 2 dads
+# very similar responses but not identical. Differences on -99, NA, and zeros
+# # response_id: R_eWNINjAZviHsnzv says "imported" in dataset. 
+# Logs info: two parent family (mom & dad) on w1 and w2 --> complete data.
+
+p_w3_clean_3 %>%
+  filter(family_id == 605) # 2 moms
+# very similar responses but not identical. Differences on -99, NA, and zeros
+# # response_id: R_0jEpFqwcLyP4yDX says "imported" in dataset.
+# Logs info: one-parent family, a mom in wave 1 and 2. Complete data. 
+
+# My overall conclusion: it appears that the duped "imported" cases are true duplicates. What differs is how Qualtrics coded non-responses: 0, NA, or -99. 
+
+```
+
+# Number of participants in Wave 2 (taking out duped cases 405, 408, 605)
+```{r}
+
+test_set <- p_w3_clean_3 %>%
+  filter(response_id != "R_cXQAULkCQKs9ZWd") %>% 
+  filter(response_id != "R_eWNINjAZviHsnzv") %>% 
+  filter(response_id != "R_0jEpFqwcLyP4yDX") 
+
+# 108 total parent participants in w2, from which...
+
+test_set %>%
+  filter(participant == 1) # 80 were moms
+
+test_set %>%
+  filter(participant == 2) # 26 were dads
+
+test_set %>%
+  filter(participant == 4) # 2 were "other" (1 stepmom (id 415), 1 grandmother (id 507)) 
+
+unique(test_set$family_id) # 86 unique id values, thus 86 families in W2. 
+
+data.frame(table(test_set$participant_id)) # 21 duplicated ids that match two-parent families in w1, 1 family (id 415) three-parent fam. 
+```
