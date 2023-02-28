@@ -1,0 +1,108 @@
+---
+title: "youth_wave_3"
+author: "Alejandra Garcia Isaza"
+date: "2023-02-28"
+output: html_document
+---
+
+Note on February 28, 2023: I copied the Rmd called "youth_wave_2.Rmd". This document only contains wave 3 youth data. 
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(rio)
+library(here)
+library(tidyverse)
+library(haven)
+library(janitor)
+library(knitr)
+library(surveytoolbox)
+library(sjPlot)
+library(kableExtra)
+library(psych)
+library(sjmisc)
+```
+
+################## WAVE 2 ##################
+
+# Loading the data & initial cleaning
+```{r}
+y_w3_raw <- read_sav(here("nopublish", "Youth W3 SPAN_February 10, 2021_11.05.sav"))
+
+
+y_w3_raw <- y_w3_raw %>% 
+  arrange(H1_1_TEXT) %>% # ordering participants ids
+  janitor::clean_names() %>% # cleaning names
+  select(-h1) %>% 
+  rename(c("id" = "h1_1_text"),
+         c("sex" = "h2"),
+         c("wave" = "h5"),
+         c("int_location" = "h6"),
+         c("int_location_4_text" = "h6_4_text"))
+```
+
+# Checking incomplete rows & duplicated ids
+```{r}
+y_w3_raw %>%
+  filter(finished == 0) # 6 records incomplete, but three are 99% (308, 405, 415), one 70% 620), and two less than 5% (ids 405 & 613, prob false starts)
+
+y_w3_raw %>% 
+  filter(wave == 1) # no rows from w1
+
+y_w3_raw %>% 
+  filter(wave == 2) # no rows from w2
+
+data.frame(table(y_w3_raw$id)) # 405(tripli), 613(dupped), 620 (dupped)
+```
+	
+# Further cleaning -- leaving out rows (false starts)
+```{r}
+y_w3_clean <- y_w3_raw %>% 
+  select(-1:-8, -10:-17, -20, -21) %>%
+  filter(response_id != "R_2cvl2wUGSyMBH2V") %>% # deleting duped row "false start" (id 405, with 100% bec qualtrics filled with -99 after q107)
+  filter(response_id != "R_PzESZy9gZPQEb9D") %>% # deleting duped row "false start" (id 405, with 4%)
+  filter(response_id != "R_1rkc9GzcBpTf5Ap") %>% # deleting row bec. filled with . throughout (id 613, with 2%)
+  filter(response_id != "R_2RayAqcviYXNSM6") %>% # deleting duped row "false start" (id 620, with 71%)
+  arrange(id)
+
+data.frame(table(y_w3_clean$id)) # no duppes
+```
+
+# Fixing wrong condition assignment and school id
+```{r}
+y_w3_clean_1 <- y_w3_clean %>%
+  mutate(school_id = str_sub(id, 1, 1),
+         condition = case_when(
+           school_id == "1" | school_id == "3" | school_id == "5" ~ "1",
+           school_id == "2" | school_id == "4" | school_id == "6" ~ "2"
+         )) %>%
+  select(school_id, condition, everything()) %>%
+  select(- h8) # deleting school var that has wrong assignment
+```
+
+# Adding value labels, making vars numeric, and recoding response option in q38
+```{r}
+y_w3_clean_2 <- y_w3_clean_1 %>%
+  mutate(condition = as.numeric(condition),
+         condition = set_vall(condition, c("control" = 1, "intervention" = 2)),
+         school_id = as.numeric(school_id),
+         school_id = set_vall(school_id, c("cascade" = 1, "prairie_mountain" = 2, "kelly" = 3, "ata" = 4, "briggs" = 5, "agnes_stewart" = 6)),
+         q38 = ifelse(q38 == 99, 88, q38),
+         q38 = set_varl(q38, "In the last 3 months, how frequently has at least one of your parents/guardians… …attended a parent group meeting."),
+         q38 = set_vall(q38, c("Never" = 1, "Rarely" = 2, "Sometimes" = 3, "Often" = 4, "I don't know" = 88))) # q38 didn't have a 99 = no response option.
+```
+
+# Number of participants in Wave 3 
+```{r}
+unique(y_w3_clean_2$id) # 85 students
+```
+
+
+```{r}
+view_df(y_w3_clean_2)
+```
+```{r}
+# y_w3_clean_2 %>%
+#   haven::write_sav(here("nopublish", "all_youth_wave3.sav"))
+```
+

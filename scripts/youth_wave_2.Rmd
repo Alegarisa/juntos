@@ -118,7 +118,7 @@ just_106 <- y_w2_clean_3 %>%
 #   haven::write_sav(here("nopublish", "just_106.sav"))
 ```
 
-
+# Number of participants in Wave 2
 ```{r}
 unique(y_w2_clean_4$id) # 81 students
 

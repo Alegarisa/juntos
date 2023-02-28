@@ -106,7 +106,10 @@ just_106 <- read_sav(here("nopublish", "just_106.sav"))
 ```{r}
 y_w1_clean_4 <- full_join(y_w1_clean_3, just_106) %>% 
   arrange(id) # this is the cleaned complete youth wave 1 dataset
+```
 
+# Number of participants in Wave 1
+```{r}
 data.frame(table(y_w1_clean_4$id)) # no duped ids
 
 unique(y_w1_clean_4$id) # 95 youth

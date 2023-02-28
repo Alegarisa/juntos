@@ -131,26 +131,32 @@ p_w3_clean_3 %>%
 
 ```
 
-# Number of participants in Wave 2 (taking out duped cases 405, 408, 605)
+# Number of participants in Wave 3 (taking out duped cases 405, 408, 605)
 ```{r}
 
-test_set <- p_w3_clean_3 %>%
-  filter(response_id != "R_cXQAULkCQKs9ZWd") %>% 
-  filter(response_id != "R_eWNINjAZviHsnzv") %>% 
-  filter(response_id != "R_0jEpFqwcLyP4yDX") 
+p_w3_clean_3 <- p_w3_clean_3 %>%
+  filter(response_id != "R_cXQAULkCQKs9ZWd") %>% # id 405
+  filter(response_id != "R_eWNINjAZviHsnzv") %>% # 408
+  filter(response_id != "R_0jEpFqwcLyP4yDX") # id 605
 
 # 108 total parent participants in w2, from which...
 
-test_set %>%
+p_w3_clean_3 %>%
   filter(participant == 1) # 80 were moms
 
-test_set %>%
+p_w3_clean_3 %>%
   filter(participant == 2) # 26 were dads
 
-test_set %>%
+p_w3_clean_3 %>%
   filter(participant == 4) # 2 were "other" (1 stepmom (id 415), 1 grandmother (id 507)) 
 
-unique(test_set$family_id) # 86 unique id values, thus 86 families in W2. 
+unique(p_w3_clean_3$family_id) # 86 unique id values, thus 86 families in W2. 
 
-data.frame(table(test_set$participant_id)) # 21 duplicated ids that match two-parent families in w1, 1 family (id 415) three-parent fam. 
+data.frame(table(p_w3_clean_3$participant_id)) # 21 duplicated ids that match two-parent families in w1, 1 family (id 415) three-parent fam. 
 ```
+
+```{r}
+# p_w3_clean_3 %>%
+#   haven::write_sav(here("nopublish", "all_parent_wave3.sav"))
+```
+
