@@ -33,7 +33,31 @@ theme_set(theme_minimal())
 
 # Loading the dataset
 ```{r}
-d_par_w1 <- read_sav(here("outcomes paper/data_outcomes", "all_parent_wave1.sav")) # This dataset has ALL parents in wave 1 (n = 124)
+d_par_w1_raw <- read_sav(here("outcomes paper/data_outcomes", "all_parent_wave1.sav")) # This dataset has ALL parents in wave 1 (n = 124)
+```
+
+# filtering primary caregiver only (wave 1)
+```{r}
+d_par_w1 <- d_par_w1_raw %>%
+  filter(participant_id != "405_1") %>% # removing mother who has less waves of data than father
+  filter(participant_id != "614_1") %>% # removing mother who has less waves of data than father
+  distinct(family_id, .keep_all = TRUE) # 95 primary caregivers
+```
+
+# Number of participants types in Wave 1 
+```{r}
+# 123 total participants in w1, from which...
+
+d_par_w1 %>%
+  filter(participant == 1) # 89 were moms
+
+d_par_w1 %>%
+  filter(participant == 2) # 5 were dads
+
+d_par_w1 %>%
+  filter(participant == 4) # 1 were "other" (grandparent)
+
+unique(d_par_w1$family_id) # 95 unique id values, thus 95 families in W1. 
 ```
 
 ```{r}
@@ -63,7 +87,7 @@ d1_par_w1 <- recode_missing_df(d_par_w1) # the function strips out variable labe
 
 # Data prep: reverse scoring negatively worded items
 ```{r}
-d1_par_w1 <- d1_par_w1 %>%
+d2_par_w1 <- d1_par_w1 %>%
   mutate(q82 = likert_reverse(q82, top = 4, bottom = 1),
          q83 = likert_reverse(q83, top = 4, bottom = 1),
          q131 = likert_reverse(q131, top = 4, bottom = 1),
@@ -71,6 +95,14 @@ d1_par_w1 <- d1_par_w1 %>%
          q136 = likert_reverse(q136, top = 4, bottom = 1))
 ```
 
+# checking reverse scoring
+```{r}
+d1_par_w1 %>%
+  select(q136)
+
+d2_par_w1 %>%
+  select(q136)
+```
 
 # Parenting Dimensions in JCCP NF paper 
 
@@ -89,10 +121,10 @@ Juntos items:
 9.	Fuimos a la Iglesia, sinagoga, u otro servicio religioso.
 
 ```{r}
-# posinvo <- d1_par_w1 %>%
+# posinvo <- d2_par_w1 %>%
 #   select(q1, q2, q3, q4, q5, q6, q7, q8, q9)
 # 
-# alpha(posinvo) # 0.55 poor
+# alpha(posinvo) # 0.54 poor (0.55 if all caregivers included)
 ```
 Alternatively (I LIKE THESE BETTER):
 
@@ -104,10 +136,10 @@ Alternatively (I LIKE THESE BETTER):
 121.	Como madre/padre, es mi trabajo reconocer y apoyar las fortalezas de mi joven
 
 ```{r}
-posinvo_2 <- d1_par_w1 %>%
+posinvo_2 <- d2_par_w1 %>%
   select(q116, q117, q118, q119, q120, q121) # NO EFA here, just face value.
 
-alpha(posinvo_2) # 0.90 
+alpha(posinvo_2) # 0.91 (0.90 if all caregivers included)
 ```
 
 - Monitoring (from my diss)
@@ -126,10 +158,10 @@ Not included:
 142.	Los amigos de mi joven se apoyan positivamente entre sí.
 
 ```{r}
-monit <- d1_par_w1 %>%
+monit <- d2_par_w1 %>%
   select(q137, q139, q140, q143, q144)
 
-alpha(monit) # 0.68 poor
+alpha(monit) # 0.64 (0.68 poor if all caregivers included)
 ```
 
 -	Homework engagement (from my diss)
@@ -140,7 +172,7 @@ Homework Involvement.  A total of 17 items reflecting the frequency in which par
 
 EFA analyses: Interpretation of items in factor one (n = 7) suggested a more academic approach to parents’ homework involvement where the parent plays a sort of tutor role; they sit by their youth’s side, help when they are stuck, quiz them to reinforce learning, correct their youth’s mistakes, and help their youth get access to additional learning resources (α = .78). Interpretation of items in factor two (n = 4) suggested a more monitoring approach to parents’ homework involvement where the parent does not get involved in academic matters, but makes sure their youth has a time and place to do their homework, checks with the youth to ensure homework is done, and checks with the teacher to ensure homework completion (α = .70).  Finally, interpretation of items in factor three (n = 3) suggested parents’ use of contingent reinforcement strategies to increase behavioral compliance with homework completion (α = .59).  
 
-hwinvo_1
+hwinvo_1 (intensive support)
 86	Me senté con mi joven mientras él / ella hacía su tarea
 87	Me hice disponible para mi joven cuando tenía preguntas sobre su tarea
 88	Ayudé a mi joven cuando estaba atascado/a en una tarea
@@ -150,26 +182,26 @@ hwinvo_1
 97	Le ayudé a mi joven practicar habilidades (lectura, revisión, problemas de práctica, etc.)
 
 ```{r}
-hwinvo_1 <- d1_par_w1 %>%
+hwinvo_1 <- d2_par_w1 %>%
   select(q86, q87, q88, q89, q94, q96, q97)
 
-alpha(hwinvo_1) # 0.79 fair
+alpha(hwinvo_1) # 0.78 (0.79 fair if all caregivers included)
 ```
 
-hwinvo_2
+hwinvo_2 (general support)
 84	Me aseguré de que tenga un cierto tiempo para hacer la tarea
 85	Me aseguré de que él / ella tenga un cierto lugar para hacer la tarea
 93	Comprobé con mi joven para asegurarme de que él / ella hiciera su tarea
 95	Comprobé con la maestra/o para asegurarme que mi joven terminó su tarea 
 
 ```{r}
-hwinvo_2 <- d1_par_w1 %>%
+hwinvo_2 <- d2_par_w1 %>%
   select(q84, q85, q93, q95)
 
-alpha(hwinvo_2) # 0.65 poor (0.69 if removing 95)
+alpha(hwinvo_2) # 0.68; 0.74 if removing 95 (0.65 poor if all caregivers included; 0.69 if removing 95)
 ```
 
-hwinvo_3
+hwinvo_3 (skill encouragement to hw)
 90	Le di a mi joven incentivos como privilegios especiales, regalos especiales, etc.
 91	Utilicé consecuencias, castigos, acciones disciplinarias
 98	Limité el ruido y/o las distracciones mientras hacia su tarea
@@ -181,10 +213,10 @@ Not included:
 92	Le recordé a mi joven que hiciera su tarea .28
 
 ```{r}
-hwinvo_3 <- d1_par_w1 %>%
+hwinvo_3 <- d2_par_w1 %>%
   select(q90, q91, q98) 
 
-alpha(hwinvo_3) # 0.51 poor
+alpha(hwinvo_3) # 0.58 (0.51 poor if all caregivers included)
 ```
 
 -	Skill encouragement
@@ -192,14 +224,15 @@ alpha(hwinvo_3) # 0.51 poor
 
 90.	Le di a mi joven incentivos como privilegios especiales, regalos especiales, etc.
 91.	Utilicé consecuencias, castigos, acciones disciplinarias
+
 134.	Cuando mi joven está aprendiendo un nuevo comportamiento (por ejemplo: ser más responsable, estudioso/a u organizado/a), reconozco su progreso con, por ejemplo, un abrazo, una sonrisa o un pequeño regalo
 135.	Cuando mi joven se enfrenta a un gran desafío o establece una meta, le ayudo a centrarse en los pequeños pasos para lograr esa meta.
 
 ```{r}
-# skill <- d1_par_w1 %>%
+# skill <- d2_par_w1 %>%
 #   select(q90, q91, q134, q135) # NO EFA here, just face value.
 # 
-# alpha(skill) # 0.32 poor
+# alpha(skill) # 0.41 (0.32 poor if all caregivers included)
 ```
 
 -	Appropriate discipline
@@ -209,34 +242,59 @@ alpha(hwinvo_3) # 0.51 poor
 129.	Mi joven sabe cómo voy a responder cuando hace algo malo cosas que no me gustan o lo que está en contra las reglas de la casa) 
 130.	Cada vez que mi joven hace algo mal, yo le respondo con una consecuencia específica (por ejemplo, una disciplina específica, quitándole privilegios, etc.) 
 132.	Puedo controlar mi enojo y mantenerme calmado/a cuando disciplino o discuto con mi joven cuando él / ella hace algo mal
-134.	Cuando mi joven está aprendiendo un nuevo comportamiento (por ejemplo: ser más responsable, estudioso/a u organizado/a), reconozco su progreso con, por ejemplo, un abrazo, una sonrisa o un pequeño regalo
-135.	Cuando mi joven se enfrenta a un gran desafío o establece una meta, le ayudo a centrarse en los pequeños pasos para lograr esa meta.
 
-
-Not used (they are negatively worded and I think the model is picking up this)
+# Not used (they are negatively worded and I think the model is picking up this)
 131.	Cuando mi joven hace algo mal, le grito o le insulto 
 133.	Cuando mi joven me desafía al no hacer lo que le pido, yo renuncio 
 136.	Cuando le doy una amenaza o advertencia a mi joven, frecuentemente no lo llevo a cabo
 
-```{r}
-# discip <- d1_par_w1 %>%
-#   select(q128, q129, q130, q131, q132, q133, q136) # NO EFA here, just face value.
-# alpha(discip) # 0.65 poor
-```
+# Not used because these are not discipline but skill encouragement
+134.	Cuando mi joven está aprendiendo un nuevo comportamiento (por ejemplo: ser más responsable, estudioso/a u organizado/a), reconozco su progreso con, por ejemplo, un abrazo, una sonrisa o un pequeño regalo
+135.	Cuando mi joven se enfrenta a un gran desafío o establece una meta, le ayudo a centrarse en los pequeños pasos para lograr esa meta.
 
 ```{r}
-discip_2 <- d1_par_w1 %>%
-  select(q128, q129, q130, q132, q134, q135) # NO EFA here, just face value.
+discip_pos <- d2_par_w1 %>%
+  select(q128, q129, q130, q132) # NO EFA here, just face value.
 
-alpha(discip_2) # 0.83
+alpha(discip_pos) # 0.77 
+```
+```{r}
+# discip_neg <- d2_par_w1 %>%
+#   select(q131, q133, q136) # NO EFA here, just face value.
+# 
+# alpha(discip_neg) # 0.50
 ```
 
+
+```{r}
+# discip_2 <- d2_par_w1 %>%
+#   select(q128, q129, q130, q132, q134, q135) # NO EFA here, just face value.
+# 
+# alpha(discip_2) # 0.83 (0.83 if all caregivers included)
+```
 
 -	General parenting
 "General parenting was an average scale score of eight items reflecting general use of effective parenting strategies during the past month with the focal youth (e.g., communicating calmly and clearly with the youth when there was a disagreement, negotiating emotional conflicts and working
 toward solutions, being consistent with discipline, and following through with consequences)." (p. 846)
 
-Items would be too similar to appropiate disciline. 
+128.	En casa, estamos de acuerdo con reglas claras sobre lo que mi joven puede y no puede hacer. 
+129.	Mi joven sabe cómo voy a responder cuando hace algo malo cosas que no me gustan o lo que está en contra las reglas de la casa) 
+130.	Cada vez que mi joven hace algo mal, yo le respondo con una consecuencia específica (por ejemplo, una disciplina específica, quitándole privilegios, etc.) 
+131.	Cuando mi joven hace algo mal, le grito o le insulto 
+132.	Puedo controlar mi enojo y mantenerme calmado/a cuando disciplino o discuto con mi joven cuando él / ella hace algo mal
+133.	Cuando mi joven me desafía al no hacer lo que le pido, yo renuncio 
+134.	Cuando mi joven está aprendiendo un nuevo comportamiento (por ejemplo: ser más responsable, estudioso/a u organizado/a), reconozco su progreso con, por ejemplo, un abrazo, una sonrisa o un pequeño regalo
+135.	Cuando mi joven se enfrenta a un gran desafío o establece una meta, le ayudo a centrarse en los pequeños pasos para lograr esa meta.
+136.	Cuando le doy una amenaza o advertencia a mi joven, frecuentemente no lo llevo a cabo
+
+*Items would be too similar to appropiate discipline. 
+
+```{r}
+gen_par <- d2_par_w1 %>%
+  select(q128:q136) # NO EFA here, just face value.
+
+alpha(gen_par) # 0.69 (136 is neg corr with tot scale, remowing it would yield 0.74)
+```
 
 # From my diss:
 - Structure at home
@@ -253,10 +311,10 @@ Structure at Home. Eight items reflecting parent’s endorsement of their employ
 
 
 ```{r}
-struct <- d1_par_w1 %>%
+struct <- d2_par_w1 %>%
   select(q23:q30)
 
-alpha(struct) # 0.82
+alpha(struct) # 0.82 (0.82 if all caregivers included)
 ```
 #################### HERE #####################
 
@@ -270,10 +328,10 @@ School-Based Involvement. Ten items reflecting the level of parent’s endorseme
 35	… aprender sobre el sistema educativo en este estado
 
 ```{r}
-navigating <- d1_par_w1 %>%
-  select(q31, q32, q33, q34, q35)
+navigating <- d2_par_w1 %>%
+  select(q31, q32, q33, q34, q35) # may be worth adding q38 and q39 to cover parent social networks (0.83)
 
-alpha(navigating) # 0.83
+alpha(navigating) # 0.86 (0.83 if all caregivers included)
 ```
 36	… entender la diferencia entre obtener un GED, graduarse con un diploma estándar de la escuela secundaria, o con un diploma de una secundaria internacional o con un diploma de Bachillerato Internacional. 
 37	… involucrarse en las actividades escolares, en el salón de clase, y/u otras maneras (por ejemplo, organizaciones de padres, trabajo voluntario, etc.) 
@@ -281,22 +339,22 @@ alpha(navigating) # 0.83
 39	…contactar los otros padres para obtener apoyo.
 40	…entender la trayectoria hacia la preparación a la universidad y para una carrera
 
+## NONE OF THESE CONVINCE ME:
 ```{r}
-sbi <- d1_par_w1 %>%
-  select(q36, q37, q38, q39, q40)
+test1 <- d2_par_w1 %>% # same as navigating plus ged item
+  select(q31, q32, q33, q34, q35, q36) # no EFA, just face value
 
-alpha(sbi) # 0.83
+alpha(test1) # 0.84
+##
+test2 <- d2_par_w1 %>% # taps on connecting with parents
+  select(q37, q38, q39) # no EFA, just face value
 
-sbi <- d1_par_w1 %>%
-  select(q37, q38, q39)
+alpha(test2) # 0.79
+##
+test3 <- d2_par_w1 %>% # taps on knowing rules
+  select(q33, q34, q35, q36, q40) # no EFA, just face value
 
-alpha(sbi) # 0.79
-
-sbi <- d1_par_w1 %>%
-  select(q33, q34, q35, q36, q40)
-
-alpha(sbi) # 0.83
-
+alpha(test3) # 0.83
 ```
 
 - Parent-child convos
@@ -304,21 +362,58 @@ Parent-Child Conversations About School. A total of 14 items reflecting the freq
 
 Items in factor one (n = 4) appeared to index conversations around youth’s school climate and youth’s behavior in school (α = .85); items in factor two (n = 4) indexed conversations around future career planning and activities conducive to attending college (α = .78). Finally, items in factors three (n = 4) appeared to reflect conversations around the youth’s school social involvement; specifically, the youth’s relationship with school friends, teachers, and their involvement in school activities and upcoming school events (α = .81). 
 
+Factor 1
+76	… desafíos que surgen en la escuela (como intimidación, agresión, acoso, racismo, peleas, etc.)
+77	… sus actitudes sobre la escuela.
+78	… su comportamiento en la escuela .
+79	… las cosas que suceden en la escuela (el ambiente escolar en general).
+
+Factor 2
+73	… cómo contribuye al salón de clase.
+75	… sus futuros objetivos de carrera y educación (incluso los objetivos a corto plazo).
+80	… la importancia de prepararse para futuras trayectorias educativas o de carrera, como la planificación universitaria y / o pensando acerca de la escuela técnica o comercial, etc.
+81	… su involucro en actividades extracurriculares en la escuela y en la comunidad como en papeles de liderazgo, haciendo trabajo voluntario en la comunidad, deportes, etc.
+
+Factor 3
 68	… sus amistades en la escuela.
 69	… su participación en actividades escolares. 
 70	… eventos que van a pasar en la escuela. 
 71	… sus profesores.
 72	… las cosas que aprende en clase.
-73	… cómo contribuye al salón de clase.
-74	… cómo va en sus clases.
-75	… sus futuros objetivos de carrera y educación (incluso los objetivos a corto plazo).
-76	… desafíos que surgen en la escuela (como intimidación, agresión, acoso, racismo, peleas, etc.)
-77	… sus actitudes sobre la escuela.
-78	… su comportamiento en la escuela .
-79	… las cosas que suceden en la escuela (el ambiente escolar en general).
-80	… la importancia de prepararse para futuras trayectorias educativas o de carrera, como la planificación universitaria y / o pensando acerca de la escuela técnica o comercial, etc.
-81	… su involucro en actividades extracurriculares en la escuela y en la comunidad como en papeles de liderazgo, haciendo trabajo voluntario en la comunidad, deportes, etc.
+
+Not included: 
+74	… cómo va en sus clases.(bec. it loaded in fac 2 and fac 3)
+
+```{r}
+fa_1 <- d2_par_w1 %>%
+  select(q76, q77, q78, q79)
+alpha(fa_1) # 0.84
+
+fa_2 <- d2_par_w1 %>%
+  select(q73, q75, q80, q81)
+alpha(fa_2) # 0.77
+
+fa_3 <- d2_par_w1 %>%
+  select(q68, q69, q70, q71, q72)
+alpha(fa_3) # 0.80
+```
+
+# self efficacy
+42.	…yo entiendo cómo funciona la escuela de mi joven.
+43.	…puedo comunicar mis preguntas y preocupaciones con los maestros y el personal de la escuela.
+44.	…puedo trabajar con la escuela para encontrar una solución positiva si surge un conflicto o un problema que involucre a mi joven en la escuela.
+45.	…estoy ayudando a mi joven hacer bien en la escuela.
+46.	… estoy ayudando a mi joven prepararse para sus futuras metas de educación y carrera.
 
 ```{r}
 
 ```
+
+
+# Relationship with youth
+116.	   Cuando mi joven me pide hablar o cuando necesita hablar conmigo, escucho atentamente.
+117.	Sé escuchar atentamente, aun cuando no esté de acuerdo con lo que dice la otra persona
+118.	Con regularidad, mi joven y yo hacemos cosas juntos que ambos disfrutamos
+119.	Mi joven y yo tenemos una relación cercana
+120.	Hago y digo cosas que le muestran a mi joven que a él / ella me importa y que yo la/lo amo (por ejemplo, diciendo cosas cariñosas, abrazándole/la, etc.)
+121.	Como madre/padre, es mi trabajo reconocer y apoyar las fortalezas de mi joven
