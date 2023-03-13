@@ -36,7 +36,7 @@ theme_set(theme_minimal())
 d_par_w1_raw <- read_sav(here("outcomes paper/data_outcomes", "all_parent_wave1.sav")) # This dataset has ALL parents in wave 1 (n = 124)
 ```
 
-# filtering primary caregiver only (wave 1)
+# filtering primary caregiver only (wave 1) - TBD if removing parent with less data waves among parents is ok
 ```{r}
 d_par_w1 <- d_par_w1_raw %>%
   filter(participant_id != "405_1") %>% # removing mother who has less waves of data than father
@@ -105,8 +105,14 @@ d2_par_w1 %>%
 ```
 
 # Parenting Dimensions in JCCP NF paper 
-
 -	Positive parental involvement
+-	Monitoring
+-	Homework engagement 
+-	Skill encouragement (not present)
+-	Appropriate discipline
+-	General parenting (not present)
+---------------------------------------------
+-	Positive parental involvement (JCCP paper)
 "Positive involvement was an average summative index of parent responses to 21 questions that reflected whether parents had engaged in a variety of positive activities with the target youth during the past week (e.g., gave him or her a hug or kiss, played a game with him or her, went for walk together, talked for at least 10 min about activities in his or her life, enjoyed music together, etc.). The scale demonstrated adequate internal consistency for mother and father scores (Cronbach’s alphas were .83 and .82, respectively)." (p. 846)
 
 Juntos items:
@@ -141,10 +147,10 @@ posinvo_2 <- d2_par_w1 %>%
 
 alpha(posinvo_2) # 0.91 (0.90 if all caregivers included)
 ```
+# From my diss:
+- Monitoring
 
-- Monitoring (from my diss)
-
-Monitoring.  Five items reflecting the level of parent’s endorsement of their tracking of their youth’s activities, where they are, and who are they with when they are not at home were used to measure parent’s monitoring of their youth. Sample items included statements such as “I often talk with my youth about their plans for the next day,” and “in general I know who my youth is with.” Response options used a Likert scale that ranged from (1) “strongly disagree” to (4) “strongly agree.” (α = .62).  
+"Monitoring.  Five items reflecting the level of parent’s endorsement of their tracking of their youth’s activities, where they are, and who are they with when they are not at home were used to measure parent’s monitoring of their youth. Sample items included statements such as “I often talk with my youth about their plans for the next day,” and “in general I know who my youth is with.” Response options used a Likert scale that ranged from (1) “strongly disagree” to (4) “strongly agree.” (α = .62)."  
 
 137.	A menudo hablo con mi joven acerca de sus planes para el día siguiente
 139.	A menudo hablo con mi joven acerca de sus amigos. 
@@ -152,7 +158,7 @@ Monitoring.  Five items reflecting the level of parent’s endorsement of their 
 143.	Por lo general yo sé con quién está mi joven
 144.	Sé lo que hace mi joven y dónde va cuando no está en casa
 
-Not included:
+Not included bec. appear to tap on different ideas:
 138.	Hablo con mi joven en muchas ocasiones acerca de lo que él / ella aprendió en la escuela
 141.	Los amigos de mi joven tienen una buena influencia en su vida. 
 142.	Los amigos de mi joven se apoyan positivamente entre sí.
@@ -163,16 +169,16 @@ monit <- d2_par_w1 %>%
 
 alpha(monit) # 0.64 (0.68 poor if all caregivers included)
 ```
+# From my diss:
+-	Homework engagement
 
--	Homework engagement (from my diss)
+"Homework Involvement.  A total of 17 items reflecting the frequency in which parents engaged in specific behaviors aimed at supporting their youth with homework (e.g., creating a home environment conducive to homework completion, verifying homework completion, providing incentives or sanctions for completion or incompletion, respectively) composed this measure. Sample items included “I reminded my youth to do their homework,” and “I reviewed and checked my youth’s homework.” Two items reflecting parent’s non-involvement in homework were reverse scored. Response options used a Likert scale that ranged from (1) “never” to (4) “often.”"
 
-Homework Involvement.  A total of 17 items reflecting the frequency in which parents engaged in specific behaviors aimed at supporting their youth with homework (e.g., creating a home environment conducive to homework completion, verifying homework completion, providing incentives or sanctions for completion or incompletion, respectively) composed this measure. Sample items included “I reminded my youth to do their homework,” and “I reviewed and checked my youth’s homework.” Two items reflecting parent’s non-involvement in homework were reverse scored. Response options used a Likert scale that ranged from (1) “never” to (4) “often.”
+"EFA analyses: "Interpretation of items in factor one (n = 7) suggested a more academic approach to parents’ homework involvement where the parent plays a sort of tutor role; they sit by their youth’s side, help when they are stuck, quiz them to reinforce learning, correct their youth’s mistakes, and help their youth get access to additional learning resources (α = .78). Interpretation of items in factor two (n = 4) suggested a more monitoring approach to parents’ homework involvement where the parent does not get involved in academic matters, but makes sure their youth has a time and place to do their homework, checks with the youth to ensure homework is done, and checks with the teacher to ensure homework completion (α = .70).  Finally, interpretation of items in factor three (n = 3) suggested parents’ use of contingent reinforcement strategies to increase behavioral compliance with homework completion (α = .59)."  
 
 # all items: q82, q83, q84, q85, q86, q87, q88, q89, q90, q91, q92, q93, q94, q95, q96, q97, q98)
 
-EFA analyses: Interpretation of items in factor one (n = 7) suggested a more academic approach to parents’ homework involvement where the parent plays a sort of tutor role; they sit by their youth’s side, help when they are stuck, quiz them to reinforce learning, correct their youth’s mistakes, and help their youth get access to additional learning resources (α = .78). Interpretation of items in factor two (n = 4) suggested a more monitoring approach to parents’ homework involvement where the parent does not get involved in academic matters, but makes sure their youth has a time and place to do their homework, checks with the youth to ensure homework is done, and checks with the teacher to ensure homework completion (α = .70).  Finally, interpretation of items in factor three (n = 3) suggested parents’ use of contingent reinforcement strategies to increase behavioral compliance with homework completion (α = .59).  
-
-hwinvo_1 (intensive support)
+hwinvo_1 (intensive support - tutoring)
 86	Me senté con mi joven mientras él / ella hacía su tarea
 87	Me hice disponible para mi joven cuando tenía preguntas sobre su tarea
 88	Ayudé a mi joven cuando estaba atascado/a en una tarea
@@ -188,7 +194,7 @@ hwinvo_1 <- d2_par_w1 %>%
 alpha(hwinvo_1) # 0.78 (0.79 fair if all caregivers included)
 ```
 
-hwinvo_2 (general support)
+hwinvo_2 (general support - monitoring)
 84	Me aseguré de que tenga un cierto tiempo para hacer la tarea
 85	Me aseguré de que él / ella tenga un cierto lugar para hacer la tarea
 93	Comprobé con mi joven para asegurarme de que él / ella hiciera su tarea
@@ -206,8 +212,7 @@ hwinvo_3 (skill encouragement to hw)
 91	Utilicé consecuencias, castigos, acciones disciplinarias
 98	Limité el ruido y/o las distracciones mientras hacia su tarea
 
-
-Not included:
+Not included bec. factor loading neg or too low:
 82	Mi joven ha tenido la plena responsabilidad de completar su tarea; no me involucro. R -.28
 83	Dejé de intentar (de ayudarlo con su tarea). R -.02
 92	Le recordé a mi joven que hiciera su tarea .28
@@ -219,86 +224,94 @@ hwinvo_3 <- d2_par_w1 %>%
 alpha(hwinvo_3) # 0.58 (0.51 poor if all caregivers included)
 ```
 
--	Skill encouragement
+-	Skill encouragement (JCCP paper)*
 "Skill encouragement was an average parent scale score of eight items reflecting the frequency of specific contingent positive reinforcement responses when the youth engaged in prosocial behavior (e.g., giving extra privileges, praising the youth, spending special time together, offering small rewards, etc.). Individual items were rated on 5-point Likert scales, with higher values reflecting greater frequency of use for a particular encouragement strategy. Scale alphas were .78 and .75 for mothers and fathers, respectively." (p. 846)
 
-90.	Le di a mi joven incentivos como privilegios especiales, regalos especiales, etc.
-91.	Utilicé consecuencias, castigos, acciones disciplinarias
-
-134.	Cuando mi joven está aprendiendo un nuevo comportamiento (por ejemplo: ser más responsable, estudioso/a u organizado/a), reconozco su progreso con, por ejemplo, un abrazo, una sonrisa o un pequeño regalo
-135.	Cuando mi joven se enfrenta a un gran desafío o establece una meta, le ayudo a centrarse en los pequeños pasos para lograr esa meta.
-
-```{r}
-# skill <- d2_par_w1 %>%
-#   select(q90, q91, q134, q135) # NO EFA here, just face value.
-# 
-# alpha(skill) # 0.41 (0.32 poor if all caregivers included)
-```
-
--	Appropriate discipline
+-	Appropriate discipline (JCCP paper)*
 "was an average scale score of 12 items reflecting the frequency of using effective limit setting strategies in response to specific youth misbehavior (e.g., giving warnings of and follow through with consequences, restricting privileges, giving a time-out, giving extra chores, etc.). (p. 846)
 
+-	General parenting (JCCP paper)*
+"General parenting was an average scale score of eight items reflecting general use of effective parenting strategies during the past month with the focal youth (e.g., communicating calmly and clearly with the youth when there was a disagreement, negotiating emotional conflicts and working
+toward solutions, being consistent with discipline, and following through with consequences)." (p. 846)
+
+*These scale were not included in Juntos
+
+Juntos items used:
 128.	En casa, estamos de acuerdo con reglas claras sobre lo que mi joven puede y no puede hacer. 
 129.	Mi joven sabe cómo voy a responder cuando hace algo malo cosas que no me gustan o lo que está en contra las reglas de la casa) 
 130.	Cada vez que mi joven hace algo mal, yo le respondo con una consecuencia específica (por ejemplo, una disciplina específica, quitándole privilegios, etc.) 
-132.	Puedo controlar mi enojo y mantenerme calmado/a cuando disciplino o discuto con mi joven cuando él / ella hace algo mal
-
-# Not used (they are negatively worded and I think the model is picking up this)
 131.	Cuando mi joven hace algo mal, le grito o le insulto 
+132.	Puedo controlar mi enojo y mantenerme calmado/a cuando disciplino o discuto con mi joven cuando él / ella hace algo mal
 133.	Cuando mi joven me desafía al no hacer lo que le pido, yo renuncio 
+134.	Cuando mi joven está aprendiendo un nuevo comportamiento (...), reconozco su progreso con, por ejemplo, un abrazo, una sonrisa o un pequeño regalo
+135.	Cuando mi joven se enfrenta a un gran desafío o establece una meta, le ayudo a centrarse en los pequeños pasos para lograr esa meta.
 136.	Cuando le doy una amenaza o advertencia a mi joven, frecuentemente no lo llevo a cabo
 
-# Not used because these are not discipline but skill encouragement
-134.	Cuando mi joven está aprendiendo un nuevo comportamiento (por ejemplo: ser más responsable, estudioso/a u organizado/a), reconozco su progreso con, por ejemplo, un abrazo, una sonrisa o un pequeño regalo
+```{r}
+# EFA iterations 
+
+# iteration 1
+test_1 <- d2_par_w1 %>%
+  select(q128, q129, q130, q131, q132, q133, q134, q135, q136)
+
+fa(test_1, n.obs = NA, rotate = "none", fm = "uls", cor = "poly")
+```
+```{r}
+# iteration 2
+test_2 <- d2_par_w1 %>%
+  select(q128, q129, q130, q131, q132, q134, q135) #rmved 133 (factor loading: 0.14) and 136 (factor loading: -0.04)
+
+fa(test_2, n.obs = NA, rotate = "none", fm = "uls", cor = "poly") # looks good
+
+fa.parallel(test_2, n.obs=NULL, fm="uls", fa="fa", nfactors=1, main="Parallel Analysis Scree Plots", n.iter=20, error.bars=FALSE, se.bars=FALSE, SMC=FALSE, ylabel=NULL, show.legend=TRUE, sim=TRUE, quant=.95, cor="poly", use="pairwise", plot=TRUE, correct=.5) # suggest 2 factors
+
+fa(test_2, nfactors = 2, n.obs = NA, rotate = "quartimin", fm = "uls", cor = "poly") # factor 1: with 5 items; factor 2: 2 items
+```
+- factor 1: Effective parenting
+128.	En casa, estamos de acuerdo con reglas claras sobre lo que mi joven puede y no puede hacer. 
+131.	Cuando mi joven hace algo mal, le grito o le insulto 
+132.	Puedo controlar mi enojo y mantenerme calmado/a cuando disciplino o discuto con mi joven cuando él / ella hace algo mal
+134.	Cuando mi joven está aprendiendo un nuevo comportamiento (...), reconozco su progreso con, por ejemplo, un abrazo, una sonrisa o un pequeño regalo
 135.	Cuando mi joven se enfrenta a un gran desafío o establece una meta, le ayudo a centrarse en los pequeños pasos para lograr esa meta.
 
 ```{r}
-discip_pos <- d2_par_w1 %>%
-  select(q128, q129, q130, q132) # NO EFA here, just face value.
+eff_parent <- d2_par_w1 %>%
+  select(q128, q131, q132, q134, q135)
 
-alpha(discip_pos) # 0.77 
+alpha(eff_parent) # 0.72 (0.76 if removing q131)
+```
+- factor 2: consistency (only 2 items, though)
+
+129.	Mi joven sabe cómo voy a responder cuando hace algo malo cosas que no me gustan o lo que está en contra las reglas de la casa) 
+130.	Cada vez que mi joven hace algo mal, yo le respondo con una consecuencia específica (por ejemplo, una disciplina específica, quitándole privilegios, etc.) 
+
+```{r}
+consistency <- d2_par_w1 %>%
+  select(q129, q130)
+
+alpha(consistency) # 0.77
 ```
 ```{r}
+# test_3<- d2_par_w1 %>%
+#   select(q128, q129, q130, q132, q134, q135) # NO EFA here, just face value.
+# 
+# alpha(test_3) # 0.83 (0.83 if all caregivers included)
+# 
+# 
+# discip_pos <- d2_par_w1 %>%
+#   select(q128, q129, q130, q132) # NO EFA here, just face value.
+# 
+# alpha(discip_pos) # 0.77 
+#
 # discip_neg <- d2_par_w1 %>%
 #   select(q131, q133, q136) # NO EFA here, just face value.
 # 
 # alpha(discip_neg) # 0.50
 ```
 
-
-```{r}
-# discip_2 <- d2_par_w1 %>%
-#   select(q128, q129, q130, q132, q134, q135) # NO EFA here, just face value.
-# 
-# alpha(discip_2) # 0.83 (0.83 if all caregivers included)
-```
-
--	General parenting
-"General parenting was an average scale score of eight items reflecting general use of effective parenting strategies during the past month with the focal youth (e.g., communicating calmly and clearly with the youth when there was a disagreement, negotiating emotional conflicts and working
-toward solutions, being consistent with discipline, and following through with consequences)." (p. 846)
-
-128.	En casa, estamos de acuerdo con reglas claras sobre lo que mi joven puede y no puede hacer. 
-129.	Mi joven sabe cómo voy a responder cuando hace algo malo cosas que no me gustan o lo que está en contra las reglas de la casa) 
-130.	Cada vez que mi joven hace algo mal, yo le respondo con una consecuencia específica (por ejemplo, una disciplina específica, quitándole privilegios, etc.) 
-131.	Cuando mi joven hace algo mal, le grito o le insulto 
-132.	Puedo controlar mi enojo y mantenerme calmado/a cuando disciplino o discuto con mi joven cuando él / ella hace algo mal
-133.	Cuando mi joven me desafía al no hacer lo que le pido, yo renuncio 
-134.	Cuando mi joven está aprendiendo un nuevo comportamiento (por ejemplo: ser más responsable, estudioso/a u organizado/a), reconozco su progreso con, por ejemplo, un abrazo, una sonrisa o un pequeño regalo
-135.	Cuando mi joven se enfrenta a un gran desafío o establece una meta, le ayudo a centrarse en los pequeños pasos para lograr esa meta.
-136.	Cuando le doy una amenaza o advertencia a mi joven, frecuentemente no lo llevo a cabo
-
-*Items would be too similar to appropiate discipline. 
-
-```{r}
-gen_par <- d2_par_w1 %>%
-  select(q128:q136) # NO EFA here, just face value.
-
-alpha(gen_par) # 0.69 (136 is neg corr with tot scale, remowing it would yield 0.74)
-```
-
 # From my diss:
 - Structure at home
-Structure at Home. Eight items reflecting parent’s endorsement of their employment of school-like functions in the home environment conformed this Juntos-developed measure. Sample items included statements such as “I have taken measures to support my youth to meet deadlines,” and “I have taken measures to support my youth to find ways to be involved in volunteer activities in the community.” Two items slightly overlap with the homework involvement construct, “I have taken measures to support my youth in developing a plan to study and complete homework,” and “I have taken measures to support my youth in developing a schedule to complete homework and school projects,” but given their focus on organization and structure, they were kept here. Response options used a Likert scale that ranged from (1) “strongly disagree” to (4) “strongly agree.” 
+Structure at Home. Eight items reflecting parent’s endorsement of their employment of school-like functions in the home environment conformed this Juntos-developed measure. Sample items included statements such as “I have taken measures to support my youth to meet deadlines,” and “I have taken measures to support my youth to find ways to be involved in volunteer activities in the community.” Two items slightly overlap with the homework involvement construct, “I have taken measures to support my youth in developing a plan to study and complete homework,” and “I have taken measures to support my youth in developing a schedule to complete homework and school projects,” but given their focus on organization and structure, they were kept here. Response options used a Likert scale that ranged from (1) “strongly disagree” to (4) “strongly agree.” ... This scale continued to index parents’ practices to create a continuity between the school and home environment in terms of structure and planning to support youth academic behaviors (α = .82)."
 
 23	… desarrollar un plan para estudiar y hacer la tarea.
 24	… encontrar formas de involucrarse en las actividades escolares.
@@ -309,52 +322,71 @@ Structure at Home. Eight items reflecting parent’s endorsement of their employ
 29	… enfocarse en hacer lo mejor posible.
 30	… desarrollar un horario para completar la tarea y los proyectos escolares a tiempo.
 
-
 ```{r}
 struct <- d2_par_w1 %>%
   select(q23:q30)
 
 alpha(struct) # 0.82 (0.82 if all caregivers included)
 ```
-#################### HERE #####################
 
+# From my diss:
 - School-based inv
 School-Based Involvement. Ten items reflecting the level of parent’s endorsement of their involvement in some school-based activities and their efforts in familiarizing themselves with the U.S. school system constituted this Juntos-developed measure. Sample items included, “In general, I make an effort to become involved in school activities, in [my youth’s] classroom, and/or other ways (e.g., parent committees, volunteering, etc.),” and “In general, I make an effort to understand the school’s rules and policies.” Response options used a Likert scale that ranged from (1) “strongly disagree” to (4) “strongly agree.” 
 
-31	… conocer el personal y la administración de la escuela 
+"Analyses of items in factor one (n = 4) appeared to index a basic level of parent school-based involvement, mostly composed by practices in which the parent gets acquainted with the school personnel and policies (α = .85). Items in factor two (n = 5) indexed parents’ school-based practices that required a higher investment of time and efforts like volunteering at school, establishing connections with other school parents, and understanding the pathways to prepare for college (α = .82)." 
+
+31.	… conocer el personal y la administración de la escuela
+32.	… conocer al menos uno de los maestros de mi joven
+33.	… entender las reglas y pólizas de la escuela
+34.	… informarme sobre mis derechos como padre
+35.	… aprender sobre el sistema educativo en este estado
+36.	… entender la diferencia entre obtener un GED, graduarse con un diploma estándar de la escuela secundaria, o con un diploma de una secundaria internacional o con un diploma de Bachillerato Internacional.
+37.	… involucrarse en las actividades escolares, en el salón de clase, y/u otras maneras (por ejemplo, organizaciones de padres, trabajo voluntario, etc.) 
+38.	… tener conversaciones con los otros padres para obtener información o aprender acerca de los recursos en la escuela.
+39.	…contactar los otros padres para obtener apoyo.
+40.	…entender la trayectoria hacia la preparación a la universidad y para una carrera
+41.	… asistir a la conferencia de padres y maestros cuando esté disponible.
+
+
+```{r}
+sbi_test <- d2_par_w1 %>%
+  select(q31, q32, q33, q34, q35, q36, q37, q38, q39, q40) # 41 removed .30 loading
+
+fa(sbi_test, n.obs = NA, rotate = "none", fm = "uls", cor = "poly") # looks good
+
+fa.parallel(sbi_test, n.obs=NULL, fm="uls", fa="fa", nfactors=1, main="Parallel Analysis Scree Plots", n.iter=20, error.bars=FALSE, se.bars=FALSE, SMC=FALSE, ylabel=NULL, show.legend=TRUE, sim=TRUE, quant=.95, cor="poly", use="pairwise", plot=TRUE, correct=.5) # suggest 3 factors
+
+fa(sbi_test, nfactors = 3, n.obs = NA, rotate = "quartimin", fm = "uls", cor = "poly") 
+```
+```{r}
+sbi_test_2 <- d2_par_w1 %>%
+  select(q32, q33, q34, q35, q37, q38, q39)
+
+fa.parallel(sbi_test_2, n.obs=NULL, fm="uls", fa="fa", nfactors=1, main="Parallel Analysis Scree Plots", n.iter=20, error.bars=FALSE, se.bars=FALSE, SMC=FALSE, ylabel=NULL, show.legend=TRUE, sim=TRUE, quant=.95, cor="poly", use="pairwise", plot=TRUE, correct=.5) # suggest 2 factors
+
+fa(sbi_test_2, nfactors = 2, n.obs = NA, rotate = "quartimin", fm = "uls", cor = "poly")
+```
+
 32	… conocer al menos uno de los maestros de mi joven 
 33	… entender las reglas y pólizas de la escuela 
 34	… informarme sobre mis derechos como padre 
 35	… aprender sobre el sistema educativo en este estado
 
 ```{r}
-navigating <- d2_par_w1 %>%
-  select(q31, q32, q33, q34, q35) # may be worth adding q38 and q39 to cover parent social networks (0.83)
+sbi1 <- d2_par_w1 %>%
+  select(q32, q33, q34, q35) 
 
-alpha(navigating) # 0.86 (0.83 if all caregivers included)
+alpha(sbi1) # 0.84
 ```
-36	… entender la diferencia entre obtener un GED, graduarse con un diploma estándar de la escuela secundaria, o con un diploma de una secundaria internacional o con un diploma de Bachillerato Internacional. 
 37	… involucrarse en las actividades escolares, en el salón de clase, y/u otras maneras (por ejemplo, organizaciones de padres, trabajo voluntario, etc.) 
 38	… tener conversaciones con los otros padres para obtener información o aprender acerca de los recursos en la escuela.
 39	…contactar los otros padres para obtener apoyo.
-40	…entender la trayectoria hacia la preparación a la universidad y para una carrera
 
-## NONE OF THESE CONVINCE ME:
 ```{r}
-test1 <- d2_par_w1 %>% # same as navigating plus ged item
-  select(q31, q32, q33, q34, q35, q36) # no EFA, just face value
+sbi2 <- d2_par_w1 %>% # taps on connecting with parents
+  select(q37, q38, q39)
 
-alpha(test1) # 0.84
-##
-test2 <- d2_par_w1 %>% # taps on connecting with parents
-  select(q37, q38, q39) # no EFA, just face value
-
-alpha(test2) # 0.79
-##
-test3 <- d2_par_w1 %>% # taps on knowing rules
-  select(q33, q34, q35, q36, q40) # no EFA, just face value
-
-alpha(test3) # 0.83
+alpha(sbi2) # 0.79
 ```
 
 - Parent-child convos
@@ -368,11 +400,23 @@ Factor 1
 78	… su comportamiento en la escuela .
 79	… las cosas que suceden en la escuela (el ambiente escolar en general).
 
+```{r}
+fa_1 <- d2_par_w1 %>%
+  select(q76, q77, q78, q79)
+alpha(fa_1) # 0.84
+```
+
 Factor 2
 73	… cómo contribuye al salón de clase.
 75	… sus futuros objetivos de carrera y educación (incluso los objetivos a corto plazo).
 80	… la importancia de prepararse para futuras trayectorias educativas o de carrera, como la planificación universitaria y / o pensando acerca de la escuela técnica o comercial, etc.
 81	… su involucro en actividades extracurriculares en la escuela y en la comunidad como en papeles de liderazgo, haciendo trabajo voluntario en la comunidad, deportes, etc.
+
+```{r}
+fa_2 <- d2_par_w1 %>%
+  select(q73, q75, q80, q81)
+alpha(fa_2) # 0.77
+```
 
 Factor 3
 68	… sus amistades en la escuela.
@@ -385,14 +429,6 @@ Not included:
 74	… cómo va en sus clases.(bec. it loaded in fac 2 and fac 3)
 
 ```{r}
-fa_1 <- d2_par_w1 %>%
-  select(q76, q77, q78, q79)
-alpha(fa_1) # 0.84
-
-fa_2 <- d2_par_w1 %>%
-  select(q73, q75, q80, q81)
-alpha(fa_2) # 0.77
-
 fa_3 <- d2_par_w1 %>%
   select(q68, q69, q70, q71, q72)
 alpha(fa_3) # 0.80
