@@ -112,10 +112,12 @@ d2_par_w1 %>%
 -	Appropriate discipline
 -	General parenting (not present)
 ---------------------------------------------
--	Positive parental involvement (JCCP paper)
+-	Positive parental involvement (JCCP paper)*
 "Positive involvement was an average summative index of parent responses to 21 questions that reflected whether parents had engaged in a variety of positive activities with the target youth during the past week (e.g., gave him or her a hug or kiss, played a game with him or her, went for walk together, talked for at least 10 min about activities in his or her life, enjoyed music together, etc.). The scale demonstrated adequate internal consistency for mother and father scores (Cronbach’s alphas were .83 and .82, respectively)." (p. 846)
 
-Juntos items:
+*this scale not included as it was in LYFEII. Some items may be similar.
+
+Juntos items, fam activities:
 1.	Trabajamos en un pasatiempo o artesanía.
 2.	Participamos en una actividad al aire libre.
 3.	Leímos o hablamos acerca de un libro o historia.
@@ -127,11 +129,12 @@ Juntos items:
 9.	Fuimos a la Iglesia, sinagoga, u otro servicio religioso.
 
 ```{r}
-# posinvo <- d2_par_w1 %>%
+# fam_act <- d2_par_w1 %>%
 #   select(q1, q2, q3, q4, q5, q6, q7, q8, q9)
 # 
-# alpha(posinvo) # 0.54 poor (0.55 if all caregivers included)
+# alpha(fam_act) # 0.54 poor (0.55 if all caregivers included)
 ```
+
 Alternatively (I LIKE THESE BETTER):
 
 116.	Cuando mi joven me pide hablar o cuando necesita hablar conmigo, escucho atentamente.
@@ -142,10 +145,10 @@ Alternatively (I LIKE THESE BETTER):
 121.	Como madre/padre, es mi trabajo reconocer y apoyar las fortalezas de mi joven
 
 ```{r}
-posinvo_2 <- d2_par_w1 %>%
+posi_rel <- d2_par_w1 %>%
   select(q116, q117, q118, q119, q120, q121) # NO EFA here, just face value.
 
-alpha(posinvo_2) # 0.91 (0.90 if all caregivers included)
+alpha(posi_rel) # 0.91 (0.90 if all caregivers included)
 ```
 # From my diss:
 - Monitoring
@@ -275,10 +278,10 @@ fa(test_2, nfactors = 2, n.obs = NA, rotate = "quartimin", fm = "uls", cor = "po
 135.	Cuando mi joven se enfrenta a un gran desafío o establece una meta, le ayudo a centrarse en los pequeños pasos para lograr esa meta.
 
 ```{r}
-eff_parent <- d2_par_w1 %>%
+posi_parent <- d2_par_w1 %>%
   select(q128, q131, q132, q134, q135)
 
-alpha(eff_parent) # 0.72 (0.76 if removing q131)
+alpha(posi_parent) # 0.72 (0.76 if removing q131)
 ```
 - factor 2: consistency (only 2 items, though)
 
@@ -373,20 +376,20 @@ fa(sbi_test_2, nfactors = 2, n.obs = NA, rotate = "quartimin", fm = "uls", cor =
 35	… aprender sobre el sistema educativo en este estado
 
 ```{r}
-sbi1 <- d2_par_w1 %>%
+sbi_1 <- d2_par_w1 %>%
   select(q32, q33, q34, q35) 
 
-alpha(sbi1) # 0.84
+alpha(sbi_1) # 0.84
 ```
 37	… involucrarse en las actividades escolares, en el salón de clase, y/u otras maneras (por ejemplo, organizaciones de padres, trabajo voluntario, etc.) 
 38	… tener conversaciones con los otros padres para obtener información o aprender acerca de los recursos en la escuela.
 39	…contactar los otros padres para obtener apoyo.
 
 ```{r}
-sbi2 <- d2_par_w1 %>% # taps on connecting with parents
+sbi_2 <- d2_par_w1 %>% # taps on connecting with parents
   select(q37, q38, q39)
 
-alpha(sbi2) # 0.79
+alpha(sbi_2) # 0.79
 ```
 
 - Parent-child convos
@@ -394,28 +397,65 @@ Parent-Child Conversations About School. A total of 14 items reflecting the freq
 
 Items in factor one (n = 4) appeared to index conversations around youth’s school climate and youth’s behavior in school (α = .85); items in factor two (n = 4) indexed conversations around future career planning and activities conducive to attending college (α = .78). Finally, items in factors three (n = 4) appeared to reflect conversations around the youth’s school social involvement; specifically, the youth’s relationship with school friends, teachers, and their involvement in school activities and upcoming school events (α = .81). 
 
+68.	… sus amistades en la escuela.
+69.	… su participación en actividades escolares.
+70.	… eventos que van a pasar en la escuela.
+71.	… sus profesores.
+72.	… las cosas que aprende en clase.
+73.	… cómo contribuye al salón de clase.
+74.	… cómo va en sus clases.
+75.	… sus futuros objetivos de carrera y educación (incluso los objetivos a corto plazo).
+76.	… desafíos que surgen en la escuela (como intimidación, agresión, acoso, racismo, peleas, etc.)
+77.	… sus actitudes sobre la escuela 
+78.	… su comportamiento en la escuela
+79.	… las cosas que suceden en la escuela (el ambiente escolar en general)
+80.	… la importancia de prepararse para futuras trayectorias educativas o de carrera, como la planificación universitaria y/o pensando acerca de la escuela técnica o comercial
+81.	… su involucro en actividades extracurriculares en la escuela y en la comunidad como en papeles de liderazgo, haciendo trabajo voluntario en la comunidad, deportes, etc.
+
+```{r}
+convos_test <- d2_par_w1 %>%
+  select(q68, q69, q70, q71, q72, q73, q74, q75, q76, q77, q78, q79, q80, q81)
+
+fa(convos_test, n.obs = NA, rotate = "none", fm = "uls", cor = "poly") # looks good
+
+fa.parallel(convos_test, n.obs=NULL, fm="uls", fa="fa", nfactors=1, main="Parallel Analysis Scree Plots", n.iter=20, error.bars=FALSE, se.bars=FALSE, SMC=FALSE, ylabel=NULL, show.legend=TRUE, sim=TRUE, quant=.95, cor="poly", use="pairwise", plot=TRUE, correct=.5) # suggest 3 factors
+
+fa(convos_test, nfactors = 3, n.obs = NA, rotate = "quartimin", fm = "uls", cor = "poly") 
+```
+
+```{r}
+convos_test2 <- d2_par_w1 %>%
+  select(q68, q69, q70, q71, q75, q76, q77, q78, q79, q80, q81) # removed q72, q73, q74 bec. loaded in >1 factors
+
+fa(convos_test2, n.obs = NA, rotate = "none", fm = "uls", cor = "poly") # looks good
+
+fa.parallel(convos_test2, n.obs=NULL, fm="uls", fa="fa", nfactors=1, main="Parallel Analysis Scree Plots", n.iter=20, error.bars=FALSE, se.bars=FALSE, SMC=FALSE, ylabel=NULL, show.legend=TRUE, sim=TRUE, quant=.95, cor="poly", use="pairwise", plot=TRUE, correct=.5) # suggest 3 factors
+
+fa(convos_test2, nfactors = 3, n.obs = NA, rotate = "quartimin", fm = "uls", cor = "poly") 
+```
+
+
 Factor 1
 76	… desafíos que surgen en la escuela (como intimidación, agresión, acoso, racismo, peleas, etc.)
 77	… sus actitudes sobre la escuela.
-78	… su comportamiento en la escuela .
+78	… su comportamiento en la escuela.
 79	… las cosas que suceden en la escuela (el ambiente escolar en general).
 
 ```{r}
-fa_1 <- d2_par_w1 %>%
+clim_convo <- d2_par_w1 %>%
   select(q76, q77, q78, q79)
-alpha(fa_1) # 0.84
+alpha(clim_convo) # 0.84
 ```
 
 Factor 2
-73	… cómo contribuye al salón de clase.
 75	… sus futuros objetivos de carrera y educación (incluso los objetivos a corto plazo).
 80	… la importancia de prepararse para futuras trayectorias educativas o de carrera, como la planificación universitaria y / o pensando acerca de la escuela técnica o comercial, etc.
 81	… su involucro en actividades extracurriculares en la escuela y en la comunidad como en papeles de liderazgo, haciendo trabajo voluntario en la comunidad, deportes, etc.
 
 ```{r}
-fa_2 <- d2_par_w1 %>%
-  select(q73, q75, q80, q81)
-alpha(fa_2) # 0.77
+prep_convo <- d2_par_w1 %>%
+  select(q75, q80, q81)
+alpha(prep_convo) # 0.77
 ```
 
 Factor 3
@@ -423,33 +463,195 @@ Factor 3
 69	… su participación en actividades escolares. 
 70	… eventos que van a pasar en la escuela. 
 71	… sus profesores.
-72	… las cosas que aprende en clase.
 
-Not included: 
+```{r}
+soc_convo <- d2_par_w1 %>%
+  select(q68, q69, q70, q71)
+alpha(soc_convo) # 0.79
+```
+Not included (loaded in >1 factor)
+72	… las cosas que aprende en clase.
+73	… cómo contribuye al salón de clase.
 74	… cómo va en sus clases.(bec. it loaded in fac 2 and fac 3)
 
 ```{r}
-fa_3 <- d2_par_w1 %>%
-  select(q68, q69, q70, q71, q72)
-alpha(fa_3) # 0.80
+# aca_convo <- d2_par_w1 %>%
+#   select(q72, q73, q74)
+# alpha(aca_convo) # 0.59 poor 
 ```
-
-# self efficacy
+Items about school 
 42.	…yo entiendo cómo funciona la escuela de mi joven.
 43.	…puedo comunicar mis preguntas y preocupaciones con los maestros y el personal de la escuela.
 44.	…puedo trabajar con la escuela para encontrar una solución positiva si surge un conflicto o un problema que involucre a mi joven en la escuela.
 45.	…estoy ayudando a mi joven hacer bien en la escuela.
-46.	… estoy ayudando a mi joven prepararse para sus futuras metas de educación y carrera.
+46.	…estoy ayudando a mi joven prepararse para sus futuras metas de educación y carrera.
+
+47.	…parte de una comunidad con el personal de la escuela y los otros padres. 
+48.	…tratado/a con respeto, sabiendo que mis opiniones son importantes.
+49.	…cómoda/o preguntando por un traductor y por materiales en español si los necesito. 
+50.	… capaz de hablar con maestros o administradores sobre grandes preocupaciones relacionados con mi joven.
+51.	…dedicada/o en creando un ambiente exitoso para todos los jóvenes.
+52.	 …feliz de que mi joven asista a esta escuela.
+53.	…bienvenido/a en la escuela de mi joven.
+
+54.	… esta escuela es un buen lugar para mi joven. 
+55.	… el personal de la escuela de mi joven está haciendo cosas buenas por ella / el. 
+56.	… la gente en la escuela de mi joven es confiable. 
+57.	… la escuela de mi joven hace un buen trabajo preparando a los jóvenes para sus futuros.
+58.	… puedo encontrar ayuda para mi joven si él / ella está batallando en una clase.
+59.	… los maestros de mi joven se preocupan por ella/el.
+60.	… maestros y administradores trabajan juntos para crear un ambiente seguro y acogedor para todos.
+61.	… hay muchas oportunidades para la involucración de los padres.
+62.	… puedo tener una conversación honesta y respetuosa sobre mi joven con su maestro.
+63.	… puedo trabajar con un maestro para resolver cualquier problema que tenga mi joven en la escuela.
+
+64.	… que se preocupa por mi joven.
+65.	… quien está interesado en conocerme
+66.	… con quien me siento/a cómodo/a hablando sobre mi joven.
+67.	… de quien puedo hacer preguntas o hacer sugerencias sobre mi joven.
 
 ```{r}
+misc_test <- d2_par_w1 %>%
+  select(q42, q43, q44, q45, q46, q47, q48, q49, q50, q51, q52, q53, q54, q55, q56, q57, q58, q59, q60, q61, q62, q63, q64, q65, q66, q67) 
 
+fa(misc_test, n.obs = NA, rotate = "none", fm = "uls", cor = "poly") # looks good
+
+fa.parallel(misc_test, n.obs=NULL, fm="uls", fa="fa", nfactors=1, main="Parallel Analysis Scree Plots", n.iter=20, error.bars=FALSE, se.bars=FALSE, SMC=FALSE, ylabel=NULL, show.legend=TRUE, sim=TRUE, quant=.95, cor="poly", use="pairwise", plot=TRUE, correct=.5) # suggest 3 factors
+
+fa(misc_test, nfactors = 3, n.obs = NA, rotate = "quartimin", fm = "uls", cor = "poly") 
 ```
 
+```{r}
+misc_test2 <- d2_par_w1 %>%
+  select(q42, q43, q44, q47, q48, q50, q51, q53, q54, q60, q63, q64, q65, q66, q67) 
 
-# Relationship with youth
-116.	   Cuando mi joven me pide hablar o cuando necesita hablar conmigo, escucho atentamente.
-117.	Sé escuchar atentamente, aun cuando no esté de acuerdo con lo que dice la otra persona
-118.	Con regularidad, mi joven y yo hacemos cosas juntos que ambos disfrutamos
-119.	Mi joven y yo tenemos una relación cercana
-120.	Hago y digo cosas que le muestran a mi joven que a él / ella me importa y que yo la/lo amo (por ejemplo, diciendo cosas cariñosas, abrazándole/la, etc.)
-121.	Como madre/padre, es mi trabajo reconocer y apoyar las fortalezas de mi joven
+fa(misc_test2, n.obs = NA, rotate = "none", fm = "uls", cor = "poly") # looks good
+
+fa.parallel(misc_test2, n.obs=NULL, fm="uls", fa="fa", nfactors=1, main="Parallel Analysis Scree Plots", n.iter=20, error.bars=FALSE, se.bars=FALSE, SMC=FALSE, ylabel=NULL, show.legend=TRUE, sim=TRUE, quant=.95, cor="poly", use="pairwise", plot=TRUE, correct=.5) # suggest 2 factors
+
+fa(misc_test2, nfactors = 2, n.obs = NA, rotate = "quartimin", fm = "uls", cor = "poly") 
+```
+# factor 1: parent as partner
+42.	…yo entiendo cómo funciona la escuela de mi joven.
+43.	…puedo comunicar mis preguntas y preocupaciones con los maestros y el personal de la escuela.
+44.	…puedo trabajar con la escuela para encontrar una solución positiva si surge un conflicto o un problema que involucre a mi joven en la escuela.
+47.	…parte de una comunidad con el personal de la escuela y los otros padres. 
+48.	…tratado/a con respeto, sabiendo que mis opiniones son importantes.
+50.	… capaz de hablar con maestros o administradores sobre grandes preocupaciones relacionados con mi joven.
+51.	…dedicada/o en creando un ambiente exitoso para todos los jóvenes.
+54.	… esta escuela es un buen lugar para mi joven.
+60.	… maestros y administradores trabajan juntos para crear un ambiente seguro y acogedor para todos.
+
+```{r}
+partner <- d2_par_w1 %>%
+  select(q42, q43, q44, q47, q48, q50, q51, q54, q60) 
+
+alpha(partner) #0.89
+```
+
+# factor 2: parent-teacher relationship
+63.	… puedo trabajar con un maestro para resolver cualquier problema que tenga mi joven en la escuela.
+64.	… que se preocupa por mi joven.
+65.	… quien está interesado en conocerme
+66.	… con quien me siento/a cómodo/a hablando sobre mi joven.
+67.	… de quien puedo hacer preguntas o hacer sugerencias sobre mi joven.
+
+```{r}
+par_teach_rel <- d2_par_w1 %>%
+  select(q63, q64, q65, q66, q67)
+
+alpha(par_teach_rel) #0.88
+```
+
+# not used, new EFA
+45.	…estoy ayudando a mi joven hacer bien en la escuela.
+46.	…estoy ayudando a mi joven prepararse para sus futuras metas de educación y carrera.
+49.	…cómoda/o preguntando por un traductor y por materiales en español si los necesito. 
+52.	…feliz de que mi joven asista a esta escuela.
+53.	…bienvenido/a en la escuela de mi joven.
+55.	… el personal de la escuela de mi joven está haciendo cosas buenas por ella / el.
+56.	… la gente en la escuela de mi joven es confiable. 
+57.	… la escuela de mi joven hace un buen trabajo preparando a los jóvenes para sus futuros.
+58.	… puedo encontrar ayuda para mi joven si él / ella está batallando en una clase.
+59.	… los maestros de mi joven se preocupan por ella/el.
+61.	… hay muchas oportunidades para la involucración de los padres.
+62.	… puedo tener una conversación honesta y respetuosa sobre mi joven con su maestro.
+
+```{r}
+misc_test_3 <- d2_par_w1 %>%
+  select(q45, q46, q49, q52, q53, q55, q56, q57, q58, q59, q61, q62) 
+
+fa(misc_test_3, n.obs = NA, rotate = "none", fm = "uls", cor = "poly") # looks good
+
+fa.parallel(misc_test_3, n.obs=NULL, fm="uls", fa="fa", nfactors=1, main="Parallel Analysis Scree Plots", n.iter=20, error.bars=FALSE, se.bars=FALSE, SMC=FALSE, ylabel=NULL, show.legend=TRUE, sim=TRUE, quant=.95, cor="poly", use="pairwise", plot=TRUE, correct=.5) # suggest 1 factor
+```
+
+# EFA again with other not included items
+31.	… conocer el personal y la administración de la escuela
+36.	… entender la diferencia entre obtener un GED, graduarse con un diploma estándar de la escuela secundaria, o con un diploma de una secundaria internacional o con un diploma de Bachillerato Internacional.
+40.	…entender la trayectoria hacia la preparación a la universidad y para una carrera
+41.	… asistir a la conferencia de padres y maestros cuando esté disponible.
+```{r}
+misc_test_4 <- d2_par_w1 %>%
+  select(q36, q40, q41, q45, q46, q49, q52, q53, q55, q56, q57, q58, q59, q61, q62) # removed q31 bec low loading 
+
+fa(misc_test_4, n.obs = NA, rotate = "none", fm = "uls", cor = "poly") # looks good
+
+fa.parallel(misc_test_4, n.obs=NULL, fm="uls", fa="fa", nfactors=1, main="Parallel Analysis Scree Plots", n.iter=20, error.bars=FALSE, se.bars=FALSE, SMC=FALSE, ylabel=NULL, show.legend=TRUE, sim=TRUE, quant=.95, cor="poly", use="pairwise", plot=TRUE, correct=.5) # suggest 3 factors
+
+fa(misc_test_4, nfactors = 3, n.obs = NA, rotate = "quartimin", fm = "uls", cor = "poly") 
+```
+
+```{r}
+misc_test_5 <- d2_par_w1 %>%
+  select(q36, q40, q41, q46, q53, q55, q56, q57, q58, q59, q62) 
+
+fa(misc_test_5, n.obs = NA, rotate = "none", fm = "uls", cor = "poly") # looks good
+
+fa.parallel(misc_test_5, n.obs=NULL, fm="uls", fa="fa", nfactors=1, main="Parallel Analysis Scree Plots", n.iter=20, error.bars=FALSE, se.bars=FALSE, SMC=FALSE, ylabel=NULL, show.legend=TRUE, sim=TRUE, quant=.95, cor="poly", use="pairwise", plot=TRUE, correct=.5) # # suggest 3 factors
+
+fa(misc_test_5, nfactors = 2, n.obs = NA, rotate = "quartimin", fm = "uls", cor = "poly") 
+```
+Factor 1: endorse school & personnel
+
+53.	…bienvenido/a en la escuela de mi joven. 
+55.	… el personal de la escuela de mi joven está haciendo cosas buenas por ella / el. 
+56.	… la gente en la escuela de mi joven es confiable. 
+57.	… la escuela de mi joven hace un buen trabajo preparando a los jóvenes para sus futuros.
+58.	… puedo encontrar ayuda para mi joven si él / ella está batallando en una clase.
+59.	… los maestros de mi joven se preocupan por ella/el.
+62.	… puedo tener una conversación honesta y respetuosa sobre mi joven con su maestro.
+
+```{r}
+endorse_test <- d2_par_w1 %>%
+  select(q53, q55, q56, q57, q58, q59, q62)
+alpha(endorse_test) # 0.93 because removed q41
+```
+
+factor 2: 
+36.	… entender la diferencia entre obtener un GED, graduarse con un diploma estándar de la escuela secundaria, o con un diploma de una secundaria internacional o con un diploma de Bachillerato Internacional.
+40.	…entender la trayectoria hacia la preparación a la universidad y para una carrera ____
+46.	… estoy ayudando a mi joven prepararse para sus futuras metas de educación y carrera. ____
+
++
+
+prep_convo
+75	… sus futuros objetivos de carrera y educación (incluso los objetivos a corto plazo).
+80	… la importancia de prepararse para futuras trayectorias educativas o de carrera, como la planificación universitaria y / o pensando acerca de la escuela técnica o comercial, etc.
+81	… su involucro en actividades extracurriculares en la escuela y en la comunidad como en papeles de liderazgo, haciendo trabajo voluntario en la comunidad, deportes, etc.
+
+```{r}
+prep_test <- d2_par_w1 %>%
+  select(q36, q40, q46, q75, q80, q81)
+alpha(prep_test) # 0.74
+```
+Definately Not used:
+31.	… conocer el personal y la administración de la escuela  
+41.	… asistir a la conferencia de padres y maestros cuando esté disponible.
+45.	…estoy ayudando a mi joven hacer bien en la escuela.
+49.	…cómoda/o preguntando por un traductor y por materiales en español si los necesito. 
+52.	 …feliz de que mi joven asista a esta escuela.
+61.	… hay muchas oportunidades para la involucración de los padres.
+
+
+
