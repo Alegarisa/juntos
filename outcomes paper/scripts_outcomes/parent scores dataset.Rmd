@@ -1,0 +1,60 @@
+---
+title: "parent scores dataset"
+author: "Alejandra Garcia Isaza"
+date: "2023-03-15"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(rio)
+library(here)
+library(tidyverse)
+library(haven)
+library(janitor)
+library(knitr)
+library(surveytoolbox)
+library(sjPlot)
+library(kableExtra)
+library(psych)
+library(sjmisc)
+library(MVN)
+
+theme_set(theme_minimal())
+```
+
+##### PARENT WAVE 1 #####
+
+# Loading the dataset
+```{r}
+parent_w1 <- read_sav(here("outcomes paper/data_outcomes", "primary_parent_w1.sav")) # This dataset has primary parents in wave 1 with most data waves (n = 95)
+```
+
+
+
+
+```{r}
+parent_w1_scales <- parent_w1 %>%
+  rowwise() %>% 
+  mutate(pos_rel = mean(c(q116, q117, q118, q119, q120, q121), na.rm = TRUE),
+         monit = mean(c(q137, q139, q140, q143, q144), na.rm = TRUE),
+         hwinvo_1 = mean(c(q86, q87, q88, q89, q94, q96, q97), na.rm = TRUE),
+         hwinvo_2 = mean(c(q84, q85, q93, q95), na.rm = TRUE),
+         hwinvo_3 = mean(c(q90, q91, q98), na.rm = TRUE),
+         pos_par = mean(c(q128, q131, q132, q134, q135), na.rm = TRUE),
+         struct = mean(c(q23:q30), na.rm = TRUE),
+         nav_sch = mean(c(q32, q33, q34, q35), na.rm = TRUE),
+         par_net = mean(c(q37, q38, q39), na.rm = TRUE),
+         check_convo = mean(c(q74, q76, q77, q78, q79), na.rm = TRUE),
+         prep_convo = mean(c(q72, q73, q75, q80, q81), na.rm = TRUE),
+         soc_convo = mean(c(q68, q69, q70, q71), na.rm = TRUE),
+         par_agent = mean(c(q42, q43, q44, q47, q48, q50, q51, q54, q60), na.rm = TRUE),
+         par_teach_rel = mean(c(q63, q64, q65, q66, q67), na.rm = TRUE),
+         endorse = mean(c(q53, q55, q56, q57, q58, q59, q62), na.rm = TRUE),
+         fut_orient = mean(c(q105, q106, q107, q108, q109, q110), na.rm = TRUE),
+         diff_convo = mean(c(q122, q123, q124, q125, q126, q127), na.rm = TRUE)) %>%
+  select(1:8, 320:336)
+```
+# next: need to do this with parent wave 2.
+

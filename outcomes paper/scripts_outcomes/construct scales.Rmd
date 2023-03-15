@@ -103,6 +103,12 @@ d1_par_w1 %>%
 d2_par_w1 %>%
   select(q136)
 ```
+# outputing a dataset 
+```{r}
+# d2_par_w1 %>%
+#   haven::write_sav(here("outcomes paper/data_outcomes", "primary_parent_w1.sav"))
+```
+
 
 # Parenting Dimensions in JCCP NF paper 
 -	Positive parental involvement
@@ -221,10 +227,10 @@ Not included bec. factor loading neg or too low:
 92	Le recordé a mi joven que hiciera su tarea .28
 
 ```{r}
-hwinvo_3 <- d2_par_w1 %>%
-  select(q90, q91, q98) 
-
-alpha(hwinvo_3) # 0.58 (0.51 poor if all caregivers included)
+# hwinvo_3 <- d2_par_w1 %>%
+#   select(q90, q91, q98) 
+# 
+# alpha(hwinvo_3) # 0.58 (0.51 poor if all caregivers included)
 ```
 
 -	Skill encouragement (JCCP paper)*
@@ -270,7 +276,7 @@ fa.parallel(test_2, n.obs=NULL, fm="uls", fa="fa", nfactors=1, main="Parallel An
 
 fa(test_2, nfactors = 2, n.obs = NA, rotate = "quartimin", fm = "uls", cor = "poly") # factor 1: with 5 items; factor 2: 2 items
 ```
-- factor 1: Effective parenting
+- factor 1: positive parenting
 128.	En casa, estamos de acuerdo con reglas claras sobre lo que mi joven puede y no puede hacer. 
 131.	Cuando mi joven hace algo mal, le grito o le insulto 
 132.	Puedo controlar mi enojo y mantenerme calmado/a cuando disciplino o discuto con mi joven cuando él / ella hace algo mal
@@ -289,10 +295,10 @@ alpha(posi_parent) # 0.72 (0.76 if removing q131)
 130.	Cada vez que mi joven hace algo mal, yo le respondo con una consecuencia específica (por ejemplo, una disciplina específica, quitándole privilegios, etc.) 
 
 ```{r}
-consistency <- d2_par_w1 %>%
-  select(q129, q130)
-
-alpha(consistency) # 0.77
+# consistency <- d2_par_w1 %>%
+#   select(q129, q130)
+# 
+# alpha(consistency) # 0.77
 ```
 ```{r}
 # test_3<- d2_par_w1 %>%
@@ -441,10 +447,17 @@ Factor 1
 78	… su comportamiento en la escuela.
 79	… las cosas que suceden en la escuela (el ambiente escolar en general).
 
+if adding back q74, this factor would be somewhat a general check in.
+74.	… cómo va en sus clases.
+
 ```{r}
-clim_convo <- d2_par_w1 %>%
-  select(q76, q77, q78, q79)
-alpha(clim_convo) # 0.84
+# clim_convo <- d2_par_w1 %>%
+#   select(q76, q77, q78, q79)
+# alpha(clim_convo) # 0.84
+###
+clim_convo_2 <- d2_par_w1 %>%
+  select(q74, q76, q77, q78, q79) # adding back q74
+alpha(clim_convo_2) #0.85
 ```
 
 Factor 2
@@ -452,10 +465,18 @@ Factor 2
 80	… la importancia de prepararse para futuras trayectorias educativas o de carrera, como la planificación universitaria y / o pensando acerca de la escuela técnica o comercial, etc.
 81	… su involucro en actividades extracurriculares en la escuela y en la comunidad como en papeles de liderazgo, haciendo trabajo voluntario en la comunidad, deportes, etc.
 
+If adding back q72 & q73, factor remains the same: prep 
+72.	… las cosas que aprende en clase 
+73.	… cómo contribuye al salón de clase.
+
 ```{r}
-prep_convo <- d2_par_w1 %>%
-  select(q75, q80, q81)
-alpha(prep_convo) # 0.77
+# prep_convo <- d2_par_w1 %>%
+#   select(q75, q80, q81)
+# alpha(prep_convo) # 0.77
+###
+prep_convo_2 <- d2_par_w1 %>%
+  select(q72, q73, q75, q80, q81) # adding back q72 & q73
+alpha(prep_convo_2) # 0.80
 ```
 
 Factor 3
@@ -479,6 +500,7 @@ Not included (loaded in >1 factor)
 #   select(q72, q73, q74)
 # alpha(aca_convo) # 0.59 poor 
 ```
+
 Items about school 
 42.	…yo entiendo cómo funciona la escuela de mi joven.
 43.	…puedo comunicar mis preguntas y preocupaciones con los maestros y el personal de la escuela.
@@ -641,17 +663,83 @@ prep_convo
 81	… su involucro en actividades extracurriculares en la escuela y en la comunidad como en papeles de liderazgo, haciendo trabajo voluntario en la comunidad, deportes, etc.
 
 ```{r}
-prep_test <- d2_par_w1 %>%
-  select(q36, q40, q46, q75, q80, q81)
-alpha(prep_test) # 0.74
+# prep_test <- d2_par_w1 %>%
+#   select(q36, q40, q46, q72, q73, q75, q80, q81)
+# alpha(prep_test) # 0.78
 ```
-Definately Not used:
+- youth engagement (from parent perspective)
+
+100.	…aprovecha al máximo las oportunidades escolares (clases extracurriculares, actividades estudiantiles, clubes de tarea)
+101.	… participa en grupos / actividades fuera de la escuela (deportes, trabajo voluntario, iglesia, música, etc.)
+102.	… le gusta la escuela
+103.	…tiene una relación cercana con al menos un maestro en la escuela.
+104.	… tiene sueños y planes para su futuro.
+
+```{r}
+# engag <- d2_par_w1 %>%
+#   select(q100, q101, q102, q103, q104) 
+# 
+# fa(engag, n.obs = NA, rotate = "none", fm = "uls", cor = "poly") # q101 limit loading
+# 
+# alpha(engag) #0.59 poor (0.64 if removing q101)
+```
+- parent's future orientation for youth
+
+105.	… que mi joven se gradúe de la escuela secundaria.
+106.	… que mi joven continúe su educación después de la secundaria
+107.	… saber cuáles son las metas que tiene mi joven para su futuro
+108.	… ayudar a mi joven a hacer planes y dar pasos hacia sus metas para el futuro
+109.	… buscar información para ayudarle a mi joven a alcanzar sus metas futuras
+110.	… ayudar a mi joven a comenzar a prepararse para la educación superior, incluso mientras esté en la escuela intermedia
+
+```{r}
+fut_or <- d2_par_w1 %>%
+  select(q105, q106, q107, q108, q109, q110) 
+
+fa(fut_or, n.obs = NA, rotate = "none", fm = "uls", cor = "poly")
+
+alpha(fut_or) # 0.91
+```
+- difficult convos with youth
+
+122.	Cuando mi joven tiene que tomar decisiones importantes o cuando él / ella enfrenta un desafío, él / ella me pide por ayuda y apoyo
+123.	Mi joven y yo podemos hablar abiertamente de situaciones y temas difíciles (como sexo, drogas, la influencia de amigos y compañeros, etc.)
+124.	Mi joven y yo podemos hablar y resolver conflictos que ocurren en casa
+125.	Mi joven y yo podemos hablar y resolver los conflictos que surgen acerca de hacer la tarea
+126.	Si mi joven tiene problemas en la escuela, sé cómo conseguirle la ayuda que él / ella necesita
+127.	Si mi joven tiene un problema en la escuela, estoy segura/o de que él / ella podría hablar conmigo al respecto
+
+```{r}
+diff_convo <- d2_par_w1 %>%
+  select(q122, q123, q124, q125, q126, q127) 
+
+fa(diff_convo, n.obs = NA, rotate = "none", fm = "uls", cor = "poly")
+
+alpha(diff_convo) # 0.86
+```
+
+
+Definitely Not used from parent-school rel (misc):
 31.	… conocer el personal y la administración de la escuela  
 41.	… asistir a la conferencia de padres y maestros cuando esté disponible.
 45.	…estoy ayudando a mi joven hacer bien en la escuela.
 49.	…cómoda/o preguntando por un traductor y por materiales en español si los necesito. 
 52.	 …feliz de que mi joven asista a esta escuela.
 61.	… hay muchas oportunidades para la involucración de los padres.
+
+Definitely Not used from homework
+82. Mi joven ha tenido la plena responsabilidad de completar su tarea; no me involucro
+83. Dejé de intentar (de ayudarlo con su tarea)
+92. Le recordé a mi joven que hiciera su tarea
+
+Definitely Not used from limts & consequences 
+133.	Cuando mi joven me desafía al no hacer lo que le pido, yo renuncio
+136.	Cuando le doy una amenaza o advertencia a mi joven, frecuentemente no lo llevo a cabo
+
+Definitely Not used from supervision
+138.	Hablo con mi joven en muchas ocasiones acerca de lo que él / ella aprendió en la escuela 
+141.	Los amigos de mi joven tienen una buena influencia en su vida.
+142.	Los amigos de mi joven se apoyan positivamente entre sí.
 
 
 
