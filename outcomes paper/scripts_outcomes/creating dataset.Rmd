@@ -1,0 +1,243 @@
+---
+title: "Creating dataset"
+author: "Alejandra Garcia Isaza"
+date: "2023-03-20"
+output: html_document
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(rio)
+library(here)
+library(tidyverse)
+library(haven)
+library(janitor)
+library(knitr)
+library(surveytoolbox)
+library(sjPlot)
+library(kableExtra)
+library(psych)
+library(sjmisc)
+library(MVN)
+
+theme_set(theme_minimal())
+```
+
+##### PARENT WAVE 1 #####
+
+# Loading the dataset
+```{r}
+d_par_w1_raw <- read_sav(here("outcomes paper/data_outcomes", "all_parent_wave1.sav")) # This dataset has ALL parents in wave 1 (n = 124)
+```
+
+# filtering primary caregiver only (wave 1) - TBD if removing parent with less data waves among parents is ok
+```{r}
+d_par_w1 <- d_par_w1_raw %>%
+  filter(participant_id != "405_1") %>% # removing mother who has less waves of data than father
+  filter(participant_id != "614_1") %>% # removing mother who has less waves of data than father
+  distinct(family_id, .keep_all = TRUE) # 95 primary caregivers
+```
+
+# Number of participants types in Wave 1 primary caregiver dataset
+```{r}
+# 95 total primary caregiver participants in w1, from which...
+
+d_par_w1 %>%
+  filter(participant == 1) # 89 were moms
+
+d_par_w1 %>%
+  filter(participant == 2) # 5 were dads
+
+d_par_w1 %>%
+  filter(participant == 4) # 1 were "other" (grandparent)
+
+unique(d_par_w1$family_id) # 95 unique id values, thus 95 families in W1. 
+```
+
+```{r}
+view_df(d_par_w1) # always load this one to check variable labels
+```
+
+# Data prep: recoding missing variables as N/A
+```{r include=FALSE}
+# recoding missing values as N/A with function
+
+# vector with missing values in dataset
+missing_vals <- c(77, 88, 99, -99)
+
+# function that returns true if values in vector are equal to missing_vals. The function takes a vector x, and specified values of missing data
+recode_missing <- function(x, missing_vals = c(77, 88, 99, -99)) {
+  test <- x %in% missing_vals
+  ifelse(test, NA, x)
+}
+
+# function that recodes missing values to NA. The function takes a dataframe with variables with missing data, and specified values of missing data
+recode_missing_df <- function(df, missing_vals = c(77, 88, 99, -99)) {
+  modify(df, ~recode_missing(.x, missing_vals)) # here uses the function created above
+}
+
+d1_par_w1 <- recode_missing_df(d_par_w1) # the function strips out variable labels
+```
+
+# Data prep: reverse scoring negatively worded items
+```{r}
+d2_par_w1 <- d1_par_w1 %>%
+  mutate(q82 = likert_reverse(q82, top = 4, bottom = 1),
+         q83 = likert_reverse(q83, top = 4, bottom = 1),
+         q131 = likert_reverse(q131, top = 4, bottom = 1),
+         q133 = likert_reverse(q133, top = 4, bottom = 1),
+         q136 = likert_reverse(q136, top = 4, bottom = 1))
+```
+
+# checking reverse scoring
+```{r}
+d1_par_w1 %>%
+  select(q136)
+
+d2_par_w1 %>%
+  select(q136)
+```
+
+# outputing primary caregiver parent wave 1 dataset 
+```{r}
+# d2_par_w1 %>%
+#   haven::write_sav(here("outcomes paper/data_outcomes", "primary_parent_w1.sav"))
+```
+
+##
+##
+##
+
+##### PARENT WAVE 2 #####
+
+# Loading the dataset
+```{r}
+d_par_w2_raw <- read_sav(here("outcomes paper/data_outcomes", "all_parent_wave2.sav")) # This dataset has ALL parents in wave 2 (n = 108)
+```
+
+# filtering primary caregiver only (wave 1) - TBD if removing parent with less data waves among parents is ok
+```{r}
+d_par_w2 <- d_par_w2_raw %>%
+  filter(participant_id != "614_1") %>% # removing mother who has less waves of data than father
+  distinct(family_id, .keep_all = TRUE) # 84 primary caregivers
+```
+
+# Number of participants types in Wave 2 primary caregiver dataset
+```{r}
+# 84 total primary caregiver participants in w2, from which...
+
+d_par_w2 %>%
+  filter(participant == 1) # 80 were moms
+
+d_par_w2 %>%
+  filter(participant == 2) # 3 were dads
+
+d_par_w2 %>%
+  filter(participant == 4) # 1 were "other" (grandparent)
+
+unique(d_par_w2$family_id) # 84 unique id values, thus 84 families in W1. 
+```
+
+```{r}
+view_df(d_par_w2) # always load this one to check variable labels
+```
+
+# Data prep: recoding missing variables as N/A
+```{r include=FALSE}
+d1_par_w2 <- recode_missing_df(d_par_w2) # the function strips out variable labels
+```
+
+# Data prep: reverse scoring negatively worded items
+```{r}
+d2_par_w2 <- d1_par_w2 %>%
+  mutate(q82 = likert_reverse(q82, top = 4, bottom = 1),
+         q83 = likert_reverse(q83, top = 4, bottom = 1),
+         q131 = likert_reverse(q131, top = 4, bottom = 1),
+         q133 = likert_reverse(q133, top = 4, bottom = 1),
+         q136 = likert_reverse(q136, top = 4, bottom = 1))
+```
+
+# checking reverse scoring
+```{r}
+d1_par_w2 %>%
+  select(q136)
+
+d2_par_w2 %>%
+  select(q136)
+```
+
+# outputing primary caregiver parent wave 2 dataset 
+```{r}
+# d2_par_w2 %>%
+#   haven::write_sav(here("outcomes paper/data_outcomes", "primary_parent_w2.sav"))
+```
+
+###
+###
+###
+
+##### PARENT WAVE 3 #####
+
+# Loading the dataset
+```{r}
+d_par_w3_raw <- read_sav(here("outcomes paper/data_outcomes", "all_parent_wave3.sav")) # This dataset has ALL parents in wave 3 (n = 108)
+```
+
+# filtering primary caregiver only (wave 1) - TBD if removing parent with less data waves among parents is ok
+```{r}
+d_par_w3 <- d_par_w3_raw %>%
+  distinct(family_id, .keep_all = TRUE) # 86 primary caregivers
+```
+
+# Number of participants types in Wave 3 primary caregiver dataset
+```{r}
+# 86 total primary caregiver participants in w3, from which...
+
+d_par_w3 %>%
+  filter(participant == 1) # 80 were moms
+
+d_par_w3 %>%
+  filter(participant == 2) # 5 were dads
+
+d_par_w3 %>%
+  filter(participant == 4) # 1 were "other" (grandparent)
+
+unique(d_par_w3$family_id) # 86 unique id values, thus 86 families in W1. 
+```
+
+```{r}
+view_df(d_par_w3) # always load this one to check variable labels
+```
+
+# Data prep: recoding missing variables as N/A
+```{r include=FALSE}
+d1_par_w3 <- recode_missing_df(d_par_w3) # the function strips out variable labels
+```
+
+# Data prep: reverse scoring negatively worded items
+```{r}
+d2_par_w3 <- d1_par_w3 %>%
+  mutate(q82 = likert_reverse(q82, top = 4, bottom = 1),
+         q83 = likert_reverse(q83, top = 4, bottom = 1),
+         q131 = likert_reverse(q131, top = 4, bottom = 1),
+         q133 = likert_reverse(q133, top = 4, bottom = 1),
+         q136 = likert_reverse(q136, top = 4, bottom = 1))
+```
+
+# checking reverse scoring
+```{r}
+d1_par_w3 %>%
+  select(q136)
+
+d2_par_w3 %>%
+  select(q136)
+```
+
+# outputing primary caregiver parent wave 2 dataset 
+```{r}
+# d2_par_w3 %>%
+#   haven::write_sav(here("outcomes paper/data_outcomes", "primary_parent_w3.sav"))
+```
+

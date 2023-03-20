@@ -43,7 +43,7 @@ parent_w1_scales <- parent_w1 %>%
          hwinvo_2 = mean(c(q84, q85, q93, q95), na.rm = TRUE),
          hwinvo_3 = mean(c(q90, q91, q98), na.rm = TRUE),
          pos_par = mean(c(q128, q131, q132, q134, q135), na.rm = TRUE),
-         struct = mean(c(q23:q30), na.rm = TRUE),
+         struct = mean(c(q23, q24, q25, q26, q27, q28, q29, q30), na.rm = TRUE),
          nav_sch = mean(c(q32, q33, q34, q35), na.rm = TRUE),
          par_net = mean(c(q37, q38, q39), na.rm = TRUE),
          check_convo = mean(c(q74, q76, q77, q78, q79), na.rm = TRUE),
@@ -54,7 +54,117 @@ parent_w1_scales <- parent_w1 %>%
          endorse = mean(c(q53, q55, q56, q57, q58, q59, q62), na.rm = TRUE),
          fut_orient = mean(c(q105, q106, q107, q108, q109, q110), na.rm = TRUE),
          diff_convo = mean(c(q122, q123, q124, q125, q126, q127), na.rm = TRUE)) %>%
-  select(1:8, 320:336)
+  select(1, 2, 4, 5, 6, 8, 320:336)
 ```
-# next: need to do this with parent wave 2.
+##
+##
+##
+
+##### PARENT WAVE 2 #####
+
+# Loading the dataset
+```{r}
+parent_w2 <- read_sav(here("outcomes paper/data_outcomes", "primary_parent_w2.sav")) # This dataset has primary parents in wave 1 with most data waves (n = 84)
+```
+
+
+```{r}
+parent_w2_scales <- parent_w2 %>%
+  rowwise() %>% 
+  mutate(pos_rel = mean(c(q116, q117, q118, q119, q120, q121), na.rm = TRUE),
+         monit = mean(c(q137, q139, q140, q143, q144), na.rm = TRUE),
+         hwinvo_1 = mean(c(q86, q87, q88, q89, q94, q96, q97), na.rm = TRUE),
+         hwinvo_2 = mean(c(q84, q85, q93, q95), na.rm = TRUE),
+         hwinvo_3 = mean(c(q90, q91, q98), na.rm = TRUE),
+         pos_par = mean(c(q128, q131, q132, q134, q135), na.rm = TRUE),
+         struct = mean(c(q23, q24, q25, q26, q27, q28, q29, q30), na.rm = TRUE),
+         nav_sch = mean(c(q32, q33, q34, q35), na.rm = TRUE),
+         par_net = mean(c(q37, q38, q39), na.rm = TRUE),
+         check_convo = mean(c(q74, q76, q77, q78, q79), na.rm = TRUE),
+         prep_convo = mean(c(q72, q73, q75, q80, q81), na.rm = TRUE),
+         soc_convo = mean(c(q68, q69, q70, q71), na.rm = TRUE),
+         par_agent = mean(c(q42, q43, q44, q47, q48, q50, q51, q54, q60), na.rm = TRUE),
+         par_teach_rel = mean(c(q63, q64, q65, q66, q67), na.rm = TRUE),
+         endorse = mean(c(q53, q55, q56, q57, q58, q59, q62), na.rm = TRUE),
+         fut_orient = mean(c(q105, q106, q107, q108, q109, q110), na.rm = TRUE),
+         diff_convo = mean(c(q122, q123, q124, q125, q126, q127), na.rm = TRUE)) %>%
+  select(1, 2, 4, 5, 6, 8, 321:337)
+# note: Participant 210_1 has mostly NA, thus most o the construct acores are NA. Remove?
+```
+
+###
+###
+###
+
+##### PARENT WAVE 3 #####
+
+# Loading the dataset
+```{r}
+parent_w3 <- read_sav(here("outcomes paper/data_outcomes", "primary_parent_w3.sav")) # This dataset has primary parents in wave 1 with most data waves (n = 86)
+```
+
+
+```{r}
+parent_w3_scales <- parent_w3 %>%
+  rowwise() %>% 
+  mutate(pos_rel = mean(c(q116, q117, q118, q119, q120, q121), na.rm = TRUE),
+         monit = mean(c(q137, q139, q140, q143, q144), na.rm = TRUE),
+         hwinvo_1 = mean(c(q86, q87, q88, q89, q94, q96, q97), na.rm = TRUE),
+         hwinvo_2 = mean(c(q84, q85, q93, q95), na.rm = TRUE),
+         hwinvo_3 = mean(c(q90, q91, q98), na.rm = TRUE),
+         pos_par = mean(c(q128, q131, q132, q134, q135), na.rm = TRUE),
+         struct = mean(c(q23, q24, q25, q26, q27, q28, q29, q30), na.rm = TRUE),
+         nav_sch = mean(c(q32, q33, q34, q35), na.rm = TRUE),
+         par_net = mean(c(q37, q38, q39), na.rm = TRUE),
+         check_convo = mean(c(q74, q76, q77, q78, q79), na.rm = TRUE),
+         prep_convo = mean(c(q72, q73, q75, q80, q81), na.rm = TRUE),
+         soc_convo = mean(c(q68, q69, q70, q71), na.rm = TRUE),
+         par_agent = mean(c(q42, q43, q44, q47, q48, q50, q51, q54, q60), na.rm = TRUE),
+         par_teach_rel = mean(c(q63, q64, q65, q66, q67), na.rm = TRUE),
+         endorse = mean(c(q53, q55, q56, q57, q58, q59, q62), na.rm = TRUE),
+         fut_orient = mean(c(q105, q106, q107, q108, q109, q110), na.rm = TRUE),
+         diff_convo = mean(c(q122, q123, q124, q125, q126, q127), na.rm = TRUE)) %>%
+  select(1, 2, 4, 5, 6, 8, 321:337)
+# note: Participant 210_1 has mostly NA, thus most o the construct acores are NA. 
+```
+
+# adding numbers to each variable name to separate waves: "1" for wave 1; "2" for wave 2, "3" for wave 3
+```{r}
+names(parent_w1_scales) <- paste(names(parent_w1_scales), "1", sep = ".")
+
+names(parent_w2_scales) <- paste(names(parent_w2_scales), "2", sep = ".")
+
+names(parent_w3_scales) <- paste(names(parent_w3_scales), "3", sep = ".")
+```
+
+# renaming these variables to be able to join later
+```{r}
+parent_w1_scales <- parent_w1_scales %>%
+  rename(c("school_id" = "school_id.1"),
+         c("condition" = "condition.1"),
+         c("family_id" = "family_id.1"),
+         c("participant_id" = "participant_id.1"),
+         c("participant" = "participant.1")) 
+
+parent_w2_scales <- parent_w2_scales %>%
+  rename(c("school_id" = "school_id.2"),
+         c("condition" = "condition.2"),
+         c("family_id" = "family_id.2"),
+         c("participant_id" = "participant_id.2"),
+         c("participant" = "participant.2"))
+
+parent_w3_scales <- parent_w3_scales %>%
+  rename(c("school_id" = "school_id.3"),
+         c("condition" = "condition.3"),
+         c("family_id" = "family_id.3"),
+         c("participant_id" = "participant_id.3"),
+         c("participant" = "participant.3"))
+```
+
+# joining datasets for analyses
+```{r}
+primary_w1_w2 <- full_join(parent_w1_scales, parent_w2_scales) # 95 rows of data
+
+primary_all <- full_join(primary_w1_w2, parent_w3_scales) # 95 rows of data
+```
 
