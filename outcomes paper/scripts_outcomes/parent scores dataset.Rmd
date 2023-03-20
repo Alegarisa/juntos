@@ -170,6 +170,6 @@ primary_all <- full_join(primary_w1_w2, parent_w3_scales) # 95 rows of data
 
 # outputing primary caregiver parent all waves dataset 
 ```{r}
-primary_all %>%
-  haven::write_sav(here("outcomes paper/data_outcomes", "primary_all.sav"))
+# primary_all %>%
+#   haven::write_sav(here("outcomes paper/data_outcomes", "primary_all.sav"))
 ```
