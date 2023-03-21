@@ -1,0 +1,83 @@
+---
+title: "prelim analyses"
+author: "Alejandra Garcia Isaza"
+date: "2023-03-21"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(rio)
+library(here)
+library(tidyverse)
+library(haven)
+library(janitor)
+library(knitr)
+library(surveytoolbox)
+library(sjPlot)
+library(kableExtra)
+library(psych)
+library(sjmisc)
+library(MVN)
+
+theme_set(theme_minimal())
+```
+
+# Loading the dataset
+```{r}
+d <- read_sav(here("outcomes paper/data_outcomes", "primary_all.sav")) # This dataset has primary parents in wave 1 with most data waves (n = 95)
+```
+1 control
+2 intervention
+
+
+```{r}
+ggplot(d, aes(condition, pos_rel.1)) +
+  geom_point() +
+  geom_smooth(method = "lm")
+```
+```{r}
+boxplot(pos_rel.1~condition,data=d, main="Construct by condition",
+   xlab="Condition", ylab="Positive rel")
+```
+```{r}
+boxplot(pos_rel.2~condition,data=d, main="Construct by condition",
+   xlab="Condition", ylab="Positive rel")
+```
+```{r}
+boxplot(pos_rel.3~condition,data=d, main="Construct by condition",
+   xlab="Condition", ylab="Positive rel")
+```
+
+
+```{r}
+ggplot(d, aes(pos_rel.1, pos_rel.2)) +
+  geom_boxplot() +
+  facet_wrap(~ condition)
+
+```
+```{r}
+tidy_d <- d %>%
+  select(condition, participant_id, pos_rel.1, pos_rel.2, pos_rel.3)
+
+tidy_d2 <- tidy_d %>%
+  gather(time, pos.rel, -condition, -participant_id)
+
+ggplot(tidy_d2, aes(time, pos.rel)) +
+  geom_boxplot() +
+  facet_wrap(~ condition) # I think this is the plot I want, but the result doesn't seem good.
+```
+
+```{r}
+tidy_d <- d %>%
+  select(condition, participant_id, monit.1, monit.2, monit.3)
+
+tidy_d2 <- tidy_d %>%
+  gather(time, monit, -condition, -participant_id)
+
+ggplot(tidy_d2, aes(time, monit)) +
+  geom_boxplot() +
+  facet_wrap(~ condition)
+```
+
