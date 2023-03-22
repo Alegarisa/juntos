@@ -21,42 +21,36 @@ library(psych)
 library(sjmisc)
 library(MVN)
 
-theme_set(theme_minimal())
+theme_set(theme_minimal(base_size = 15))
 ```
 
 # Loading the dataset
 ```{r}
 d <- read_sav(here("outcomes paper/data_outcomes", "primary_all.sav")) # This dataset has primary parents in wave 1 with most data waves (n = 95)
 ```
-1 control
-2 intervention
 
 
 ```{r}
-ggplot(d, aes(condition, pos_rel.1)) +
-  geom_point() +
-  geom_smooth(method = "lm")
-```
-```{r}
-boxplot(pos_rel.1~condition,data=d, main="Construct by condition",
-   xlab="Condition", ylab="Positive rel")
-```
-```{r}
-boxplot(pos_rel.2~condition,data=d, main="Construct by condition",
-   xlab="Condition", ylab="Positive rel")
-```
-```{r}
-boxplot(pos_rel.3~condition,data=d, main="Construct by condition",
-   xlab="Condition", ylab="Positive rel")
+d <- d %>%
+  mutate(condition = factor(condition),
+         condition = fct_recode(condition,
+                           "Control" = "1",
+                            "Intervention" = "2"))
 ```
 
 
 ```{r}
-ggplot(d, aes(pos_rel.1, pos_rel.2)) +
-  geom_boxplot() +
-  facet_wrap(~ condition)
-
+# boxplot(pos_rel.1~condition,data=d, main="Construct by condition",
+#    xlab="Condition", ylab="Positive rel")
+# 
+# boxplot(pos_rel.2~condition,data=d, main="Construct by condition",
+#    xlab="Condition", ylab="Positive rel")
+# 
+# boxplot(pos_rel.3~condition,data=d, main="Construct by condition",
+#    xlab="Condition", ylab="Positive rel")
 ```
+
+
 ```{r}
 tidy_d <- d %>%
   select(condition, participant_id, pos_rel.1, pos_rel.2, pos_rel.3)
@@ -66,7 +60,16 @@ tidy_d2 <- tidy_d %>%
 
 ggplot(tidy_d2, aes(time, pos.rel)) +
   geom_boxplot() +
-  facet_wrap(~ condition) # I think this is the plot I want, but the result doesn't seem good.
+  geom_jitter(color = "cornflowerblue", alpha = 0.3) +
+  facet_wrap(~ condition) +
+  scale_y_continuous(limits = c(1, 4)) +
+  scale_y_continuous(breaks = c(1, 1.5, 2, 2.5, 3, 3.5, 4)) +  
+  labs(title = "Positive Relationship Between Parent & Youth",
+       y = "Score",
+       x = "Time: Assessment Wave") +
+  theme(plot.title = element_text(family = "sans", size = 16, face = "bold", hjust = 0.2, margin = margin(20, 20, 30, 10)), 
+        axis.title.x = element_text(family = "sans", size = 12, margin = margin(20, 20, 10, 20)),
+        axis.title.y = element_text(family = "sans", size = 12, margin = margin(20, 20, 10, 10)))
 ```
 
 ```{r}
@@ -74,10 +77,353 @@ tidy_d <- d %>%
   select(condition, participant_id, monit.1, monit.2, monit.3)
 
 tidy_d2 <- tidy_d %>%
-  gather(time, monit, -condition, -participant_id)
+  gather(time, monitoring, -condition, -participant_id)
 
-ggplot(tidy_d2, aes(time, monit)) +
+ggplot(tidy_d2, aes(time, monitoring)) +
   geom_boxplot() +
-  facet_wrap(~ condition)
+  geom_jitter(color = "cornflowerblue", alpha = 0.3) +
+  facet_wrap(~ condition) +
+  scale_y_continuous(limits = c(1, 4)) +
+  scale_y_continuous(breaks = c(1, 1.5, 2, 2.5, 3, 3.5, 4)) +  
+  labs(title = "Parent Monitoring",
+       y = "Score",
+       x = "Time: Assessment Wave") +
+  theme(plot.title = element_text(family = "sans", size = 16, face = "bold", hjust = 0.5, margin = margin(20, 20, 30, 10)), 
+        axis.title.x = element_text(family = "sans", size = 12, margin = margin(20, 20, 10, 20)),
+        axis.title.y = element_text(family = "sans", size = 12, margin = margin(20, 20, 10, 10)))
 ```
 
+
+```{r}
+tidy_d <- d %>%
+  select(condition, participant_id, hwinvo_1.1, hwinvo_1.2, hwinvo_1.3)
+
+tidy_d2 <- tidy_d %>%
+  gather(time, hwi_intensive, -condition, -participant_id)
+
+ggplot(tidy_d2, aes(time, hwi_intensive)) +
+  geom_boxplot() +
+  geom_jitter(color = "cornflowerblue", alpha = 0.3) +
+  facet_wrap(~ condition) +
+  scale_y_continuous(limits = c(1, 4)) +
+  scale_y_continuous(breaks = c(1, 1.5, 2, 2.5, 3, 3.5, 4)) +  
+  labs(title = "Parent Intensive HW Involvement",
+       y = "Score",
+       x = "Time: Assessment Wave") +
+  theme(plot.title = element_text(family = "sans", size = 16, face = "bold", hjust = 0.5, margin = margin(20, 20, 30, 10)), 
+        axis.title.x = element_text(family = "sans", size = 12, margin = margin(20, 20, 10, 20)),
+        axis.title.y = element_text(family = "sans", size = 12, margin = margin(20, 20, 10, 10)))
+```
+
+```{r}
+tidy_d <- d %>%
+  select(condition, participant_id, hwinvo_2.1, hwinvo_2.2, hwinvo_2.3)
+
+tidy_d2 <- tidy_d %>%
+  gather(time, hwi_general, -condition, -participant_id)
+
+ggplot(tidy_d2, aes(time, hwi_general)) +
+  geom_boxplot() +
+  geom_jitter(color = "cornflowerblue", alpha = 0.3) +
+  facet_wrap(~ condition) +
+  scale_y_continuous(breaks = c(1, 2, 3, 4)) +
+  labs(title = "Parent General HW Involvement",
+       y = "Score",
+       x = "Time: Assessment Wave") +
+  theme(plot.title = element_text(family = "sans", size = 16, face = "bold", hjust = 0.5, margin = margin(20, 20, 30, 10)), 
+        axis.title.x = element_text(family = "sans", size = 12, margin = margin(20, 20, 10, 20)),
+        axis.title.y = element_text(family = "sans", size = 12, margin = margin(20, 20, 10, 10)))
+```
+
+```{r}
+tidy_d <- d %>%
+  select(condition, participant_id, hwinvo_3.1, hwinvo_3.2, hwinvo_3.3)
+
+tidy_d2 <- tidy_d %>%
+  gather(time, hwi_skill, -condition, -participant_id)
+
+ggplot(tidy_d2, aes(time, hwi_skill)) +
+  geom_boxplot() +
+  geom_jitter(color = "cornflowerblue", alpha = 0.3) +
+  facet_wrap(~ condition) +
+  scale_y_continuous(limits = c(1, 4)) +
+  scale_y_continuous(breaks = c(1, 1.5, 2, 2.5, 3, 3.5, 4)) +  
+  labs(title = "Parent HW Involvement: Skill Development",
+       y = "Score",
+       x = "Time: Assessment Wave") +
+  theme(plot.title = element_text(family = "sans", size = 16, face = "bold", hjust = 0.5, margin = margin(20, 20, 30, 10)), 
+        axis.title.x = element_text(family = "sans", size = 12, margin = margin(20, 20, 10, 20)),
+        axis.title.y = element_text(family = "sans", size = 12, margin = margin(20, 20, 10, 10)))
+```
+
+```{r}
+tidy_d <- d %>%
+  select(condition, participant_id, pos_par.1, pos_par.2, pos_par.3)
+
+tidy_d2 <- tidy_d %>%
+  gather(time, posi_parenting, -condition, -participant_id)
+
+ggplot(tidy_d2, aes(time, posi_parenting)) +
+  geom_boxplot() +
+  geom_jitter(color = "cornflowerblue", alpha = 0.3) +
+  facet_wrap(~ condition) +
+  scale_y_continuous(limits = c(1, 4)) +
+  scale_y_continuous(breaks = c(1, 1.5, 2, 2.5, 3, 3.5, 4)) +
+  labs(title = "Positive Parenting",
+       y = "Score",
+       x = "Time: Assessment Wave") +
+  theme(plot.title = element_text(family = "sans", size = 16, face = "bold", hjust = 0.5, margin = margin(20, 20, 30, 10)), 
+        axis.title.x = element_text(family = "sans", size = 12, margin = margin(20, 20, 10, 20)),
+        axis.title.y = element_text(family = "sans", size = 12, margin = margin(20, 20, 10, 10)))
+```
+
+
+```{r}
+tidy_d <- d %>%
+  select(condition, participant_id, struct.1, struct.2, struct.3)
+
+tidy_d2 <- tidy_d %>%
+  gather(time, home_structure, -condition, -participant_id)
+
+ggplot(tidy_d2, aes(time, home_structure)) +
+  geom_boxplot() +
+  geom_jitter(color = "cornflowerblue", alpha = 0.3) +
+  facet_wrap(~ condition) +
+  scale_y_continuous(limits = c(1, 4)) +
+  scale_y_continuous(breaks = c(1, 1.5, 2, 2.5, 3, 3.5, 4)) +  
+  labs(title = "Home Structure",
+       y = "Score",
+       x = "Time: Assessment Wave") +
+  theme(plot.title = element_text(family = "sans", size = 16, face = "bold", hjust = 0.5, margin = margin(20, 20, 30, 10)), 
+        axis.title.x = element_text(family = "sans", size = 12, margin = margin(20, 20, 10, 20)),
+        axis.title.y = element_text(family = "sans", size = 12, margin = margin(20, 20, 10, 10)))
+```
+
+```{r}
+tidy_d <- d %>%
+  select(condition, participant_id, nav_sch.1, nav_sch.2, nav_sch.3)
+
+tidy_d2 <- tidy_d %>%
+  gather(time, navigating_sch, -condition, -participant_id)
+
+ggplot(tidy_d2, aes(time, navigating_sch)) +
+  geom_boxplot() +
+  geom_jitter(color = "cornflowerblue", alpha = 0.3) +
+  facet_wrap(~ condition) +
+  scale_y_continuous(limits = c(1, 4)) +
+  scale_y_continuous(breaks = c(1, 1.5, 2, 2.5, 3, 3.5, 4)) +  
+  labs(title = "Navigating School",
+       y = "Score",
+       x = "Time: Assessment Wave") +
+  theme(plot.title = element_text(family = "sans", size = 16, face = "bold", hjust = 0.5, margin = margin(20, 20, 30, 10)), 
+        axis.title.x = element_text(family = "sans", size = 12, margin = margin(20, 20, 10, 20)),
+        axis.title.y = element_text(family = "sans", size = 12, margin = margin(20, 20, 10, 10)))
+```
+
+
+```{r}
+tidy_d <- d %>%
+  select(condition, participant_id, par_net.1, par_net.2, par_net.3)
+
+tidy_d2 <- tidy_d %>%
+  gather(time, par_networking, -condition, -participant_id)
+
+ggplot(tidy_d2, aes(time, par_networking)) +
+  geom_boxplot() +
+  geom_jitter(color = "cornflowerblue", alpha = 0.3) +
+  facet_wrap(~ condition) +
+  scale_y_continuous(limits = c(1, 4)) +
+  scale_y_continuous(breaks = c(1, 1.5, 2, 2.5, 3, 3.5, 4)) +  
+  labs(title = "Parent Networking at School",
+       y = "Score",
+       x = "Time: Assessment Wave") +
+  theme(plot.title = element_text(family = "sans", size = 16, face = "bold", hjust = 0.5, margin = margin(20, 20, 30, 10)), 
+        axis.title.x = element_text(family = "sans", size = 12, margin = margin(20, 20, 10, 20)),
+        axis.title.y = element_text(family = "sans", size = 12, margin = margin(20, 20, 10, 10)))
+```
+
+
+```{r}
+tidy_d <- d %>%
+  select(condition, participant_id, check_convo.1, check_convo.2, check_convo.3)
+
+tidy_d2 <- tidy_d %>%
+  gather(time, gen_check_in, -condition, -participant_id)
+
+ggplot(tidy_d2, aes(time, gen_check_in)) +
+  geom_boxplot() +
+  geom_jitter(color = "cornflowerblue", alpha = 0.3) +
+  facet_wrap(~ condition) +
+  scale_y_continuous(limits = c(1, 4)) +
+  scale_y_continuous(breaks = c(1, 1.5, 2, 2.5, 3, 3.5, 4)) +  
+  labs(title = "Parent General Checking In on Youth",
+       y = "Score",
+       x = "Time: Assessment Wave") +
+  theme(plot.title = element_text(family = "sans", size = 16, face = "bold", hjust = 0.5, margin = margin(20, 20, 30, 10)), 
+        axis.title.x = element_text(family = "sans", size = 12, margin = margin(20, 20, 10, 20)),
+        axis.title.y = element_text(family = "sans", size = 12, margin = margin(20, 20, 10, 10)),
+        axis.text.x = element_text(angle = 45, vjust = 0.5, hjust=0.5))
+```
+
+```{r}
+tidy_d <- d %>%
+  select(condition, participant_id, prep_convo.1, prep_convo.2, prep_convo.3)
+
+tidy_d2 <- tidy_d %>%
+  gather(time, prep_convo, -condition, -participant_id)
+
+ggplot(tidy_d2, aes(time, prep_convo)) +
+  geom_boxplot() +
+  geom_jitter(color = "cornflowerblue", alpha = 0.3) +
+  facet_wrap(~ condition) +
+  scale_y_continuous(limits = c(1, 4)) +
+  scale_y_continuous(breaks = c(1, 1.5, 2, 2.5, 3, 3.5, 4)) +  
+  labs(title = "Parent Check In on Youth's College Going",
+       y = "Score",
+       x = "Time: Assessment Wave") +
+  theme(plot.title = element_text(family = "sans", size = 16, face = "bold", hjust = 0.5, margin = margin(20, 20, 30, 10)), 
+        axis.title.x = element_text(family = "sans", size = 12, margin = margin(20, 20, 10, 20)),
+        axis.title.y = element_text(family = "sans", size = 12, margin = margin(20, 20, 10, 10)),
+        axis.text.x = element_text(angle = 45, vjust = 0.5, hjust=0.5))
+```
+
+
+```{r}
+tidy_d <- d %>%
+  select(condition, participant_id, soc_convo.1, soc_convo.2, soc_convo.3)
+
+tidy_d2 <- tidy_d %>%
+  gather(time, soc_convo, -condition, -participant_id)
+
+ggplot(tidy_d2, aes(time, soc_convo)) +
+  geom_boxplot() +
+  geom_jitter(color = "cornflowerblue", alpha = 0.3) +
+  facet_wrap(~ condition) +
+  scale_y_continuous(limits = c(1, 4)) +
+  scale_y_continuous(breaks = c(1, 1.5, 2, 2.5, 3, 3.5, 4)) +  
+  labs(title = "Parent Check In on Youth Socialization",
+       y = "Score",
+       x = "Time: Assessment Wave") +
+  theme(plot.title = element_text(family = "sans", size = 16, face = "bold", hjust = 0.5, margin = margin(20, 20, 30, 10)), 
+        axis.title.x = element_text(family = "sans", size = 12, margin = margin(20, 20, 10, 20)),
+        axis.title.y = element_text(family = "sans", size = 12, margin = margin(20, 20, 10, 10)),
+        axis.text.x = element_text(angle = 45, vjust = 0.5, hjust=0.5))
+```
+
+
+```{r}
+tidy_d <- d %>%
+  select(condition, participant_id, par_agent.1, par_agent.2, par_agent.3)
+
+tidy_d2 <- tidy_d %>%
+  gather(time, par_agent, -condition, -participant_id)
+
+ggplot(tidy_d2, aes(time, par_agent)) +
+  geom_boxplot() +
+  geom_jitter(color = "cornflowerblue", alpha = 0.3) +
+  facet_wrap(~ condition) +
+  scale_y_continuous(limits = c(1, 4)) +
+  scale_y_continuous(breaks = c(1, 1.5, 2, 2.5, 3, 3.5, 4)) +  
+  labs(title = "Parent's Agency at School",
+       y = "Score",
+       x = "Time: Assessment Wave") +
+  theme(plot.title = element_text(family = "sans", size = 16, face = "bold", hjust = 0.5, margin = margin(20, 20, 30, 10)), 
+        axis.title.x = element_text(family = "sans", size = 12, margin = margin(20, 20, 10, 20)),
+        axis.title.y = element_text(family = "sans", size = 12, margin = margin(20, 20, 10, 10)),
+        axis.text.x = element_text(angle = 45, vjust = 0.5, hjust=0.5))
+```
+
+
+
+
+
+```{r}
+tidy_d <- d %>%
+  select(condition, participant_id, par_teach_rel.1, par_teach_rel.2, par_teach_rel.3)
+
+tidy_d2 <- tidy_d %>%
+  gather(time, par_teach_rel, -condition, -participant_id)
+
+ggplot(tidy_d2, aes(time, par_teach_rel)) +
+  geom_boxplot() +
+  geom_jitter(color = "cornflowerblue", alpha = 0.3) +
+  facet_wrap(~ condition) +
+  scale_y_continuous(limits = c(1, 4)) +
+  scale_y_continuous(breaks = c(1, 1.5, 2, 2.5, 3, 3.5, 4)) +  
+  labs(title = "Parent's Relationship with Teacher(s)",
+       y = "Score",
+       x = "Time: Assessment Wave") +
+  theme(plot.title = element_text(family = "sans", size = 16, face = "bold", hjust = 0.5, margin = margin(20, 20, 30, 10)), 
+        axis.title.x = element_text(family = "sans", size = 12, margin = margin(20, 20, 10, 20)),
+        axis.title.y = element_text(family = "sans", size = 12, margin = margin(20, 20, 10, 10)),
+        axis.text.x = element_text(angle = 45, vjust = 0.5, hjust=0.5))
+```
+
+
+
+```{r}
+tidy_d <- d %>%
+  select(condition, participant_id, endorse.1, endorse.2, endorse.3)
+
+tidy_d2 <- tidy_d %>%
+  gather(time, endorse, -condition, -participant_id)
+
+ggplot(tidy_d2, aes(time, endorse)) +
+  geom_boxplot() +
+  geom_jitter(color = "cornflowerblue", alpha = 0.3) +
+  facet_wrap(~ condition) +
+  scale_y_continuous(limits = c(1, 4)) +
+  scale_y_continuous(breaks = c(1, 1.5, 2, 2.5, 3, 3.5, 4)) +  
+  labs(title = "Parent's Endorsement of School",
+       y = "Score",
+       x = "Time: Assessment Wave") +
+  theme(plot.title = element_text(family = "sans", size = 16, face = "bold", hjust = 0.5, margin = margin(20, 20, 30, 10)), 
+        axis.title.x = element_text(family = "sans", size = 12, margin = margin(20, 20, 10, 20)),
+        axis.title.y = element_text(family = "sans", size = 12, margin = margin(20, 20, 10, 10)),
+        axis.text.x = element_text(angle = 45, vjust = 0.5, hjust=0.5))
+```
+
+
+
+```{r}
+tidy_d <- d %>%
+  select(condition, participant_id, fut_orient.1, fut_orient.2, fut_orient.3)
+
+tidy_d2 <- tidy_d %>%
+  gather(time, fut_orient, -condition, -participant_id)
+
+ggplot(tidy_d2, aes(time, fut_orient)) +
+  geom_boxplot() +
+  geom_jitter(color = "cornflowerblue", alpha = 0.3) +
+  facet_wrap(~ condition) +
+  scale_y_continuous(limits = c(1, 4)) +
+  scale_y_continuous(breaks = c(1, 1.5, 2, 2.5, 3, 3.5, 4)) +  
+  labs(title = "Parent's Future Orientation",
+       y = "Score",
+       x = "Time: Assessment Wave") +
+  theme(plot.title = element_text(family = "sans", size = 16, face = "bold", hjust = 0.5, margin = margin(20, 20, 30, 10)), 
+        axis.title.x = element_text(family = "sans", size = 12, margin = margin(20, 20, 10, 20)),
+        axis.title.y = element_text(family = "sans", size = 12, margin = margin(20, 20, 10, 10)))
+```
+
+```{r}
+tidy_d <- d %>%
+  select(condition, participant_id, diff_convo.1, diff_convo.2, diff_convo.3)
+
+tidy_d2 <- tidy_d %>%
+  gather(time, diff_convo, -condition, -participant_id)
+
+ggplot(tidy_d2, aes(time, diff_convo)) +
+  geom_boxplot() +
+  geom_jitter(color = "cornflowerblue", alpha = 0.3) +
+  facet_wrap(~ condition) +
+  scale_y_continuous(limits = c(1, 4)) +
+  scale_y_continuous(breaks = c(1, 1.5, 2, 2.5, 3, 3.5, 4)) +  
+  labs(title = "Parent's Difficult Conversations with Youth",
+       y = "Score",
+       x = "Time: Assessment Wave") +
+  theme(plot.title = element_text(family = "sans", size = 16, face = "bold", hjust = 0.5, margin = margin(20, 20, 30, 10)), 
+        axis.title.x = element_text(family = "sans", size = 12, margin = margin(20, 20, 10, 20)),
+        axis.title.y = element_text(family = "sans", size = 12, margin = margin(20, 20, 10, 10)),
+        axis.text.x = element_text(angle = 45, vjust = 0.5, hjust=0.5))
+```
