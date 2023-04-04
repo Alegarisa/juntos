@@ -25,16 +25,25 @@ theme_set(theme_minimal())
 ```
 
 
-# Loading the dataset
+# Loading paent data
 ```{r}
 p <- read_sav(here("outcomes paper/data_outcomes", "primary_parent_w1.sav")) 
 
-y <- read_sav(here("outcomes paper/data_outcomes", "all_youth_wave1.sav"))
+p_1 <- p %>%
+  select(-response_id, -participant_4_text, -location, -location_5_text)
+
+names(p_1) <- paste(names(p_1), "p", sep = "_")
+
+p_2 <- p_1 %>%
+  rename(c("school_id" = "school_id_p"),
+         c("condition" = "condition_p"),
+         c("family_id" = "family_id_p"))
 ```
 
-
-
+#Loading youth data
 ```{r}
+y <- read_sav(here("outcomes paper/data_outcomes", "all_youth_wave1.sav"))
+
 view_df(y)
 ```
 
@@ -65,14 +74,264 @@ y_2 <- y_1 %>%
   mutate(q84 = likert_reverse(q84, top = 5, bottom = 1),
          q86 = likert_reverse(q86, top = 5, bottom = 1),
          q87 = likert_reverse(q87, top = 5, bottom = 1))
-
-
-y_sch_eng <- y_2 %>%
-  select(q83, q84, q85, q86, q87, q88, q89, q90, q91)
-
-alpha(y_sch_eng) # 0.72
 ```
-next: (cgeck diss analysis for reference)
-- join parent and youth datasets
-- add covariates
-- run simple regressions 
+
+
+```{r}
+names(y_2) <- paste(names(y_2), "y", sep = "_")
+```
+
+```{r}
+y_3 <- y_2 %>%
+  select(-response_id_y, -int_location_y, -int_location_4_text_y) %>%
+  rename(c("school_id" = "school_id_y"),
+         c("condition" = "condition_y"),
+         c("family_id" = "id_y"))
+```
+
+
+# Joining youth and parent wave 1
+```{r}
+par_you_w1 <- right_join(p_2, y_3) # 95 rows of data ... not full join bec. youth id 623 has no parent data
+
+```
+
+Youth outcomes:
+
+letter grades = q4
+overall GPA = q5 (this is mostly NA)
+hw_practices = q6, q7, q8, q9, q10, q11, q12, q13
+likelihood of dropping out = q16
+y_sch_eng = q83, q84, q85, q86, q87, q88, q89, q90, q91 (alpha = 0.72)
+
+```{r}
+par_you_w2 <- par_you_w1 %>%
+  rowwise() %>% 
+  mutate(par_agent = mean(c(q42_p, q43_p, q44_p, q47_p, q48_p, q50_p, q51_p, q54_p, q60_p), na.rm = TRUE),
+         par_teach_rel = mean(c(q63_p, q64_p, q65_p, q66_p, q67_p), na.rm = TRUE),
+         endorse = mean(c(q53_p, q55_p, q56_p, q57_p, q58_p, q59_p, q62_p), na.rm = TRUE),
+         hw_practic = mean(c(q6_y, q7_y, q8_y, q9_y, q10_y, q11_y, q12_y, q13_y), na.rm = TRUE),
+         y_sch_eng = mean(c(q83_y, q84_y, q85_y, q86_y, q87_y, q88_y, q89_y, q90_y, q91_y), na.rm = TRUE)) %>%
+  select(school_id, condition, family_id, par_agent, par_teach_rel, endorse, sex_y, q2_y, q4_y, q16_y, hw_practic, y_sch_eng)
+```
+
+# making factors and releveling
+```{r}
+
+d <- par_you_w2 %>%
+  mutate(youth_gender = factor(sex_y),
+         youth_gender = relevel(youth_gender, ref = "1"), # male
+         youth_grlevel = factor(q2_y),
+         youth_grlevel = relevel(youth_grlevel, ref = "2"), # 7th grade
+         youth_letter_grd = factor(q4_y),
+         youth_letter_grd = relevel(youth_letter_grd, ref = "1"), # mostly A
+         youth_drop = factor(q16_y),
+         youth_drop = relevel(youth_drop, ref = "1")) %>% # will not drop out
+ select(-sex_y, -q2_y)
+```
+
+# descriptive stats function
+```{r include=FALSE}
+
+# function that takes a df and returns a df with only the numeric columns
+only_numeric <- function(df) {
+  select_numeric <- dplyr::select_if(df, is.numeric)
+  return(select_numeric)
+}
+
+# a list with the functions we want
+smry <- list(n = function(x) length(x),
+             n_valid = function(x) sum(!is.na(x)),
+             na = function(x) sum(is.na(x)),
+             M = function(x) round(mean(x, na.rm = TRUE), 2), 
+             SD = function(x) round(sd(x, na.rm = TRUE), 2),
+             Min = function(x) round(min(x, na.rm = TRUE), 2),
+             Max = function(x) round(max(x, na.rm = TRUE), 2))
+
+# wrapping solution in a function
+descriptives <- function(df) {
+  select_numeric <- only_numeric(df)
+  mean_sd <- map_df(select_numeric, function(col) map_df(smry, ~.x(col)),
+       .id = "column")
+  return(mean_sd)
+}
+```
+
+
+```{r}
+only_scales <- d %>%
+  select(-school_id, -condition, -family_id)
+
+descrip_table <- descriptives(only_scales) %>%
+  rename(c("Scale" = "column"))
+```
+
+
+# correlation matrix 
+```{r}
+library(Hmisc)
+rcorr(as.matrix(only_scales), type = "pearson")
+```
+
+```{r}
+ggplot(d, aes(y_sch_eng)) + 
+  geom_histogram() # approxiamtes normality, shows one outlier z-score greater than 3.0 or -3.0 (converting to Z-scores)
+```
+
+# parent agency predicting youth engagement
+```{r}
+m1 <- lm(y_sch_eng ~ par_agent, d)
+summary(m1) # p = 0.32
+
+m1_c <- lm(y_sch_eng ~ youth_gender + youth_grlevel + par_agent, d) # controling for youth's gender & grade
+summary(m1_c)
+```
+# parent-teach rel predicting youth engagement
+```{r}
+m2 <- lm(y_sch_eng ~ par_teach_rel, d)
+summary(m2) # p = 0.17
+
+m2_c <- lm(y_sch_eng ~ youth_gender + youth_grlevel + par_teach_rel, d) # controling for youth's gender & grade
+summary(m2_c)
+```
+# parent endorse of sch predicting youth engagement
+```{r}
+m3 <- lm(y_sch_eng ~ endorse, d)
+summary(m2) # p = 0.17
+
+m3_c <- lm(y_sch_eng ~ youth_gender + youth_grlevel + endorse, d) # controling for youth's gender & grade
+summary(m3_c)
+```
+
+```{r}
+ggplot(d, aes(youth_letter_grd)) + 
+  geom_bar()
+
+ggplot(d, aes(q4_y)) + 
+  geom_histogram()
+```
+
+#### needs to be logistic regression to use var youth_letter_grd###
+
+# parent agency predicting youth grades
+```{r}
+# m1 <- glm(youth_letter_grd ~ par_agent, d)
+# summary(m1) 
+# 
+# m1_c <- glm(youth_letter_grd ~ youth_gender + youth_grlevel + par_agent, d) # controling for youth's gender & grade
+# summary(m1_c)
+
+m1 <- lm(q4_y ~ par_agent, d)
+summary(m1) # p = 0.63
+
+m1_c <- lm(q4_y ~ youth_gender + youth_grlevel + par_agent, d) # controling for youth's gender & grade
+summary(m1_c)
+```
+
+# parent-teach rel predicting youth grades
+```{r}
+m2 <- lm(q4_y ~ par_teach_rel, d)
+summary(m2) # p = 0.98
+
+m2_c <- lm(q4_y ~ youth_gender + youth_grlevel + par_teach_rel, d) # controling for youth's gender & grade
+summary(m2_c)
+```
+
+# parent endorse of sch predicting youth engagement
+```{r}
+m3 <- lm(q4_y ~ endorse, d)
+summary(m2) # p = 0.98
+
+m3_c <- lm(q4_y ~ youth_gender + youth_grlevel + endorse, d) # controling for youth's gender & grade
+summary(m3_c)
+```
+
+```{r}
+ggplot(d, aes(youth_drop)) + 
+  geom_bar()
+
+ggplot(d, aes(q16_y)) + 
+  geom_histogram()
+```
+
+# parent agency predicting youth dropping out
+```{r}
+# m1 <- glm(youth_drop ~ par_agent, d)
+# summary(m1) 
+# 
+# m1_c <- glm(youth_drop ~ youth_gender + youth_grlevel + par_agent, d) # controling for youth's gender & grade
+# summary(m1_c)
+
+m1 <- lm(q16_y ~ par_agent, d)
+summary(m1) # p = 0.80
+
+m1_c <- lm(q16_y ~ youth_gender + youth_grlevel + par_agent, d) # controling for youth's gender & grade
+summary(m1_c)
+```
+
+# parent-teach rel predicting youth dropping out
+
+significant but confusing: for every one-unit increase in parent-teacher rel, the... (?) Difficult to interpret given the categorical nature of var. 
+```{r}
+m2 <- lm(q16_y ~ par_teach_rel, d)
+summary(m2) # p = 0.04 !!
+
+m2_c <- lm(q16_y ~ youth_gender + youth_grlevel + par_teach_rel, d) # controling for youth's gender & grade
+summary(m2_c)
+```
+
+# parent endorse of sch predicting youth dropping out
+
+significant but confusing: for every one-unit increase in parent endorse, the... (?) Difficult to interpret given the categorical nature of var. 
+```{r}
+m3 <- lm(q16_y ~ endorse, d)
+summary(m2) # p = 0.04
+
+m3_c <- lm(q16_y ~ youth_gender + youth_grlevel + endorse, d) # controling for youth's gender & grade
+summary(m3_c)
+```
+
+
+```{r}
+ggplot(d, aes(hw_practic)) + 
+  geom_histogram()
+```
+
+# parent agency predicting youth positive hw practices
+```{r}
+m1 <- lm(hw_practic ~ par_agent, d)
+summary(m1) # p = 0.01
+
+m1_c <- lm(hw_practic ~ youth_gender + youth_grlevel + par_agent, d) # controling for youth's gender & grade
+summary(m1_c)
+```
+
+# parent-teach rel predicting youth positive hw practices
+```{r}
+m2 <- lm(hw_practic ~ par_teach_rel, d)
+summary(m2) # p = 0.43
+
+m2_c <- lm(hw_practic ~ youth_gender + youth_grlevel + par_teach_rel, d) # controling for youth's gender & grade
+summary(m2_c)
+```
+
+# parent endorse of sch predicting youth positive hw practices
+```{r}
+m3 <- lm(hw_practic ~ endorse, d)
+summary(m2) # p = 0.43
+
+m3_c <- lm(hw_practic ~ youth_gender + youth_grlevel + endorse, d) # controling for youth's gender & grade
+summary(m3_c)
+```
+
+
+
+
+
+
+
+
+
+
+
+
