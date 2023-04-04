@@ -1,0 +1,78 @@
+---
+title: "models for FSC paper"
+author: "Alejandra Garcia Isaza"
+date: "2023-04-03"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(rio)
+library(here)
+library(tidyverse)
+library(haven)
+library(janitor)
+library(knitr)
+library(surveytoolbox)
+library(sjPlot)
+library(kableExtra)
+library(psych)
+library(sjmisc)
+library(MVN)
+
+theme_set(theme_minimal())
+```
+
+
+# Loading the dataset
+```{r}
+p <- read_sav(here("outcomes paper/data_outcomes", "primary_parent_w1.sav")) 
+
+y <- read_sav(here("outcomes paper/data_outcomes", "all_youth_wave1.sav"))
+```
+
+
+
+```{r}
+view_df(y)
+```
+
+# Data prep: recoding missing variables as N/A
+```{r include=FALSE}
+# recoding missing values as N/A with function
+
+# vector with missing values in dataset
+missing_vals <- c(77, 88, 99, -99)
+
+# function that returns true if values in vector are equal to missing_vals. The function takes a vector x, and specified values of missing data
+recode_missing <- function(x, missing_vals = c(77, 88, 99, -99)) {
+  test <- x %in% missing_vals
+  ifelse(test, NA, x)
+}
+
+# function that recodes missing values to NA. The function takes a dataframe with variables with missing data, and specified values of missing data
+recode_missing_df <- function(df, missing_vals = c(77, 88, 99, -99)) {
+  modify(df, ~recode_missing(.x, missing_vals)) # here uses the function created above
+}
+
+y_1 <- recode_missing_df(y) # the function strips out variable labels
+```
+
+# Data prep: reverse scoring
+```{r}
+y_2 <- y_1 %>%
+  mutate(q84 = likert_reverse(q84, top = 5, bottom = 1),
+         q86 = likert_reverse(q86, top = 5, bottom = 1),
+         q87 = likert_reverse(q87, top = 5, bottom = 1))
+
+
+y_sch_eng <- y_2 %>%
+  select(q83, q84, q85, q86, q87, q88, q89, q90, q91)
+
+alpha(y_sch_eng) # 0.72
+```
+next: (cgeck diss analysis for reference)
+- join parent and youth datasets
+- add covariates
+- run simple regressions 
