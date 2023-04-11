@@ -1,0 +1,683 @@
+---
+title: "construct scales - TESTING"
+author: "Alejandra Garcia Isaza"
+date: "2023-02-28"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(rio)
+library(here)
+library(tidyverse)
+library(haven)
+library(janitor)
+library(knitr)
+library(surveytoolbox)
+library(sjPlot)
+library(kableExtra)
+library(psych)
+library(sjmisc)
+library(MVN)
+
+theme_set(theme_minimal())
+```
+
+##### PARENT WAVE 1 #####
+
+# Loading the dataset parent wave 1
+```{r}
+parent_w1 <- read_sav(here("outcomes paper/data_outcomes", "primary_parent_w1.sav")) # This dataset has primary parents in wave 1 with most data waves (n = 95)
+```
+
+alpha internal consistencies benchmarks
+.00 to .69 = Poor reliability  
+.70 to .79 = Fair reliability  
+.80 to .89 = Good reliability  
+.90 to .99 = Excellent/Strong reliability 
+
+# Parenting Dimensions in JCCP NF paper 
+-	Positive parental involvement
+-	Monitoring
+-	Homework engagement 
+-	Skill encouragement (not present)
+-	Appropriate discipline
+-	General parenting (not present)
+---------------------------------------------
+-	Positive parental involvement (JCCP paper)*
+"Positive involvement was an average summative index of parent responses to 21 questions that reflected whether parents had engaged in a variety of positive activities with the target youth during the past week (e.g., gave him or her a hug or kiss, played a game with him or her, went for walk together, talked for at least 10 min about activities in his or her life, enjoyed music together, etc.). The scale demonstrated adequate internal consistency for mother and father scores (Cronbach’s alphas were .83 and .82, respectively)." (p. 846)
+
+*this scale not included as it was in LYFEII. Some items may be similar.
+
+Juntos items, fam activities:
+1.	Trabajamos en un pasatiempo o artesanía.
+2.	Participamos en una actividad al aire libre.
+3.	Leímos o hablamos acerca de un libro o historia.
+4.	Fuimos a un evento de entretenimiento.
+5.	Participamos en otras actividades (Fuimos al parque, nadamos, excursión a pie, etc.). 
+6.	Horneamos o cocinamos una comida.
+7.	Hicimos ejercicio o jugamos un juego al aire libre (baloncesto o béisbol, etc.)
+8.	Trabajamos alrededor de la casa o patio.
+9.	Fuimos a la Iglesia, sinagoga, u otro servicio religioso.
+
+```{r}
+# fam_act <- parent_w1 %>%
+#   select(q1, q2, q3, q4, q5, q6, q7, q8, q9)
+# 
+# alpha(fam_act) # 0.54 poor (0.55 if all caregivers included)
+```
+
+Alternatively (I LIKE THESE BETTER):
+
+116.	Cuando mi joven me pide hablar o cuando necesita hablar conmigo, escucho atentamente.
+117.	Sé escuchar atentamente, aun cuando no esté de acuerdo con lo que dice la otra persona.
+118.	Con regularidad, mi joven y yo hacemos cosas juntos que ambos disfrutamos
+119.	Mi joven y yo tenemos una relación cercana
+120.	Hago y digo cosas que le muestran a mi joven que a él / ella me importa y que yo la/lo amo (por ejemplo, diciendo cosas cariñosas, abrazándole/la, etc.)
+121.	Como madre/padre, es mi trabajo reconocer y apoyar las fortalezas de mi joven
+
+```{r}
+posi_rel <- parent_w1 %>%
+  select(q116, q117, q118, q119, q120, q121)
+
+fa(posi_rel, n.obs = NA, rotate = "none", fm = "uls", cor = "poly")
+
+alpha(posi_rel) # 0.91 (0.90 if all caregivers included)
+```
+# From my diss:
+- Monitoring
+
+"Monitoring.  Five items reflecting the level of parent’s endorsement of their tracking of their youth’s activities, where they are, and who are they with when they are not at home were used to measure parent’s monitoring of their youth. Sample items included statements such as “I often talk with my youth about their plans for the next day,” and “in general I know who my youth is with.” Response options used a Likert scale that ranged from (1) “strongly disagree” to (4) “strongly agree.” (α = .62)."  
+
+137.	A menudo hablo con mi joven acerca de sus planes para el día siguiente
+139.	A menudo hablo con mi joven acerca de sus amigos. 
+140.	Conozco muy bien a los amigos de mi joven. 
+143.	Por lo general yo sé con quién está mi joven
+144.	Sé lo que hace mi joven y dónde va cuando no está en casa
+
+Not included bec. appear to tap on different ideas:
+138.	Hablo con mi joven en muchas ocasiones acerca de lo que él / ella aprendió en la escuela
+141.	Los amigos de mi joven tienen una buena influencia en su vida. 
+142.	Los amigos de mi joven se apoyan positivamente entre sí.
+
+```{r}
+monit <- parent_w1 %>%
+  select(q137, q139, q140, q143, q144)
+
+fa(monit, n.obs = NA, rotate = "none", fm = "uls", cor = "poly")
+
+alpha(monit) # 0.64 (0.68 poor if all caregivers included)
+```
+# From my diss:
+-	Homework engagement
+
+"Homework Involvement.  A total of 17 items reflecting the frequency in which parents engaged in specific behaviors aimed at supporting their youth with homework (e.g., creating a home environment conducive to homework completion, verifying homework completion, providing incentives or sanctions for completion or incompletion, respectively) composed this measure. Sample items included “I reminded my youth to do their homework,” and “I reviewed and checked my youth’s homework.” Two items reflecting parent’s non-involvement in homework were reverse scored. Response options used a Likert scale that ranged from (1) “never” to (4) “often.”"
+
+"EFA analyses: "Interpretation of items in factor one (n = 7) suggested a more academic approach to parents’ homework involvement where the parent plays a sort of tutor role; they sit by their youth’s side, help when they are stuck, quiz them to reinforce learning, correct their youth’s mistakes, and help their youth get access to additional learning resources (α = .78). Interpretation of items in factor two (n = 4) suggested a more monitoring approach to parents’ homework involvement where the parent does not get involved in academic matters, but makes sure their youth has a time and place to do their homework, checks with the youth to ensure homework is done, and checks with the teacher to ensure homework completion (α = .70).  Finally, interpretation of items in factor three (n = 3) suggested parents’ use of contingent reinforcement strategies to increase behavioral compliance with homework completion (α = .59)."  
+
+# all items: q82, q83, q84, q85, q86, q87, q88, q89, q90, q91, q92, q93, q94, q95, q96, q97, q98)
+
+hwinvo_1 (intensive support - tutoring)
+86	Me senté con mi joven mientras él / ella hacía su tarea
+87	Me hice disponible para mi joven cuando tenía preguntas sobre su tarea
+88	Ayudé a mi joven cuando estaba atascado/a en una tarea
+89	Ayudé a mi joven a prepararse para los exámenes haciéndole preguntas sobre el tema, etc.
+94	Comprobé y corregí la tarea de mi hija/o 
+96	Le ayudé a mi joven acceder a otros recursos (biblioteca, materiales de arte, laboratorio de computación, etc.)
+97	Le ayudé a mi joven practicar habilidades (lectura, revisión, problemas de práctica, etc.)
+
+```{r}
+hwinvo_1 <- parent_w1 %>%
+  select(q86, q87, q88, q89, q94, q96, q97)
+
+fa(hwinvo_1, n.obs = NA, rotate = "none", fm = "uls", cor = "poly")
+
+alpha(hwinvo_1) # 0.78 (0.79 fair if all caregivers included)
+```
+
+hwinvo_2 (general support - monitoring)
+84	Me aseguré de que tenga un cierto tiempo para hacer la tarea
+85	Me aseguré de que él / ella tenga un cierto lugar para hacer la tarea
+93	Comprobé con mi joven para asegurarme de que él / ella hiciera su tarea
+95	Comprobé con la maestra/o para asegurarme que mi joven terminó su tarea 
+
+```{r}
+hwinvo_2 <- parent_w1 %>%
+  select(q84, q85, q93, q95)
+
+fa(hwinvo_2, n.obs = NA, rotate = "none", fm = "uls", cor = "poly")
+
+alpha(hwinvo_2) # 0.68; 0.74 if removing 95 (0.65 poor if all caregivers included; 0.69 if removing 95)
+```
+
+hwinvo_3 (skill encouragement to hw)
+90	Le di a mi joven incentivos como privilegios especiales, regalos especiales, etc.
+91	Utilicé consecuencias, castigos, acciones disciplinarias
+98	Limité el ruido y/o las distracciones mientras hacia su tarea
+
+Not included bec. factor loading neg or too low:
+82	Mi joven ha tenido la plena responsabilidad de completar su tarea; no me involucro. R -.28
+83	Dejé de intentar (de ayudarlo con su tarea). R -.02
+92	Le recordé a mi joven que hiciera su tarea .28
+
+```{r}
+# hwinvo_3 <- parent_w1 %>%
+#   select(q90, q91, q98)
+# 
+# fa(hwinvo_3, n.obs = NA, rotate = "none", fm = "uls", cor = "poly")
+# 
+# alpha(hwinvo_3) # 0.58 (0.51 poor if all caregivers included)
+```
+
+-	Skill encouragement (JCCP paper)*
+"Skill encouragement was an average parent scale score of eight items reflecting the frequency of specific contingent positive reinforcement responses when the youth engaged in prosocial behavior (e.g., giving extra privileges, praising the youth, spending special time together, offering small rewards, etc.). Individual items were rated on 5-point Likert scales, with higher values reflecting greater frequency of use for a particular encouragement strategy. Scale alphas were .78 and .75 for mothers and fathers, respectively." (p. 846)
+
+-	Appropriate discipline (JCCP paper)*
+"was an average scale score of 12 items reflecting the frequency of using effective limit setting strategies in response to specific youth misbehavior (e.g., giving warnings of and follow through with consequences, restricting privileges, giving a time-out, giving extra chores, etc.). (p. 846)
+
+-	General parenting (JCCP paper)*
+"General parenting was an average scale score of eight items reflecting general use of effective parenting strategies during the past month with the focal youth (e.g., communicating calmly and clearly with the youth when there was a disagreement, negotiating emotional conflicts and working
+toward solutions, being consistent with discipline, and following through with consequences)." (p. 846)
+
+*These scale were not included in Juntos
+
+Juntos items used:
+128.	En casa, estamos de acuerdo con reglas claras sobre lo que mi joven puede y no puede hacer. 
+129.	Mi joven sabe cómo voy a responder cuando hace algo malo cosas que no me gustan o lo que está en contra las reglas de la casa) 
+130.	Cada vez que mi joven hace algo mal, yo le respondo con una consecuencia específica (por ejemplo, una disciplina específica, quitándole privilegios, etc.) 
+131.	Cuando mi joven hace algo mal, le grito o le insulto 
+132.	Puedo controlar mi enojo y mantenerme calmado/a cuando disciplino o discuto con mi joven cuando él / ella hace algo mal
+133.	Cuando mi joven me desafía al no hacer lo que le pido, yo renuncio 
+134.	Cuando mi joven está aprendiendo un nuevo comportamiento (...), reconozco su progreso con, por ejemplo, un abrazo, una sonrisa o un pequeño regalo
+135.	Cuando mi joven se enfrenta a un gran desafío o establece una meta, le ayudo a centrarse en los pequeños pasos para lograr esa meta.
+136.	Cuando le doy una amenaza o advertencia a mi joven, frecuentemente no lo llevo a cabo
+
+```{r}
+# EFA iterations 
+
+# iteration 1
+test_1 <- parent_w1 %>%
+  select(q128, q129, q130, q131, q132, q133, q134, q135, q136)
+
+fa(test_1, n.obs = NA, rotate = "none", fm = "uls", cor = "poly")
+```
+
+```{r}
+# iteration 2
+test_2 <- parent_w1 %>%
+  select(q128, q129, q130, q131, q132, q134, q135) #rmved 133 (factor loading: 0.14) and 136 (factor loading: -0.04)
+
+fa(test_2, n.obs = NA, rotate = "none", fm = "uls", cor = "poly") # looks good
+
+fa.parallel(test_2, n.obs=NULL, fm="uls", fa="fa", nfactors=1, main="Parallel Analysis Scree Plots", n.iter=20, error.bars=FALSE, se.bars=FALSE, SMC=FALSE, ylabel=NULL, show.legend=TRUE, sim=TRUE, quant=.95, cor="poly", use="pairwise", plot=TRUE, correct=.5) # suggest 2 factors
+
+fa(test_2, nfactors = 2, n.obs = NA, rotate = "quartimin", fm = "uls", cor = "poly") # factor 1: with 5 items; factor 2: 2 items
+```
+- factor 1: positive parenting
+128.	En casa, estamos de acuerdo con reglas claras sobre lo que mi joven puede y no puede hacer. 
+131.	Cuando mi joven hace algo mal, le grito o le insulto 
+132.	Puedo controlar mi enojo y mantenerme calmado/a cuando disciplino o discuto con mi joven cuando él / ella hace algo mal
+134.	Cuando mi joven está aprendiendo un nuevo comportamiento (...), reconozco su progreso con, por ejemplo, un abrazo, una sonrisa o un pequeño regalo
+135.	Cuando mi joven se enfrenta a un gran desafío o establece una meta, le ayudo a centrarse en los pequeños pasos para lograr esa meta.
+
+```{r}
+posi_parent <- parent_w1 %>%
+  select(q128, q131, q132, q134, q135)
+
+alpha(posi_parent) # 0.72 (0.76 if removing q131)
+```
+- factor 2: consistency (only 2 items, though)
+
+129.	Mi joven sabe cómo voy a responder cuando hace algo malo cosas que no me gustan o lo que está en contra las reglas de la casa) 
+130.	Cada vez que mi joven hace algo mal, yo le respondo con una consecuencia específica (por ejemplo, una disciplina específica, quitándole privilegios, etc.) 
+
+```{r}
+# consistency <- parent_w1 %>%
+#   select(q129, q130)
+# 
+# alpha(consistency) # 0.77
+```
+```{r}
+# test_3<- parent_w1 %>%
+#   select(q128, q129, q130, q132, q134, q135) # NO EFA here, just face value.
+# 
+# alpha(test_3) # 0.83 (0.83 if all caregivers included)
+# 
+# 
+# discip_pos <- parent_w1 %>%
+#   select(q128, q129, q130, q132) # NO EFA here, just face value.
+# 
+# alpha(discip_pos) # 0.77 
+#
+# discip_neg <- parent_w1 %>%
+#   select(q131, q133, q136) # NO EFA here, just face value.
+# 
+# alpha(discip_neg) # 0.50
+```
+
+# From my diss:
+- Structure at home
+Structure at Home. Eight items reflecting parent’s endorsement of their employment of school-like functions in the home environment conformed this Juntos-developed measure. Sample items included statements such as “I have taken measures to support my youth to meet deadlines,” and “I have taken measures to support my youth to find ways to be involved in volunteer activities in the community.” Two items slightly overlap with the homework involvement construct, “I have taken measures to support my youth in developing a plan to study and complete homework,” and “I have taken measures to support my youth in developing a schedule to complete homework and school projects,” but given their focus on organization and structure, they were kept here. Response options used a Likert scale that ranged from (1) “strongly disagree” to (4) “strongly agree.” ... This scale continued to index parents’ practices to create a continuity between the school and home environment in terms of structure and planning to support youth academic behaviors (α = .82)."
+
+23	… desarrollar un plan para estudiar y hacer la tarea.
+24	… encontrar formas de involucrarse en las actividades escolares.
+25	… encontrar maneras de involucrarse en actividades de voluntario/a en la comunidad.
+26	… hacer metas para el año escolar.
+27	… cumplir fechas de limite.
+28	… participar en papeles de liderazgo en la escuela o comunidad.
+29	… enfocarse en hacer lo mejor posible.
+30	… desarrollar un horario para completar la tarea y los proyectos escolares a tiempo.
+
+```{r}
+struct <- parent_w1 %>%
+  select(q23:q30)
+
+alpha(struct) # 0.82 (0.82 if all caregivers included)
+```
+
+# From my diss:
+- School-based inv
+School-Based Involvement. Ten items reflecting the level of parent’s endorsement of their involvement in some school-based activities and their efforts in familiarizing themselves with the U.S. school system constituted this Juntos-developed measure. Sample items included, “In general, I make an effort to become involved in school activities, in [my youth’s] classroom, and/or other ways (e.g., parent committees, volunteering, etc.),” and “In general, I make an effort to understand the school’s rules and policies.” Response options used a Likert scale that ranged from (1) “strongly disagree” to (4) “strongly agree.” 
+
+"Analyses of items in factor one (n = 4) appeared to index a basic level of parent school-based involvement, mostly composed by practices in which the parent gets acquainted with the school personnel and policies (α = .85). Items in factor two (n = 5) indexed parents’ school-based practices that required a higher investment of time and efforts like volunteering at school, establishing connections with other school parents, and understanding the pathways to prepare for college (α = .82)." 
+
+31.	… conocer el personal y la administración de la escuela
+32.	… conocer al menos uno de los maestros de mi joven
+33.	… entender las reglas y pólizas de la escuela
+34.	… informarme sobre mis derechos como padre
+35.	… aprender sobre el sistema educativo en este estado
+36.	… entender la diferencia entre obtener un GED, graduarse con un diploma estándar de la escuela secundaria, o con un diploma de una secundaria internacional o con un diploma de Bachillerato Internacional.
+37.	… involucrarse en las actividades escolares, en el salón de clase, y/u otras maneras (por ejemplo, organizaciones de padres, trabajo voluntario, etc.) 
+38.	… tener conversaciones con los otros padres para obtener información o aprender acerca de los recursos en la escuela.
+39.	…contactar los otros padres para obtener apoyo.
+40.	…entender la trayectoria hacia la preparación a la universidad y para una carrera
+41.	… asistir a la conferencia de padres y maestros cuando esté disponible.
+
+
+```{r}
+sbi_test <- parent_w1 %>%
+  select(q31, q32, q33, q34, q35, q36, q37, q38, q39, q40) # 41 removed .30 loading
+
+fa(sbi_test, n.obs = NA, rotate = "none", fm = "uls", cor = "poly") # looks good
+
+fa.parallel(sbi_test, n.obs=NULL, fm="uls", fa="fa", nfactors=1, main="Parallel Analysis Scree Plots", n.iter=20, error.bars=FALSE, se.bars=FALSE, SMC=FALSE, ylabel=NULL, show.legend=TRUE, sim=TRUE, quant=.95, cor="poly", use="pairwise", plot=TRUE, correct=.5) # suggest 3 factors
+
+fa(sbi_test, nfactors = 3, n.obs = NA, rotate = "quartimin", fm = "uls", cor = "poly") 
+```
+```{r}
+sbi_test_2 <- parent_w1 %>%
+  select(q32, q33, q34, q35, q37, q38, q39)
+
+fa.parallel(sbi_test_2, n.obs=NULL, fm="uls", fa="fa", nfactors=1, main="Parallel Analysis Scree Plots", n.iter=20, error.bars=FALSE, se.bars=FALSE, SMC=FALSE, ylabel=NULL, show.legend=TRUE, sim=TRUE, quant=.95, cor="poly", use="pairwise", plot=TRUE, correct=.5) # suggest 2 factors
+
+fa(sbi_test_2, nfactors = 2, n.obs = NA, rotate = "quartimin", fm = "uls", cor = "poly")
+```
+
+32	… conocer al menos uno de los maestros de mi joven 
+33	… entender las reglas y pólizas de la escuela 
+34	… informarme sobre mis derechos como padre 
+35	… aprender sobre el sistema educativo en este estado
+
+```{r}
+sbi_1 <- parent_w1 %>%
+  select(q32, q33, q34, q35) 
+
+alpha(sbi_1) # 0.84
+```
+37	… involucrarse en las actividades escolares, en el salón de clase, y/u otras maneras (por ejemplo, organizaciones de padres, trabajo voluntario, etc.) 
+38	… tener conversaciones con los otros padres para obtener información o aprender acerca de los recursos en la escuela.
+39	…contactar los otros padres para obtener apoyo.
+
+```{r}
+sbi_2 <- parent_w1 %>% # taps on connecting with parents
+  select(q37, q38, q39)
+
+alpha(sbi_2) # 0.79
+```
+
+- Parent-child convos
+Parent-Child Conversations About School. A total of 14 items reflecting the frequency in which parents engaged in conversations with their youth about school (e.g., events happening at school, youth’s behavior, academic engagement, progress at school, challenging events like bullying or discrimination, youth’s school friends etc.) constituted this Juntos-developed measure. Sample items included “I have had conversations with my youth about things they learn in class,” and “I have had conversations with my youth about things that happen at school.” A subset of three items tap into conversations about college and career planning. Response options used a Likert scale that ranged from (1) “never” to (4) “often.” 
+
+Items in factor one (n = 4) appeared to index conversations around youth’s school climate and youth’s behavior in school (α = .85); items in factor two (n = 4) indexed conversations around future career planning and activities conducive to attending college (α = .78). Finally, items in factors three (n = 4) appeared to reflect conversations around the youth’s school social involvement; specifically, the youth’s relationship with school friends, teachers, and their involvement in school activities and upcoming school events (α = .81). 
+
+68.	… sus amistades en la escuela.
+69.	… su participación en actividades escolares.
+70.	… eventos que van a pasar en la escuela.
+71.	… sus profesores.
+72.	… las cosas que aprende en clase.
+73.	… cómo contribuye al salón de clase.
+74.	… cómo va en sus clases.
+75.	… sus futuros objetivos de carrera y educación (incluso los objetivos a corto plazo).
+76.	… desafíos que surgen en la escuela (como intimidación, agresión, acoso, racismo, peleas, etc.)
+77.	… sus actitudes sobre la escuela 
+78.	… su comportamiento en la escuela
+79.	… las cosas que suceden en la escuela (el ambiente escolar en general)
+80.	… la importancia de prepararse para futuras trayectorias educativas o de carrera, como la planificación universitaria y/o pensando acerca de la escuela técnica o comercial
+81.	… su involucro en actividades extracurriculares en la escuela y en la comunidad como en papeles de liderazgo, haciendo trabajo voluntario en la comunidad, deportes, etc.
+
+```{r}
+convos_test <- parent_w1 %>%
+  select(q68, q69, q70, q71, q72, q73, q74, q75, q76, q77, q78, q79, q80, q81)
+
+fa(convos_test, n.obs = NA, rotate = "none", fm = "uls", cor = "poly") # looks good
+
+fa.parallel(convos_test, n.obs=NULL, fm="uls", fa="fa", nfactors=1, main="Parallel Analysis Scree Plots", n.iter=20, error.bars=FALSE, se.bars=FALSE, SMC=FALSE, ylabel=NULL, show.legend=TRUE, sim=TRUE, quant=.95, cor="poly", use="pairwise", plot=TRUE, correct=.5) # suggest 3 factors
+
+fa(convos_test, nfactors = 3, n.obs = NA, rotate = "quartimin", fm = "uls", cor = "poly") 
+```
+
+```{r}
+convos_test2 <- parent_w1 %>%
+  select(q68, q69, q70, q71, q75, q76, q77, q78, q79, q80, q81) # removed q72, q73, q74 bec. loaded in >1 factors
+
+fa(convos_test2, n.obs = NA, rotate = "none", fm = "uls", cor = "poly") # looks good
+
+fa.parallel(convos_test2, n.obs=NULL, fm="uls", fa="fa", nfactors=1, main="Parallel Analysis Scree Plots", n.iter=20, error.bars=FALSE, se.bars=FALSE, SMC=FALSE, ylabel=NULL, show.legend=TRUE, sim=TRUE, quant=.95, cor="poly", use="pairwise", plot=TRUE, correct=.5) # suggest 3 factors
+
+fa(convos_test2, nfactors = 3, n.obs = NA, rotate = "quartimin", fm = "uls", cor = "poly") 
+```
+
+
+Factor 1
+76	… desafíos que surgen en la escuela (como intimidación, agresión, acoso, racismo, peleas, etc.)
+77	… sus actitudes sobre la escuela.
+78	… su comportamiento en la escuela.
+79	… las cosas que suceden en la escuela (el ambiente escolar en general).
+
+if adding back q74, this factor would be somewhat a general check in.
+74.	… cómo va en sus clases.
+
+```{r}
+# clim_convo <- parent_w1 %>%
+#   select(q76, q77, q78, q79)
+# alpha(clim_convo) # 0.84
+###
+clim_convo_2 <- parent_w1 %>%
+  select(q74, q76, q77, q78, q79) # adding back q74
+alpha(clim_convo_2) #0.85
+```
+
+Factor 2
+75	… sus futuros objetivos de carrera y educación (incluso los objetivos a corto plazo).
+80	… la importancia de prepararse para futuras trayectorias educativas o de carrera, como la planificación universitaria y / o pensando acerca de la escuela técnica o comercial, etc.
+81	… su involucro en actividades extracurriculares en la escuela y en la comunidad como en papeles de liderazgo, haciendo trabajo voluntario en la comunidad, deportes, etc.
+
+If adding back q72 & q73, factor remains the same: prep 
+72.	… las cosas que aprende en clase 
+73.	… cómo contribuye al salón de clase.
+
+```{r}
+# prep_convo <- parent_w1 %>%
+#   select(q75, q80, q81)
+# alpha(prep_convo) # 0.77
+###
+prep_convo_2 <- parent_w1 %>%
+  select(q72, q73, q75, q80, q81) # adding back q72 & q73
+alpha(prep_convo_2) # 0.80
+```
+
+Factor 3
+68	… sus amistades en la escuela.
+69	… su participación en actividades escolares. 
+70	… eventos que van a pasar en la escuela. 
+71	… sus profesores.
+
+```{r}
+soc_convo <- parent_w1 %>%
+  select(q68, q69, q70, q71)
+alpha(soc_convo) # 0.79
+```
+Not included (loaded in >1 factor)
+72	… las cosas que aprende en clase.
+73	… cómo contribuye al salón de clase.
+74	… cómo va en sus clases.(bec. it loaded in fac 2 and fac 3)
+
+```{r}
+# aca_convo <- parent_w1 %>%
+#   select(q72, q73, q74)
+# alpha(aca_convo) # 0.59 poor 
+```
+
+Items about school 
+42.	…yo entiendo cómo funciona la escuela de mi joven.
+43.	…puedo comunicar mis preguntas y preocupaciones con los maestros y el personal de la escuela.
+44.	…puedo trabajar con la escuela para encontrar una solución positiva si surge un conflicto o un problema que involucre a mi joven en la escuela.
+45.	…estoy ayudando a mi joven hacer bien en la escuela.
+46.	…estoy ayudando a mi joven prepararse para sus futuras metas de educación y carrera.
+
+47.	…parte de una comunidad con el personal de la escuela y los otros padres. 
+48.	…tratado/a con respeto, sabiendo que mis opiniones son importantes.
+49.	…cómoda/o preguntando por un traductor y por materiales en español si los necesito. 
+50.	… capaz de hablar con maestros o administradores sobre grandes preocupaciones relacionados con mi joven.
+51.	…dedicada/o en creando un ambiente exitoso para todos los jóvenes.
+52.	 …feliz de que mi joven asista a esta escuela.
+53.	…bienvenido/a en la escuela de mi joven.
+
+54.	… esta escuela es un buen lugar para mi joven. 
+55.	… el personal de la escuela de mi joven está haciendo cosas buenas por ella / el. 
+56.	… la gente en la escuela de mi joven es confiable. 
+57.	… la escuela de mi joven hace un buen trabajo preparando a los jóvenes para sus futuros.
+58.	… puedo encontrar ayuda para mi joven si él / ella está batallando en una clase.
+59.	… los maestros de mi joven se preocupan por ella/el.
+60.	… maestros y administradores trabajan juntos para crear un ambiente seguro y acogedor para todos.
+61.	… hay muchas oportunidades para la involucración de los padres.
+62.	… puedo tener una conversación honesta y respetuosa sobre mi joven con su maestro.
+63.	… puedo trabajar con un maestro para resolver cualquier problema que tenga mi joven en la escuela.
+
+64.	… que se preocupa por mi joven.
+65.	… quien está interesado en conocerme
+66.	… con quien me siento/a cómodo/a hablando sobre mi joven.
+67.	… de quien puedo hacer preguntas o hacer sugerencias sobre mi joven.
+
+```{r}
+misc_test <- parent_w1 %>%
+  select(q42, q43, q44, q45, q46, q47, q48, q49, q50, q51, q52, q53, q54, q55, q56, q57, q58, q59, q60, q61, q62, q63, q64, q65, q66, q67) 
+
+fa(misc_test, n.obs = NA, rotate = "none", fm = "uls", cor = "poly") # looks good
+
+fa.parallel(misc_test, n.obs=NULL, fm="uls", fa="fa", nfactors=1, main="Parallel Analysis Scree Plots", n.iter=20, error.bars=FALSE, se.bars=FALSE, SMC=FALSE, ylabel=NULL, show.legend=TRUE, sim=TRUE, quant=.95, cor="poly", use="pairwise", plot=TRUE, correct=.5) # suggest 3 factors
+
+fa(misc_test, nfactors = 3, n.obs = NA, rotate = "quartimin", fm = "uls", cor = "poly") 
+```
+
+```{r}
+misc_test2 <- parent_w1 %>%
+  select(q42, q43, q44, q47, q48, q50, q51, q53, q54, q60, q63, q64, q65, q66, q67) 
+
+fa(misc_test2, n.obs = NA, rotate = "none", fm = "uls", cor = "poly") # looks good
+
+fa.parallel(misc_test2, n.obs=NULL, fm="uls", fa="fa", nfactors=1, main="Parallel Analysis Scree Plots", n.iter=20, error.bars=FALSE, se.bars=FALSE, SMC=FALSE, ylabel=NULL, show.legend=TRUE, sim=TRUE, quant=.95, cor="poly", use="pairwise", plot=TRUE, correct=.5) # suggest 2 factors
+
+fa(misc_test2, nfactors = 2, n.obs = NA, rotate = "quartimin", fm = "uls", cor = "poly") 
+```
+# factor 1: parent as partner
+42.	…yo entiendo cómo funciona la escuela de mi joven.
+43.	…puedo comunicar mis preguntas y preocupaciones con los maestros y el personal de la escuela.
+44.	…puedo trabajar con la escuela para encontrar una solución positiva si surge un conflicto o un problema que involucre a mi joven en la escuela.
+47.	…parte de una comunidad con el personal de la escuela y los otros padres. 
+48.	…tratado/a con respeto, sabiendo que mis opiniones son importantes.
+50.	… capaz de hablar con maestros o administradores sobre grandes preocupaciones relacionados con mi joven.
+51.	…dedicada/o en creando un ambiente exitoso para todos los jóvenes.
+54.	… esta escuela es un buen lugar para mi joven.
+60.	… maestros y administradores trabajan juntos para crear un ambiente seguro y acogedor para todos.
+
+```{r}
+partner <- parent_w1 %>%
+  select(q42, q43, q44, q47, q48, q50, q51, q54, q60) 
+
+alpha(partner) #0.89
+```
+
+# factor 2: parent-teacher relationship
+63.	… puedo trabajar con un maestro para resolver cualquier problema que tenga mi joven en la escuela.
+64.	… que se preocupa por mi joven.
+65.	… quien está interesado en conocerme
+66.	… con quien me siento/a cómodo/a hablando sobre mi joven.
+67.	… de quien puedo hacer preguntas o hacer sugerencias sobre mi joven.
+
+```{r}
+par_teach_rel <- parent_w1 %>%
+  select(q63, q64, q65, q66, q67)
+
+alpha(par_teach_rel) #0.88
+```
+
+# not used, new EFA
+45.	…estoy ayudando a mi joven hacer bien en la escuela.
+46.	…estoy ayudando a mi joven prepararse para sus futuras metas de educación y carrera.
+49.	…cómoda/o preguntando por un traductor y por materiales en español si los necesito. 
+52.	…feliz de que mi joven asista a esta escuela.
+53.	…bienvenido/a en la escuela de mi joven.
+55.	… el personal de la escuela de mi joven está haciendo cosas buenas por ella / el.
+56.	… la gente en la escuela de mi joven es confiable. 
+57.	… la escuela de mi joven hace un buen trabajo preparando a los jóvenes para sus futuros.
+58.	… puedo encontrar ayuda para mi joven si él / ella está batallando en una clase.
+59.	… los maestros de mi joven se preocupan por ella/el.
+61.	… hay muchas oportunidades para la involucración de los padres.
+62.	… puedo tener una conversación honesta y respetuosa sobre mi joven con su maestro.
+
+```{r}
+misc_test_3 <- parent_w1 %>%
+  select(q45, q46, q49, q52, q53, q55, q56, q57, q58, q59, q61, q62) 
+
+fa(misc_test_3, n.obs = NA, rotate = "none", fm = "uls", cor = "poly") # looks good
+
+fa.parallel(misc_test_3, n.obs=NULL, fm="uls", fa="fa", nfactors=1, main="Parallel Analysis Scree Plots", n.iter=20, error.bars=FALSE, se.bars=FALSE, SMC=FALSE, ylabel=NULL, show.legend=TRUE, sim=TRUE, quant=.95, cor="poly", use="pairwise", plot=TRUE, correct=.5) # suggest 1 factor
+```
+
+# EFA again with other not included items
+31.	… conocer el personal y la administración de la escuela
+36.	… entender la diferencia entre obtener un GED, graduarse con un diploma estándar de la escuela secundaria, o con un diploma de una secundaria internacional o con un diploma de Bachillerato Internacional.
+40.	…entender la trayectoria hacia la preparación a la universidad y para una carrera
+41.	… asistir a la conferencia de padres y maestros cuando esté disponible.
+```{r}
+misc_test_4 <- parent_w1 %>%
+  select(q36, q40, q41, q45, q46, q49, q52, q53, q55, q56, q57, q58, q59, q61, q62) # removed q31 bec low loading 
+
+fa(misc_test_4, n.obs = NA, rotate = "none", fm = "uls", cor = "poly") # looks good
+
+fa.parallel(misc_test_4, n.obs=NULL, fm="uls", fa="fa", nfactors=1, main="Parallel Analysis Scree Plots", n.iter=20, error.bars=FALSE, se.bars=FALSE, SMC=FALSE, ylabel=NULL, show.legend=TRUE, sim=TRUE, quant=.95, cor="poly", use="pairwise", plot=TRUE, correct=.5) # suggest 3 factors
+
+fa(misc_test_4, nfactors = 3, n.obs = NA, rotate = "quartimin", fm = "uls", cor = "poly") 
+```
+
+```{r}
+misc_test_5 <- parent_w1 %>%
+  select(q36, q40, q41, q46, q53, q55, q56, q57, q58, q59, q62) 
+
+fa(misc_test_5, n.obs = NA, rotate = "none", fm = "uls", cor = "poly") # looks good
+
+fa.parallel(misc_test_5, n.obs=NULL, fm="uls", fa="fa", nfactors=1, main="Parallel Analysis Scree Plots", n.iter=20, error.bars=FALSE, se.bars=FALSE, SMC=FALSE, ylabel=NULL, show.legend=TRUE, sim=TRUE, quant=.95, cor="poly", use="pairwise", plot=TRUE, correct=.5) # # suggest 3 factors
+
+fa(misc_test_5, nfactors = 2, n.obs = NA, rotate = "quartimin", fm = "uls", cor = "poly") 
+```
+Factor 1: endorse school & personnel
+
+53.	…bienvenido/a en la escuela de mi joven. 
+55.	… el personal de la escuela de mi joven está haciendo cosas buenas por ella / el. 
+56.	… la gente en la escuela de mi joven es confiable. 
+57.	… la escuela de mi joven hace un buen trabajo preparando a los jóvenes para sus futuros.
+58.	… puedo encontrar ayuda para mi joven si él / ella está batallando en una clase.
+59.	… los maestros de mi joven se preocupan por ella/el.
+62.	… puedo tener una conversación honesta y respetuosa sobre mi joven con su maestro.
+
+```{r}
+endorse_test <- parent_w1 %>%
+  select(q53, q55, q56, q57, q58, q59, q62)
+alpha(endorse_test) # 0.93 because removed q41
+```
+
+factor 2: 
+36.	… entender la diferencia entre obtener un GED, graduarse con un diploma estándar de la escuela secundaria, o con un diploma de una secundaria internacional o con un diploma de Bachillerato Internacional.
+40.	…entender la trayectoria hacia la preparación a la universidad y para una carrera ____
+46.	… estoy ayudando a mi joven prepararse para sus futuras metas de educación y carrera. ____
+
++
+
+prep_convo
+75	… sus futuros objetivos de carrera y educación (incluso los objetivos a corto plazo).
+80	… la importancia de prepararse para futuras trayectorias educativas o de carrera, como la planificación universitaria y / o pensando acerca de la escuela técnica o comercial, etc.
+81	… su involucro en actividades extracurriculares en la escuela y en la comunidad como en papeles de liderazgo, haciendo trabajo voluntario en la comunidad, deportes, etc.
+
+```{r}
+# prep_test <- parent_w1 %>%
+#   select(q36, q40, q46, q72, q73, q75, q80, q81)
+# alpha(prep_test) # 0.78
+```
+- youth engagement (from parent perspective)
+
+100.	…aprovecha al máximo las oportunidades escolares (clases extracurriculares, actividades estudiantiles, clubes de tarea)
+101.	… participa en grupos / actividades fuera de la escuela (deportes, trabajo voluntario, iglesia, música, etc.)
+102.	… le gusta la escuela
+103.	…tiene una relación cercana con al menos un maestro en la escuela.
+104.	… tiene sueños y planes para su futuro.
+
+```{r}
+# engag <- parent_w1 %>%
+#   select(q100, q101, q102, q103, q104) 
+# 
+# fa(engag, n.obs = NA, rotate = "none", fm = "uls", cor = "poly") # q101 limit loading
+# 
+# alpha(engag) #0.59 poor (0.64 if removing q101)
+```
+- parent's future orientation for youth
+
+105.	… que mi joven se gradúe de la escuela secundaria.
+106.	… que mi joven continúe su educación después de la secundaria
+107.	… saber cuáles son las metas que tiene mi joven para su futuro
+108.	… ayudar a mi joven a hacer planes y dar pasos hacia sus metas para el futuro
+109.	… buscar información para ayudarle a mi joven a alcanzar sus metas futuras
+110.	… ayudar a mi joven a comenzar a prepararse para la educación superior, incluso mientras esté en la escuela intermedia
+
+```{r}
+fut_or <- parent_w1 %>%
+  select(q105, q106, q107, q108, q109, q110) 
+
+fa(fut_or, n.obs = NA, rotate = "none", fm = "uls", cor = "poly")
+
+alpha(fut_or) # 0.91
+```
+- difficult convos with youth
+
+122.	Cuando mi joven tiene que tomar decisiones importantes o cuando él / ella enfrenta un desafío, él / ella me pide por ayuda y apoyo
+123.	Mi joven y yo podemos hablar abiertamente de situaciones y temas difíciles (como sexo, drogas, la influencia de amigos y compañeros, etc.)
+124.	Mi joven y yo podemos hablar y resolver conflictos que ocurren en casa
+125.	Mi joven y yo podemos hablar y resolver los conflictos que surgen acerca de hacer la tarea
+126.	Si mi joven tiene problemas en la escuela, sé cómo conseguirle la ayuda que él / ella necesita
+127.	Si mi joven tiene un problema en la escuela, estoy segura/o de que él / ella podría hablar conmigo al respecto
+
+```{r}
+diff_convo <- parent_w1 %>%
+  select(q122, q123, q124, q125, q126, q127) 
+
+fa(diff_convo, n.obs = NA, rotate = "none", fm = "uls", cor = "poly")
+
+alpha(diff_convo) # 0.86
+```
+
+
+Definitely Not used from parent-school rel (misc):
+31.	… conocer el personal y la administración de la escuela  
+41.	… asistir a la conferencia de padres y maestros cuando esté disponible.
+45.	…estoy ayudando a mi joven hacer bien en la escuela.
+49.	…cómoda/o preguntando por un traductor y por materiales en español si los necesito. 
+52.	 …feliz de que mi joven asista a esta escuela.
+61.	… hay muchas oportunidades para la involucración de los padres.
+
+Definitely Not used from homework
+82. Mi joven ha tenido la plena responsabilidad de completar su tarea; no me involucro
+83. Dejé de intentar (de ayudarlo con su tarea)
+92. Le recordé a mi joven que hiciera su tarea
+
+Definitely Not used from limts & consequences 
+133.	Cuando mi joven me desafía al no hacer lo que le pido, yo renuncio
+136.	Cuando le doy una amenaza o advertencia a mi joven, frecuentemente no lo llevo a cabo
+
+Definitely Not used from supervision
+138.	Hablo con mi joven en muchas ocasiones acerca de lo que él / ella aprendió en la escuela 
+141.	Los amigos de mi joven tienen una buena influencia en su vida.
+142.	Los amigos de mi joven se apoyan positivamente entre sí.
+
+
+

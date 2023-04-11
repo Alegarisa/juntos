@@ -215,8 +215,8 @@ ggplot(d, aes(q4_y)) +
 
 # parent agency predicting youth grades
 ```{r}
-# m1 <- glm(youth_letter_grd ~ par_agent, d)
-# summary(m1) 
+# m1 <- glm(youth_letter_grd ~ par_agent, d, family = "?")
+# summary(m1)
 # 
 # m1_c <- glm(youth_letter_grd ~ youth_gender + youth_grlevel + par_agent, d) # controling for youth's gender & grade
 # summary(m1_c)
