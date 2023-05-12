@@ -241,3 +241,10 @@ d2_par_w3 %>%
 #   haven::write_sav(here("outcomes paper/data_outcomes", "primary_parent_w3.sav"))
 ```
 
+
+# need to create dataset with all variables of all waves to conduct CFA (to check time invariance)
+```{r}
+# Jaime's code to try
+tidyr::pivot_longer(data=it2, cols= c("pre", "post"), names_to = "time", values_to = "val")
+```
+

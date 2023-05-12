@@ -25,9 +25,16 @@ parent_w1 <- read_sav(here("outcomes paper/data_outcomes", "primary_parent_w1.sa
 # Heywood cases: "Improper solutions (e.g.,a model solution with at least one negative estimated residual variance term, or“Heywoodcase”) are also likely to occur in the presence of one or more unusual cases (Bollen, 1987), which can lead to a researcher unwittingly revising a model or removing an observed variable from the analysis."
 
 # # #
-# 1. Check for collinearity between items included on a EFA model
+# multicollenearity will produce 1 of 2 things:
+# - aberrant factorial load 
+# - negative variance (more for CFA) - non-positive definite matrix. 
+# 1. Check for collinearity between items included on a EFA model using the correlation plot
 ################################################
-
+# Steps
+# 1. matrix polychoric
+# 2. kmo
+# 3. parallel analysis (with no warning messages)
+# if it shows more factors than sensible: look for communality above .4 (h2); factor loading above 0.4; 
 
 #######################################################################################
 ############################# Positive relationship ###################################
@@ -44,14 +51,21 @@ parent_w1 <- read_sav(here("outcomes paper/data_outcomes", "primary_parent_w1.sa
 posi_rel <- parent_w1 %>%
   select(q116, q117, q118, q119, q120, q121)
 
-## kmo Kaiser-Meyer-Olkin factor SAMPLING ADEQUACY (ABOVE 0.5, CLOSER TO 1 BEST)
-KMO(posi_rel) # 0.88 ok 
-
 # Poly corr matrix
 poly <- polychoric(posi_rel)
 cor.plot(poly$rho, numbers = T, upper = F, main = "Polychoric", show.legend = F)
 
+## kmo Kaiser-Meyer-Olkin factor SAMPLING ADEQUACY (ABOVE 0.5, CLOSER TO 1 BEST)
+KMO(posi_rel) # 0.88 ok 
+
 ### EFA analyses: using oblimin: it's best to assume that factors are correlated.  
+fa.parallel(poly$rho, n.obs=95, fm="uls", fa="fa", main="Parallel Analysis Scree Plots", cor="poly", use="pairwise", plot=TRUE)
+# Parallel analysis suggests that the number of factors =  1
+# shows 4 warning messages: "The estimated weights for the factor scores are probably incorrect." and "An ultra-Heywood case was detected" 
+
+fa.parallel(poly$rho, n.obs=95, fm="pa", fa="fa", main="Parallel Analysis Scree Plots", cor="poly", use="pairwise", plot=TRUE)
+# Parallel analysis suggests that the number of factors =  1
+# shows 7 warning messages: "The estimated weights for the factor scores are probably incorrect." and "An ultra-Heywood case was detected"
 
 # EFA using ULS 
 factor_test_uls <- fa(posi_rel, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 1) 
@@ -77,33 +91,270 @@ posi_rel_2 <- parent_w1 %>%
 poly <- polychoric(posi_rel_2)
 cor.plot(poly$rho, numbers = T, upper = F, main = "Polychoric", show.legend = F) # The correlations are not as elevated
 
+## kmo Kaiser-Meyer-Olkin factor SAMPLING ADEQUACY (ABOVE 0.5, CLOSER TO 1 BEST)
+KMO(posi_rel_2) # 0.85
+
+# parallel test with ULS
+fa.parallel(poly$rho, n.obs=95, fm="uls", fa="fa", main="Parallel Analysis Scree Plots", cor="poly", use="pairwise", plot=TRUE)
+# Parallel analysis suggests that the number of factors =  1, BUT it throws warning messages: "Try a different factor score estimation method" and "An ultra-Heywood case was detected" ------- BTW: the number of warning messages change everytime i run the code. 
+
+# parallel test with PA
+fa.parallel(poly$rho, n.obs=95, fm="pa", fa="fa", main="Parallel Analysis Scree Plots", cor="poly", use="pairwise", plot=TRUE) # Parallel analysis suggests that the number of factors =  1, BUT it throws warning messages: "Try a different factor score estimation method" and "An ultra-Heywood case was detected" ------- BTW: the number of warning messages change everytime i run the code. 
+
 # EFA using ULS 
 factor_test_uls <- fa(posi_rel_2, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 1) # no warning message :)
 
-# scree plot
-scree(posi_rel_2, factors = TRUE, pc = FALSE, main = "Scree plot", hline = NULL, add = FALSE)
-# Scree plot clearly shows 1 factor solution
+fa.diagram(factor_test_uls) # item 119 has a factor loading of 1
 
-# parallel test, anyways
-fa.parallel(posi_rel_2, n.obs=NULL, fm="uls", fa="fa", main="Parallel Analysis Scree Plots", cor="poly", use="pairwise", plot=TRUE)
-# Parallel analysis suggests that the number of factors =  1, BUT it throws warnings about 
+# EFA using pa 
+factor_test_pa <- fa(posi_rel_2, n.obs = 95, rotate = "oblimin", fm = "pa", cor = "poly", nfactors = 1) # no warning message :)
 
-# alpha
-alpha(posi_rel_2) # 0.89
+fa.diagram(factor_test_pa) # item 119 has a factor loading of 1
 
-# Omega 
-omega(posi_rel_2, nfactors = 1, n.obs = 95, flip = T, plot = T) # likes more than 1 factor, but still good to know Omega Total 0.89 (same as alpha)
+# trying without 119 (check for SS loadings and Proportion Var (larger # better); and TLI larger, better)
 
-# The final set of items would be
+
+# The scale to factor analyze
+posi_rel_3 <- parent_w1 %>%
+  select(q116, q117, q118, q121)
+
+# Poly corr matrix
+poly <- polychoric(posi_rel_3)
+cor.plot(poly$rho, numbers = T, upper = F, main = "Polychoric", show.legend = F) 
+
+## kmo Kaiser-Meyer-Olkin factor SAMPLING ADEQUACY (ABOVE 0.5, CLOSER TO 1 BEST)
+KMO(posi_rel_3) # 0.81
+
+# parallel test with ULS
+fa.parallel(poly$rho, n.obs=95, fm="uls", fa="fa", main="Parallel Analysis Scree Plots", cor="poly", use="pairwise", plot=TRUE)
+# Parallel analysis suggests that the number of factors =  2, and STILL throws warning messages: "Try a different factor score estimation method" and "An ultra-Heywood case was detected" ------- BTW: the number of warning messages change everytime i run the code. 
+
+# parallel test with PA
+fa.parallel(poly$rho, n.obs=95, fm="pa", fa="fa", main="Parallel Analysis Scree Plots", cor="poly", use="pairwise", plot=TRUE) 
+# Parallel analysis suggests that the number of factors =  2, and STILL it throws warning messages: "Try a different factor score estimation method" and "An ultra-Heywood case was detected" ------- BTW: the number of warning messages change everytime i run the code. 
+# ######################## IF i USE posi_rel_3, n.obs=NULL, I GET JUST 1 FACTOR #### I don't understand this shit. 
+
+# EFA using ULS 
+factor_test_uls <- fa(posi_rel_3, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 1) # no warning message :)
+
+fa.diagram(factor_test_uls)
+
+# EFA using pa 
+factor_test_pa <- fa(posi_rel_3, n.obs = 95, rotate = "oblimin", fm = "pa", cor = "poly", nfactors = 1) # no warning message :)
+
+fa.diagram(factor_test_pa)
+
+
+# Conclusion: I have to ignore the parallel analysis suggestion of 2 factors, because there is just 4 items. 
+# 
+# SOOOO... i AM GOING TO KEEP ITEM 119 BECAUSE MAKES THE SOLUTION MORE INESTABLE.
+# IDEAL QUE NO HAYA WARNINGS EN PARALLEL, PERO SI SALEN, NI MODO. DONDE SI NO SE PUEDEN TENER WARNINGS ES EN EL fa()
+
+# Final items:
 # 116.	Cuando mi joven me pide hablar o cuando necesita hablar conmigo, escucho atentamente.
 # 117.	Sé escuchar atentamente, aun cuando no esté de acuerdo con lo que dice la otra persona.
 # 118.	Con regularidad, mi joven y yo hacemos cosas juntos que ambos disfrutamos
-# 119.	Mi joven y yo tenemos una relación cercana
-# --
+# 119.	removed
+# 120.	removed
 # 121.	Como madre/padre, es mi trabajo reconocer y apoyar las fortalezas de mi joven
+
+# alpha
+alpha(posi_rel_3) # 0.84
+
+# Omega 
+omega(posi_rel_3, nfactors = 1, n.obs = 95, flip = T, plot = T) # likes more than 1 factor, but still good to know Omega Total 0.84 (same as alpha)
+
+############ CFA ##############
 
 # el siguiente paso seria usar lavaan, especificar el modelo 
 rp <- ("rp=~ q116 + q117 + q118 + q119 + q121") # aqui necesito un long format (116 seria variable y row seria tiempo 1, 2 y 3)
+
+
+# [TBD]
+
+#######################################################################################
+############################# positive involvement ##############################################
+
+# this scale is dichotomous
+
+### The items ###
+# 1.	Trabajamos en un pasatiempo o artesanía.
+# 2.	Participamos en una actividad al aire libre.
+# 3.	Leímos o hablamos acerca de un libro o historia.
+# 4.	Fuimos a un evento de entretenimiento.
+# 5.	Participamos en otras actividades (Fuimos al parque, nadamos, excursión a pie, etc.). 
+# 6.	Horneamos o cocinamos una comida.
+# 7.	Hicimos ejercicio o jugamos un juego al aire libre (baloncesto o béisbol, etc.)
+# 8.	Trabajamos alrededor de la casa o patio.
+# 9.	Fuimos a la Iglesia, sinagoga, u otro servicio religioso.
+
+# leaving 8 and 9 out because seem out of concept #kmo with was 0.6
+
+# The scale to factor analyze
+posi_inv <- parent_w1 %>%
+  select(q1, q2, q3, q4, q5, q6, q7)
+
+# The scale to factor analyze (ver 2) - taking out items 3 and 4 bec they show low communality 
+posi_inv <- parent_w1 %>%
+  select(q1, q2, q5, q6, q7)
+
+posi_inv <- parent_w1 %>% # (ver 3) - taking out ite 6 bec it has very low corr with other items, low communality (6%)
+  select(q1, q2, q5, q7)
+
+posi_inv <- parent_w1 %>% # (ver 4) - taking out ite 1 bec, ultra heywood case
+  select(q2, q5, q7)
+
+## kmo Kaiser-Meyer-Olkin factor SAMPLING ADEQUACY (ABOVE 0.5, CLOSER TO 1 BEST)
+KMO(posi_inv) # 0.56 (ver 1 = pretty poor)
+# 0.65 ver 2
+# 0.64 ver 3 (regular, pero trabajable)
+# 0.64 ver 4 (regular, pero trabajable)
+
+
+# Poly corr matrix
+poly <- tetrachoric(posi_inv)
+rho <- poly$rho
+cor.plot(rho, numbers = T, upper = F, main = "Tetrachoric", show.legend = F)
+
+fa.parallel(rho, n.obs=95, fm="uls", fa="both", main="Parallel Analysis Scree Plots", cor="tet", use="pairwise", plot=TRUE) # ver 1 says 2 factors, but kmo is not good enough; 
+
+# EFA using ULS 
+factor_test_uls <- fa(rho, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "tet", nfactors = 1) 
+
+# EFA using WLS 
+factor_test_uls <- fa(rho, n.obs = 95, rotate = "oblimin", fm = "wls", cor = "tet", nfactors = 1) # funciona mejor
+
+### final items ###
+# 1.	removed
+# 2.	Participamos en una actividad al aire libre.
+# 3.	removed
+# 4.	removed
+# 5.	Participamos en otras actividades (Fuimos al parque, nadamos, excursión a pie, etc.). 
+# 6.	removed
+# 7.	Hicimos ejercicio o jugamos un juego al aire libre (baloncesto o béisbol, etc.)
+# 8.	removed
+# 9.	removed
+
+# alpha
+alpha(posi_inv) # 0.6
+
+# Omega 
+omega(posi_inv, nfactors = 1, n.obs = 95, flip = T, plot = T) # 0.6
+
+# Conclusion: evidence of construct validity, but it has poor internal consistency (relation between items is not very high).  
+
+# make a CFA using wave 2 and 3, to check time invariance. 
+
+# [TBD]
+
+
+#######################################################################################
+############################# Disclipline & limit setting ###################################
+
+### The items ###
+# 128.	En casa, estamos de acuerdo con reglas claras sobre lo que mi joven puede y no puede hacer. 
+# 129.	Mi joven sabe cómo voy a responder cuando hace algo malo cosas que no me gustan o lo que está en contra las reglas de la casa)
+# 130.	Cada vez que mi joven hace algo mal, yo le respondo con una consecuencia específica (p. ej., una disciplina específica, quitándole privilegios, etc.) 
+# 131.	Cuando mi joven hace algo mal, le grito o le insulto
+# 132.	Puedo controlar mi enojo y mantenerme calmado/a cuando disciplino o discuto con mi joven cuando él / ella hace algo mal
+# 133.	Cuando mi joven me desafía al no hacer lo que le pido, yo renuncio
+# 134.	Cuando mi joven está aprendiendo un nuevo comportamiento (p. ej.: ser más responsable, estudioso/a u organizado/a), reconozco su progreso con, por ejemplo, un abrazo, una sonrisa o un pequeño regalo
+# 135.	Cuando mi joven se enfrenta a un gran desafío o establece una meta, le ayudo a centrarse en los pequeños pasos para lograr esa meta.
+# 136.	Cuando le doy una amenaza o advertencia a mi joven, frecuentemente no lo llevo a cabo
+
+
+# The scale to factor analyze
+limits <- parent_w1 %>%
+  select(q130, q131, q132, q133, q134, q136) # removed 128, 129, and 135
+
+# Poly corr matrix
+poly <- polychoric(limits)
+cor.plot(poly$rho, numbers = T, upper = F, main = "Polychoric", show.legend = F)
+
+## kmo Kaiser-Meyer-Olkin factor SAMPLING ADEQUACY (ABOVE 0.5, CLOSER TO 1 BEST)
+KMO(limits) 
+# 0.76
+# 0.55
+# 0.6
+
+fa.parallel(poly$rho, n.obs=95, fm="uls", fa="fa", main="Parallel Analysis Scree Plots", cor="poly", use="pairwise", plot=TRUE)# Parallel analysis suggests that the number of factors =  6, but just 1 crosses over eigenvlue of 1
+# shows 7 warning messages: "The estimated weights for the factor scores are probably incorrect." and "An ultra-Heywood case was detected"
+
+# EFA using ULS 
+factor_test_uls <- fa(limits, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 2) 
+# iteration 1 (3 factors): Model above throws warning message: "The estimated weights for the factor scores are probably incorrect.  Try a different factor score estimation method." and "An ultra-Heywood case was detected."
+# iteration 2 (2 factors):  items 128 and 135 very high communalities.
+# iteraton 3 (2 factors): item 129 heywood case (very high communality)
+# iteration 4: no warning messages :) 
+
+fa.diagram(factor_test_uls) 
+# with 3 factors: fa1 has 6 items, fa2 has 2 items, fa3 has 1 item. Item 130 prob is the ultra heywood
+# with 2 factors: fa1 has 6 items, fa2 has 3 items. Fa2 are the negatively worded items
+# with 2 factors: item 130 doesn't go in any factor
+
+# EFA using PA
+factor_test_pa <- fa(limits, n.obs = 95, rotate = "oblimin", fm = "pa", cor = "poly", nfactors = 2) 
+# iteration 1 (3 factors): Model above throws warning message: "The estimated weights for the factor scores are probably incorrect.  Try a different factor score estimation method." and "An ultra-Heywood case was detected."
+# iteration 2 (2 factors):  items 128 and 135 very high communalities.
+# # iteraton 3 (2 factors): item 129 heywood case (very high communality)
+# iteration 4: no warning messages :)
+
+fa.diagram(factor_test_pa) 
+# with 3 factors: fa1 has 6 items, fa2 has 2 items, fa3 has 1 item. Item 130 prob is the ultra heywood
+# with 2 factors: fa1 has 6 items, fa2 has 3 items. Fa2 are the negatively worded items
+# # with 2 factors: item 130 doesn't go in any factor
+
+factor_test_uls <- fa(limits, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 1) 
+fa.diagram(factor_test_uls) 
+
+#### Conclusion here: estimation method (uls or pa) shows the same factor loadings. Item 130 did not load in any of 2 factors, hence a 2-factor model did no longer make sense. In 1-factor model, 130 barely pass the threshold of .30. The "best" theoretical model was made by 2 factor model but item 129 was ultra heywood case.
+
+
+# 129.	Mi joven sabe cómo voy a responder cuando hace algo malo cosas que no me gustan o lo que está en contra las reglas de la casa)
+# 130.	Cada vez que mi joven hace algo mal, yo le respondo con una consecuencia específica (p. ej., una disciplina específica, quitándole privilegios, etc.) 
+# 132.	Puedo controlar mi enojo y mantenerme calmado/a cuando disciplino o discuto con mi joven cuando él / ella hace algo mal
+# 134.	Cuando mi joven está aprendiendo un nuevo comportamiento (p. ej.: ser más responsable, estudioso/a u organizado/a), reconozco su progreso con, por ejemplo, un abrazo, una sonrisa o un pequeño regalo
+
+limits_fa1 <- parent_w1 %>%
+  select(q129, q130, q132, q134)
+alpha(limits_fa1) # 0.66
+
+# 131.	Cuando mi joven hace algo mal, le grito o le insulto
+# 133.	Cuando mi joven me desafía al no hacer lo que le pido, yo renuncio
+# 136.	Cuando le doy una amenaza o advertencia a mi joven, frecuentemente no lo llevo a cabo
+
+limits_fa2 <- parent_w1 %>%
+  select(q131, q133, q136)
+alpha(limits_fa2) # 0.49
+
+# but I had to remove item 129, so...
+
+### Final items ###
+# 128.	removed
+# 129.	removed
+# 130.	Cada vez que mi joven hace algo mal, yo le respondo con una consecuencia específica (p. ej., una disciplina específica, quitándole privilegios, etc.) 
+# 131.	Cuando mi joven hace algo mal, le grito o le insulto
+# 132.	Puedo controlar mi enojo y mantenerme calmado/a cuando disciplino o discuto con mi joven cuando él / ella hace algo mal
+# 133.	Cuando mi joven me desafía al no hacer lo que le pido, yo renuncio
+# 134.	Cuando mi joven está aprendiendo un nuevo comportamiento (p. ej.: ser más responsable, estudioso/a u organizado/a), reconozco su progreso con, por ejemplo, un abrazo, una sonrisa o un pequeño regalo
+# 135.	Removed
+# 136.	Cuando le doy una amenaza o advertencia a mi joven, frecuentemente no lo llevo a cabo
+
+# alpha
+alpha(limits) # 0.51
+
+# Omega 
+omega(limits, nfactors = 1, n.obs = 95, flip = T, plot = T) # 0.51
+
+
+
+
+
+
+
+
+
+
 
 #######################################################################################
 ############################# Monitoring ##############################################
@@ -129,18 +380,18 @@ KMO(monit) # 0.78
 poly <- polychoric(monit)
 cor.plot(poly$rho, numbers = T, upper = F, main = "Polychoric", show.legend = F)
 
+# parallel test, anyways
+fa.parallel(monit, n.obs=NULL, fm="uls", fa="fa", main="Parallel Analysis Scree Plots", cor="poly", use="pairwise", plot=TRUE)
+# Parallel analysis suggests that the number of factors =  2, warnings about ulta-heywood case
+
 # EFA using ULS 
 factor_test_uls <- fa(monit, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 1) 
 # No warnings
 # all factor loadings above 0.4
 
-# scree plot
-scree(monit, factors = TRUE, pc = FALSE, main = "Scree plot", hline = NULL, add = FALSE)
-# Scree plot clearly shows 1 factor solution
 
-# parallel test, anyways
-fa.parallel(monit, n.obs=NULL, fm="uls", fa="fa", main="Parallel Analysis Scree Plots", cor="poly", use="pairwise", plot=TRUE)
-# Parallel analysis suggests that the number of factors =  2, warnings about ulta-heywood case
+
+
 
 # EFA using ULS - More than 1 factors 
 factor_test_uls_2 <- fa(monit, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 2) 
@@ -265,6 +516,13 @@ alpha(hw_inv_fa_3) # 0.66
 omega(hw_inv_2, nfactors = 3, n.obs = 95, flip = T, plot = T) # likes more than 1 factor, but still good to know Omega Total X (same as alpha)
 
 # the omega figure is different than my conceptual "giving" of items. Yields just 2 factors. What is best to do?
+
+### 
+### 
+### 
+### 
+
+
 
 ### 
 ### 
