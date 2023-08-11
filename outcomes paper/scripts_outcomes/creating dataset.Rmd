@@ -235,7 +235,7 @@ d2_par_w3 %>%
   select(q136)
 ```
 
-# outputing primary caregiver parent wave 2 dataset 
+# outputing primary caregiver parent wave 3 dataset 
 ```{r}
 # d2_par_w3 %>%
 #   haven::write_sav(here("outcomes paper/data_outcomes", "primary_parent_w3.sav"))

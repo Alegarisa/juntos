@@ -38,6 +38,7 @@ parent_w1 <- read_sav(here("outcomes paper/data_outcomes", "primary_parent_w1.sa
 
 #######################################################################################
 ############################# Positive relationship ###################################
+#######################################################################################
 
 ### The items ###
 # 116.	Cuando mi joven me pide hablar o cuando necesita hablar conmigo, escucho atentamente.
@@ -173,7 +174,8 @@ rp <- ("rp=~ q116 + q117 + q118 + q119 + q121") # aqui necesito un long format (
 # [TBD]
 
 #######################################################################################
-############################# positive involvement ##############################################
+############################# positive involvement ####################################
+#######################################################################################
 
 # this scale is dichotomous
 
@@ -194,170 +196,56 @@ rp <- ("rp=~ q116 + q117 + q118 + q119 + q121") # aqui necesito un long format (
 posi_inv <- parent_w1 %>%
   select(q1, q2, q3, q4, q5, q6, q7)
 
-# The scale to factor analyze (ver 2) - taking out items 3 and 4 bec they show low communality 
-posi_inv <- parent_w1 %>%
-  select(q1, q2, q5, q6, q7)
-
-posi_inv <- parent_w1 %>% # (ver 3) - taking out ite 6 bec it has very low corr with other items, low communality (6%)
-  select(q1, q2, q5, q7)
-
-posi_inv <- parent_w1 %>% # (ver 4) - taking out ite 1 bec, ultra heywood case
-  select(q2, q5, q7)
-
 ## kmo Kaiser-Meyer-Olkin factor SAMPLING ADEQUACY (ABOVE 0.5, CLOSER TO 1 BEST)
 KMO(posi_inv) # 0.56 (ver 1 = pretty poor)
-# 0.65 ver 2
-# 0.64 ver 3 (regular, pero trabajable)
-# 0.64 ver 4 (regular, pero trabajable)
-
 
 # Poly corr matrix
 poly <- tetrachoric(posi_inv)
 rho <- poly$rho
-cor.plot(rho, numbers = T, upper = F, main = "Tetrachoric", show.legend = F)
+cor.plot(rho, numbers = T, upper = F, main = "Tetrachoric", show.legend = F) # doesn't look great. 
 
-fa.parallel(rho, n.obs=95, fm="uls", fa="both", main="Parallel Analysis Scree Plots", cor="tet", use="pairwise", plot=TRUE) # ver 1 says 2 factors, but kmo is not good enough; 
+
+fa.parallel(rho, n.obs=95, fm="uls", fa="both", main="Parallel Analysis Scree Plots", cor="tet", use="pairwise", plot=TRUE) # says 2 factors, but kmo is not good enough; 
 
 # EFA using ULS 
 factor_test_uls <- fa(rho, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "tet", nfactors = 1) 
 
-# EFA using WLS 
-factor_test_uls <- fa(rho, n.obs = 95, rotate = "oblimin", fm = "wls", cor = "tet", nfactors = 1) # funciona mejor
+# ULS1    h2   u2 com
+q1 0.37 0.134 0.87   1
+q2 0.63 0.403 0.60   1
+q3 0.16 0.027 0.97   1
+q4 0.19 0.038 0.96   1
+q5 0.70 0.490 0.51   1
+q6 0.25 0.061 0.94   1
+q7 0.79 0.621 0.38   1
 
-### final items ###
-# 1.	removed
-# 2.	Participamos en una actividad al aire libre.
-# 3.	removed
-# 4.	removed
-# 5.	Participamos en otras actividades (Fuimos al parque, nadamos, excursión a pie, etc.). 
-# 6.	removed
-# 7.	Hicimos ejercicio o jugamos un juego al aire libre (baloncesto o béisbol, etc.)
-# 8.	removed
-# 9.	removed
+posi_inv <- parent_w1 %>%
+  select(q1, q2, q5, q7)
 
-# alpha
-alpha(posi_inv) # 0.6
+## kmo Kaiser-Meyer-Olkin factor SAMPLING ADEQUACY (ABOVE 0.5, CLOSER TO 1 BEST)
+KMO(posi_inv) # 0.64 better
+
+# EFA using ULS 
+factor_test_uls <- fa(posi_inv, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "tet", nfactors = 1)
+# no warnings
+
+#  ULS1    h2   u2 com
+q1 0.31 0.095 0.90   1
+q2 0.62 0.382 0.62   1
+q5 0.71 0.507 0.49   1
+q7 0.83 0.694 0.31   1
 
 # Omega 
-omega(posi_inv, nfactors = 1, n.obs = 95, flip = T, plot = T) # 0.6
+omega(posi_inv, nfactors = 1, n.obs = 95, flip = T, plot = T) # 0.57
 
 # Conclusion: evidence of construct validity, but it has poor internal consistency (relation between items is not very high).  
 
-# make a CFA using wave 2 and 3, to check time invariance. 
-
-# [TBD]
-
-
-#######################################################################################
-############################# Disclipline & limit setting ###################################
-
-### The items ###
-# 128.	En casa, estamos de acuerdo con reglas claras sobre lo que mi joven puede y no puede hacer. 
-# 129.	Mi joven sabe cómo voy a responder cuando hace algo malo cosas que no me gustan o lo que está en contra las reglas de la casa)
-# 130.	Cada vez que mi joven hace algo mal, yo le respondo con una consecuencia específica (p. ej., una disciplina específica, quitándole privilegios, etc.) 
-# 131.	Cuando mi joven hace algo mal, le grito o le insulto
-# 132.	Puedo controlar mi enojo y mantenerme calmado/a cuando disciplino o discuto con mi joven cuando él / ella hace algo mal
-# 133.	Cuando mi joven me desafía al no hacer lo que le pido, yo renuncio
-# 134.	Cuando mi joven está aprendiendo un nuevo comportamiento (p. ej.: ser más responsable, estudioso/a u organizado/a), reconozco su progreso con, por ejemplo, un abrazo, una sonrisa o un pequeño regalo
-# 135.	Cuando mi joven se enfrenta a un gran desafío o establece una meta, le ayudo a centrarse en los pequeños pasos para lograr esa meta.
-# 136.	Cuando le doy una amenaza o advertencia a mi joven, frecuentemente no lo llevo a cabo
-
-
-# The scale to factor analyze
-limits <- parent_w1 %>%
-  select(q130, q131, q132, q133, q134, q136) # removed 128, 129, and 135
-
-# Poly corr matrix
-poly <- polychoric(limits)
-cor.plot(poly$rho, numbers = T, upper = F, main = "Polychoric", show.legend = F)
-
-## kmo Kaiser-Meyer-Olkin factor SAMPLING ADEQUACY (ABOVE 0.5, CLOSER TO 1 BEST)
-KMO(limits) 
-# 0.76
-# 0.55
-# 0.6
-
-fa.parallel(poly$rho, n.obs=95, fm="uls", fa="fa", main="Parallel Analysis Scree Plots", cor="poly", use="pairwise", plot=TRUE)# Parallel analysis suggests that the number of factors =  6, but just 1 crosses over eigenvlue of 1
-# shows 7 warning messages: "The estimated weights for the factor scores are probably incorrect." and "An ultra-Heywood case was detected"
-
-# EFA using ULS 
-factor_test_uls <- fa(limits, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 2) 
-# iteration 1 (3 factors): Model above throws warning message: "The estimated weights for the factor scores are probably incorrect.  Try a different factor score estimation method." and "An ultra-Heywood case was detected."
-# iteration 2 (2 factors):  items 128 and 135 very high communalities.
-# iteraton 3 (2 factors): item 129 heywood case (very high communality)
-# iteration 4: no warning messages :) 
-
-fa.diagram(factor_test_uls) 
-# with 3 factors: fa1 has 6 items, fa2 has 2 items, fa3 has 1 item. Item 130 prob is the ultra heywood
-# with 2 factors: fa1 has 6 items, fa2 has 3 items. Fa2 are the negatively worded items
-# with 2 factors: item 130 doesn't go in any factor
-
-# EFA using PA
-factor_test_pa <- fa(limits, n.obs = 95, rotate = "oblimin", fm = "pa", cor = "poly", nfactors = 2) 
-# iteration 1 (3 factors): Model above throws warning message: "The estimated weights for the factor scores are probably incorrect.  Try a different factor score estimation method." and "An ultra-Heywood case was detected."
-# iteration 2 (2 factors):  items 128 and 135 very high communalities.
-# # iteraton 3 (2 factors): item 129 heywood case (very high communality)
-# iteration 4: no warning messages :)
-
-fa.diagram(factor_test_pa) 
-# with 3 factors: fa1 has 6 items, fa2 has 2 items, fa3 has 1 item. Item 130 prob is the ultra heywood
-# with 2 factors: fa1 has 6 items, fa2 has 3 items. Fa2 are the negatively worded items
-# # with 2 factors: item 130 doesn't go in any factor
-
-factor_test_uls <- fa(limits, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 1) 
-fa.diagram(factor_test_uls) 
-
-#### Conclusion here: estimation method (uls or pa) shows the same factor loadings. Item 130 did not load in any of 2 factors, hence a 2-factor model did no longer make sense. In 1-factor model, 130 barely pass the threshold of .30. The "best" theoretical model was made by 2 factor model but item 129 was ultra heywood case.
-
-
-# 129.	Mi joven sabe cómo voy a responder cuando hace algo malo cosas que no me gustan o lo que está en contra las reglas de la casa)
-# 130.	Cada vez que mi joven hace algo mal, yo le respondo con una consecuencia específica (p. ej., una disciplina específica, quitándole privilegios, etc.) 
-# 132.	Puedo controlar mi enojo y mantenerme calmado/a cuando disciplino o discuto con mi joven cuando él / ella hace algo mal
-# 134.	Cuando mi joven está aprendiendo un nuevo comportamiento (p. ej.: ser más responsable, estudioso/a u organizado/a), reconozco su progreso con, por ejemplo, un abrazo, una sonrisa o un pequeño regalo
-
-limits_fa1 <- parent_w1 %>%
-  select(q129, q130, q132, q134)
-alpha(limits_fa1) # 0.66
-
-# 131.	Cuando mi joven hace algo mal, le grito o le insulto
-# 133.	Cuando mi joven me desafía al no hacer lo que le pido, yo renuncio
-# 136.	Cuando le doy una amenaza o advertencia a mi joven, frecuentemente no lo llevo a cabo
-
-limits_fa2 <- parent_w1 %>%
-  select(q131, q133, q136)
-alpha(limits_fa2) # 0.49
-
-# but I had to remove item 129, so...
-
-### Final items ###
-# 128.	removed
-# 129.	removed
-# 130.	Cada vez que mi joven hace algo mal, yo le respondo con una consecuencia específica (p. ej., una disciplina específica, quitándole privilegios, etc.) 
-# 131.	Cuando mi joven hace algo mal, le grito o le insulto
-# 132.	Puedo controlar mi enojo y mantenerme calmado/a cuando disciplino o discuto con mi joven cuando él / ella hace algo mal
-# 133.	Cuando mi joven me desafía al no hacer lo que le pido, yo renuncio
-# 134.	Cuando mi joven está aprendiendo un nuevo comportamiento (p. ej.: ser más responsable, estudioso/a u organizado/a), reconozco su progreso con, por ejemplo, un abrazo, una sonrisa o un pequeño regalo
-# 135.	Removed
-# 136.	Cuando le doy una amenaza o advertencia a mi joven, frecuentemente no lo llevo a cabo
-
-# alpha
-alpha(limits) # 0.51
-
-# Omega 
-omega(limits, nfactors = 1, n.obs = 95, flip = T, plot = T) # 0.51
-
-
-
-
-
-
-
-
-
+# make a CFA using wave 2 and 3, to check time invariance. [TBD]
 
 
 #######################################################################################
 ############################# Monitoring ##############################################
+#######################################################################################
 
 ### The items ###
 # 137.	A menudo hablo con mi joven acerca de sus planes para el día siguiente
@@ -378,7 +266,7 @@ KMO(monit) # 0.78
 
 # Poly corr matrix
 poly <- polychoric(monit)
-cor.plot(poly$rho, numbers = T, upper = F, main = "Polychoric", show.legend = F)
+cor.plot(poly$rho, numbers = T, upper = F, main = "Polychoric", show.legend = F) # looks good
 
 # parallel test, anyways
 fa.parallel(monit, n.obs=NULL, fm="uls", fa="fa", main="Parallel Analysis Scree Plots", cor="poly", use="pairwise", plot=TRUE)
@@ -389,35 +277,44 @@ factor_test_uls <- fa(monit, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "
 # No warnings
 # all factor loadings above 0.4
 
-
-
-
-
 # EFA using ULS - More than 1 factors 
-factor_test_uls_2 <- fa(monit, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 2) 
+factor_test_uls_2 <- fa(monit, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 2)
+# No warnings
 
-monit_fa_1 <- parent_w1 %>%
-  select(q140, q141, q142, q143)
-# 140.	Conozco muy bien a los amigos de mi joven. 
-# 141.	Los amigos de mi joven tienen una buena influencia en su vida. 
-# 142.	Los amigos de mi joven se apoyan positivamente entre sí.
-# 143.	Por lo general yo sé con quién está mi joven
+# factor 1
+#     ULS1  ULS2   h2   u2 com
+q140  0.75 -0.08 0.49 0.51 1.0
+q141  0.71 -0.07 0.44 0.56 1.0
+q142  0.79  0.08 0.71 0.29 1.0
+q143  0.69  0.14 0.63 0.37 1.1
 
-monit_fa_2 <- parent_w1 %>%
-  select(q138, q139, q144)
-# 138.	Hablo con mi joven en muchas ocasiones acerca de lo que él/ella aprendió en la escuela
-# 139.	A menudo hablo con mi joven acerca de sus amigos. 
-# 144.	Sé lo que hace mi joven y dónde va cuando no está en casa
+140.	Conozco muy bien a los amigos de mi joven.
+141.	Los amigos de mi joven tienen una buena influencia en su vida.
+142.	Los amigos de mi joven se apoyan positivamente entre sí.
+143.	Por lo general yo sé con quién está mi joven
 
-# alpha
-alpha(monit_fa_1) # 0.76
-alpha(monit_fa_2) # 0.67
+# factor 2
+q138  0.13  0.76 0.73 0.27 1.1
+q139  0.04  0.74 0.58 0.42 1.0
+q144 -0.15  0.69 0.36 0.64 1.1
 
-# Omega I AM NOT SURE IF THIS IS THE WAY TO COMPUTE THIS !!!
+138.	Hablo con mi joven en muchas ocasiones acerca de lo que él / ella aprendió en la escuela
+139.	A menudo hablo con mi joven acerca de sus amigos.
+144.	Sé lo que hace mi joven y dónde va cuando no está en casa
+
+# loads into both
+q137  0.24  0.29 0.23 0.77 1.9
+
+monit <- parent_w1 %>%
+  select(q138, q139, q140, q141, q142, q143, q144)
+
+# Omega
 omega(monit, nfactors = 2, n.obs = 95, flip = T, plot = T) # likes more than 1 factor, but still good to know Omega Total 0.82 (same as alpha)
 
+
 #######################################################################################
-############################# Homework Involvement ##############################################
+############################# Homework Involvement ####################################
+#######################################################################################
 
 ### The items ###
 # 82	Mi joven ha tenido la plena responsabilidad de completar su tarea; no me involucro.
@@ -440,19 +337,18 @@ omega(monit, nfactors = 2, n.obs = 95, flip = T, plot = T) # likes more than 1 f
 
 # The scale to factor analyze
 hw_inv <- parent_w1 %>%
-  select(q82, q83, q84, q85, q86, q87, q88, q89, q90, q91, q92, q93, q94, q95, q96, q97, q98)
+  select(q84, q85, q86, q87, q88, q89, q90, q91, q92, q93, q94, q95, q96, q97, q98)
 
 ## kmo Kaiser-Meyer-Olkin factor SAMPLING ADEQUACY (ABOVE 0.5, CLOSER TO 1 BEST)
-KMO(hw_inv) # 0.69
+KMO(hw_inv) # 0.71 --> ok
 
 # Poly corr matrix
 poly <- polychoric(hw_inv)
 cor.plot(poly$rho, numbers = T, upper = F, main = "Polychoric", show.legend = F)
-# items 82, 83, 92 appear problematic
+# items 84, 89, 92 neg corr with other items
 
 # EFA using ULS 
 factor_test_uls <- fa(hw_inv, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 1) 
-# items 82 and 83 neg. correlated with factor
 # items 91 and 92 load at or below .31 
 
 # new efa iteration without problematic items
@@ -475,47 +371,298 @@ fa.parallel(hw_inv_2, n.obs=NULL, fm="uls", fa="fa", main="Parallel Analysis Scr
 # Parallel analysis suggests that the number of factors =  3
 
 # EFA using ULS - More than 1 factors 
-factor_test_uls <- fa(hw_inv_2, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 3) 
+factor_test_uls <- fa(hw_inv_2, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 2) 
 
-hw_inv_fa_1 <- parent_w1 %>% # tutoring
-  select(q87, q88, q89, q90, q96, q97) # q86 loads in fa 1 and fa 3; q98 loads in fa 1 and fa 2
+#factor 1
+q86  0.59  0.13 0.39 0.61 1.1
+q87  0.74 -0.08 0.53 0.47 1.0
+q88  0.84 -0.18 0.69 0.31 1.1
+q89  0.66  0.19 0.51 0.49 1.2
+q90  0.39  0.23 0.23 0.77 1.6
+q94  0.57  0.06 0.34 0.66 1.0
+q96  0.51  0.09 0.29 0.71 1.1
+q97  0.48  0.15 0.28 0.72 1.2
 
-# -- decided to "give" 86 to fa 3 bec. the factor feels more theoretically cohesive: checking completion
-# 87	Me hice disponible para mi joven cuando tenía preguntas sobre su tarea
-# 88	Ayudé a mi joven cuando estaba atascado/a en una tarea
-# 89	Ayudé a mi joven a prepararse para los exámenes haciéndole preguntas sobre el tema, etc.
-# 90	Le di a mi joven incentivos como privilegios especiales, regalos especiales, etc.
-# 96	Le ayudé a mi joven acceder a otros recursos (biblioteca, materiales de arte, laboratorio de computación, etc.)
-# 97	Le ayudé a mi joven practicar habilidades (lectura, revisión, problemas de práctica, etc.)
-# -- decided to "give" 98 to fa 2 bec. the factor feels more theoretically cohesive: facilitating environment
+86	Me senté con mi joven mientras él / ella hacía su tarea
+87	Me hice disponible para mi joven cuando tenía preguntas sobre su tarea
+88	Ayudé a mi joven cuando estaba atascado/a en una tarea
+89	Ayudé a mi joven a prepararse para los exámenes haciéndole preguntas sobre el tema, etc
+90	Le di a mi joven incentivos como privilegios especiales, regalos especiales, etc.
+94	Comprobé y corregí la tarea de mi hija/o 
+96	Le ayudé a mi joven acceder a otros recursos (biblioteca, materiales de arte, laboratorio de computación, etc.)
+97	Le ayudé a mi joven practicar habilidades (lectura, revisión, problemas de práctica, etc.)
 
-hw_inv_fa_2 <- parent_w1 %>% # facilitating
-  select(q84, q85, q98) #q93 load in fa 2 and fa 3; q98 loads in fa 1 and fa 2
+# factor 2
+q84 -0.11  0.91 0.81 0.19 1.0
+q85  0.01  0.90 0.81 0.19 1.0
+q93  0.22  0.65 0.51 0.49 1.2
 
-# 84	Me aseguré de que tenga un cierto tiempo para hacer la tarea
-# 85	Me aseguré de que él / ella tenga un cierto lugar para hacer la tarea
-# -- decided to "give" 93 to fa 3 bec. the factor feels more theoretically cohesive: checking completion 
-# 98	Limité el ruido y/o las distracciones mientras hacia su tarea
+84	Me aseguré de que tenga un cierto tiempo para hacer la tarea
+85	Me aseguré de que él / ella tenga un cierto lugar para hacer la tarea
+93	Comprobé con mi joven para asegurarme de que él / ella hiciera su tarea
 
-hw_inv_fa_3 <- parent_w1 %>% # checking
-  select(q86, q93, q94, q95) # q86 loads in fa 1 and fa 3; #q93 load in fa 2 and fa 3
-# 86	Me senté con mi joven mientras él / ella hacía su tarea
-# 93	Comprobé con mi joven para asegurarme de que él / ella hiciera su tarea
-# 94	Comprobé y corregí la tarea de mi hija/o 
-# 95	Comprobé con la maestra/o para asegurarme que mi joven terminó su tarea 
-
-
-# alpha
-alpha(hw_inv_fa_1) # 0.74
-# alpha
-alpha(hw_inv_fa_2) # 0.65
-# alpha
-alpha(hw_inv_fa_3) # 0.66
+# load into both factors
+q95  0.34  0.37 0.30 0.70 2.0
+q98  0.30  0.32 0.23 0.77 2.0
 
 # Omega 
-omega(hw_inv_2, nfactors = 3, n.obs = 95, flip = T, plot = T) # likes more than 1 factor, but still good to know Omega Total X (same as alpha)
+omega(hw_inv_2, nfactors = 2, n.obs = 95, flip = T, plot = T) # likes more than 1 factor, but still good to know Omega Total X (same as alpha)
 
-# the omega figure is different than my conceptual "giving" of items. Yields just 2 factors. What is best to do?
+
+#######################################################################################
+############################# Discipline & limit setting ##############################
+#######################################################################################
+
+### The items ###
+# 128.	En casa, estamos de acuerdo con reglas claras sobre lo que mi joven puede y no puede hacer. 
+# 129.	Mi joven sabe cómo voy a responder cuando hace algo malo cosas que no me gustan o lo que está en contra las reglas de la casa)
+# 130.	Cada vez que mi joven hace algo mal, yo le respondo con una consecuencia específica (p. ej., una disciplina específica, quitándole privilegios, etc.) 
+# 131.	Cuando mi joven hace algo mal, le grito o le insulto
+# 132.	Puedo controlar mi enojo y mantenerme calmado/a cuando disciplino o discuto con mi joven cuando él / ella hace algo mal
+# 133.	Cuando mi joven me desafía al no hacer lo que le pido, yo renuncio
+# 134.	Cuando mi joven está aprendiendo un nuevo comportamiento (p. ej.: ser más responsable, estudioso/a u organizado/a), reconozco su progreso con, por ejemplo, un abrazo, una sonrisa o un pequeño regalo
+# 135.	Cuando mi joven se enfrenta a un gran desafío o establece una meta, le ayudo a centrarse en los pequeños pasos para lograr esa meta.
+# 136.	Cuando le doy una amenaza o advertencia a mi joven, frecuentemente no lo llevo a cabo
+
+
+# The scale to factor analyze
+
+limits <- parent_w1 %>%
+  select(q128, q129, q130, q131, q132, q133, q134, q135, q136) 
+
+# EFA using ULS 
+factor_test_uls <- fa(limits, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 1) 
+
+limits <- parent_w1 %>%
+  select(q128, q129, q130, q131, q132, q133, q134, q135) # removed 136 was neg corr with rest of items. Prob. neg wording. 
+
+# Poly corr matrix
+poly <- polychoric(limits)
+cor.plot(poly$rho, numbers = T, upper = F, main = "Polychoric", show.legend = F)
+
+## kmo Kaiser-Meyer-Olkin factor SAMPLING ADEQUACY (ABOVE 0.5, CLOSER TO 1 BEST)
+KMO(limits) # 0.8
+
+fa.parallel(poly$rho, n.obs=95, fm="uls", fa="fa", main="Parallel Analysis Scree Plots", cor="poly", use="pairwise", plot=TRUE) 
+# Parallel analysis suggests that the number of factors =  4, but don't reach eigenvalue of 1
+# shows warning messages: "The estimated weights for the factor scores are probably incorrect." and "An ultra-Heywood case was detected"
+
+# EFA using ULS -- 2 factor
+factor_test_uls <- fa(limits, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 2) 
+# warning messages
+
+#     ULS1  ULS2   h2      u2 com
+q128 0.78  0.27 0.91  0.0919 1.2
+q129 0.54  0.45 0.77  0.2307 1.9
+q130 0.07  0.96 1.00 -0.0025 1.0 #
+q131 0.48 -0.19 0.17  0.8327 1.3
+q132 0.74 -0.23 0.41  0.5888 1.2
+q133 0.11  0.05 0.02  0.9798 1.5 #
+q134 0.77 -0.21 0.46  0.5431 1.2 
+q135 0.85  0.20 0.96  0.0425 1.1
+
+# EFA using ULS -- 1 factor
+factor_test_uls <- fa(limits, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 1) 
+# warning messages
+
+#    ULS1    h2    u2 com
+q128 0.97 0.94 0.059   1
+q129 0.87 0.76 0.244   1
+q130 0.71 0.50 0.500   1
+q131 0.32 0.10 0.900   1
+q132 0.53 0.28 0.721   1
+q133 0.14 0.02 0.980   1
+q134 0.57 0.33 0.674   1
+q135 0.99 0.97 0.026   1
+
+# conclusion: this is a 1-factor scale. One of the factors would have 2 items only
+
+limits <- parent_w1 %>%
+  select(q128, q129, q130, q131, q132, q133, q134) # removed 135 very high communality
+
+# EFA using ULS
+factor_test_uls <- fa(limits, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 1) 
+# warning messages
+
+#   ULS1    h2     u2 com
+q128 1.01 1.011 -0.011   1
+q129 0.90 0.801  0.199   1
+q130 0.69 0.476  0.524   1
+q131 0.33 0.108  0.892   1
+q132 0.49 0.241  0.759   1
+q133 0.15 0.022  0.978   1
+q134 0.53 0.286  0.714   1
+
+limits <- parent_w1 %>%
+  select(q129, q130, q131, q132, q133, q134) # removing 128 very high communality
+
+factor_test_uls <- fa(limits, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 1) 
+# no warning messages
+
+#    ULS1    h2    u2 com
+q129 0.96 0.928 0.072   1
+q130 0.66 0.430 0.570   1
+q131 0.32 0.099 0.901   1
+q132 0.49 0.239 0.761   1
+q133 0.21 0.045 0.955   1
+q134 0.48 0.230 0.770   1
+
+# 129.	Mi joven sabe cómo voy a responder cuando hace algo malo cosas que no me gustan o lo que está en contra las reglas de la casa)
+# 130.	Cada vez que mi joven hace algo mal, yo le respondo con una consecuencia específica (p. ej., una disciplina específica, quitándole privilegios, etc.) 
+# 131.	Cuando mi joven hace algo mal, le grito o le insulto
+# 132.	Puedo controlar mi enojo y mantenerme calmado/a cuando disciplino o discuto con mi joven cuando él / ella hace algo mal
+# 133.	Cuando mi joven me desafía al no hacer lo que le pido, yo renuncio
+# 134.	Cuando mi joven está aprendiendo un nuevo comportamiento (p. ej.: ser más responsable, estudioso/a u organizado/a), reconozco su progreso con, por ejemplo, un abrazo, una sonrisa o un pequeño regalo
+
+limits <- parent_w1 %>%
+  select(q129, q130, q131, q132, q134) # removing 133 loads less than 0.30
+
+factor_test_uls <- fa(limits, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 1)
+# warnings
+
+#    ULS1    h2     u2 com
+q129 1.00 0.997 0.0027   1
+q130 0.64 0.415 0.5854   1
+q131 0.29 0.082 0.9176   1
+q132 0.47 0.221 0.7790   1
+q134 0.49 0.241 0.7591   1
+
+limits <- parent_w1 %>%
+  select(q130, q131, q132, q134) # removing 129 very high communality
+
+factor_test_uls <- fa(limits, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 1)
+# no warnings
+
+#    ULS1   h2   u2 com
+q130 0.32 0.10 0.90   1
+q131 0.45 0.20 0.80   1
+q132 0.61 0.38 0.62   1
+q134 0.62 0.39 0.61   1
+
+# Omega 
+omega(limits, nfactors = 1, n.obs = 95, flip = T, plot = T) # 0.51
+
+
+#######################################################################################
+################################### Problem solving ###################################
+#######################################################################################
+
+# The scale to factor analyze
+probs_sol <- parent_w1 %>%
+  select(q122, q123, q124, q125, q126, q127) 
+
+## kmo Kaiser-Meyer-Olkin factor SAMPLING ADEQUACY (ABOVE 0.5, CLOSER TO 1 BEST)
+KMO(probs_sol) # 0.76 --> ok
+
+# Poly corr matrix
+poly <- polychoric(probs_sol)
+cor.plot(poly$rho, numbers = T, upper = F, main = "Polychoric", show.legend = F) # look good
+
+# scree plot
+scree(probs_sol, factors = TRUE, pc = FALSE, main = "Scree plot", hline = NULL, add = FALSE)
+# Scree plot clearly shows 1 factor solution
+
+# parallel test, anyways
+fa.parallel(probs_sol, n.obs=NULL, fm="uls", fa="fa", main="Parallel Analysis Scree Plots", cor="poly", use="pairwise", plot=TRUE)
+# Parallel analysis suggests that the number of factors =  2
+
+# EFA using ULS -- 2 factor
+factor_test_uls <- fa(probs_sol, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 2) 
+# warnings
+
+#    ULS1  ULS2   h2      u2 com
+q122 0.91 -0.03 0.79  0.2074 1.0
+q123 0.90 -0.08 0.73  0.2745 1.0
+q124 1.02  0.00 1.05 -0.0484 1.0
+q125 0.48  0.39 0.59  0.4130 1.9
+q127 0.71  0.20 0.71  0.2909 1.2
+
+q126 0.00  1.00 1.01 -0.0086 1.0 # one factor with one item. 
+
+# EFA using ULS -- 1 factor
+factor_test_uls <- fa(probs_sol, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 1) 
+# warnings
+
+#    ULS1   h2     u2 com
+q122 0.86 0.75  0.252   1
+q123 0.81 0.66  0.339   1
+q124 1.01 1.03 -0.027   1
+q125 0.75 0.56  0.443   1
+q126 0.63 0.39  0.607   1
+q127 0.85 0.73  0.272   1
+
+# conclusion, the scale is a 1-factor. 
+
+probs_sol <- parent_w1 %>%
+  select(q122, q123, q125, q126, q127)
+
+factor_test_uls <- fa(probs_sol, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 1) 
+# no warnings
+
+#    ULS1   h2   u2 com
+q122 0.84 0.71 0.29   1
+q123 0.78 0.60 0.40   1
+q125 0.76 0.58 0.42   1
+q126 0.67 0.45 0.55   1
+q127 0.85 0.73 0.27   1
+
+# Omega 
+omega(probs_sol, nfactors = 1, n.obs = 95, flip = T, plot = T) # likes more than 1 factor, but still good to know Omega Total X (same as alpha)
+
+## HERE ##
+
+######################################################################################################
+############################# College readiness support ##############################################
+######################################################################################################
+
+
+# The scale to factor analyze
+scale_name <- datafile_name %>%
+  select(item1, item2, item3, item...n)
+
+## kmo Kaiser-Meyer-Olkin factor SAMPLING ADEQUACY (ABOVE 0.5, CLOSER TO 1 BEST)
+KMO(scale_name) # 
+
+# Poly corr matrix
+poly <- polychoric(scale_name)
+cor.plot(poly$rho, numbers = T, upper = F, main = "Polychoric", show.legend = F)
+
+# EFA using ULS 
+factor_test_uls <- fa(scale_name, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 1) 
+
+# scree plot
+scree(scale_name, factors = TRUE, pc = FALSE, main = "Scree plot", hline = NULL, add = FALSE)
+# Scree plot clearly shows X factor solution
+
+# parallel test, anyways
+fa.parallel(scale_name, n.obs=NULL, fm="uls", fa="fa", main="Parallel Analysis Scree Plots", cor="poly", use="pairwise", plot=TRUE)
+# Parallel analysis suggests that the number of factors =  X
+
+# alpha
+alpha(scale_name) # X
+
+# Omega 
+omega(scale_name, nfactors = 1, n.obs = 95, flip = T, plot = T) # likes more than 1 factor, but still good to know Omega Total X (same as alpha)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ### 
 ### 
