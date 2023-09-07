@@ -544,7 +544,7 @@ omega(limits, nfactors = 1, n.obs = 95, flip = T, plot = T) # 0.51
 
 
 #######################################################################################
-################################### Problem solving ###################################
+########################### Trust (prev, Problem solving) #############################
 #######################################################################################
 
 # The scale to factor analyze
@@ -609,53 +609,196 @@ q127 0.85 0.73 0.27   1
 # Omega 
 omega(probs_sol, nfactors = 1, n.obs = 95, flip = T, plot = T) # likes more than 1 factor, but still good to know Omega Total X (same as alpha)
 
-## HERE ##
+
 
 ######################################################################################################
-############################# College readiness support ##############################################
+############################# College readiness convos ##############################################
 ######################################################################################################
 
 
 # The scale to factor analyze
-scale_name <- datafile_name %>%
-  select(item1, item2, item3, item...n)
+readiness <- parent_w1 %>%
+  select(q72, q73, q74, q75, q80, q81) 
 
 ## kmo Kaiser-Meyer-Olkin factor SAMPLING ADEQUACY (ABOVE 0.5, CLOSER TO 1 BEST)
-KMO(scale_name) # 
+KMO(readiness) # 0.82
 
 # Poly corr matrix
-poly <- polychoric(scale_name)
-cor.plot(poly$rho, numbers = T, upper = F, main = "Polychoric", show.legend = F)
-
-# EFA using ULS 
-factor_test_uls <- fa(scale_name, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 1) 
+poly <- polychoric(readiness)
+cor.plot(poly$rho, numbers = T, upper = F, main = "Polychoric", show.legend = F) # looks pretty good
 
 # scree plot
-scree(scale_name, factors = TRUE, pc = FALSE, main = "Scree plot", hline = NULL, add = FALSE)
-# Scree plot clearly shows X factor solution
+scree(readiness, factors = TRUE, pc = FALSE, main = "Scree plot", hline = NULL, add = FALSE) # Scree plot clearly shows 1 factor solution
 
 # parallel test, anyways
-fa.parallel(scale_name, n.obs=NULL, fm="uls", fa="fa", main="Parallel Analysis Scree Plots", cor="poly", use="pairwise", plot=TRUE)
-# Parallel analysis suggests that the number of factors =  X
+fa.parallel(readiness, n.obs=NULL, fm="uls", fa="fa", main="Parallel Analysis Scree Plots", cor="poly", use="pairwise", plot=TRUE)
+# Parallel analysis suggests that the number of factors =  1, there are warnings, though
+
+# EFA using ULS 
+factor_test_uls <- fa(readiness, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 1) # no warnings
+
+#   ULS1   h2   u2 com
+q72 0.72 0.51 0.49   1
+q73 0.61 0.37 0.63   1
+q74 0.81 0.66 0.34   1
+q75 0.90 0.81 0.19   1
+q80 0.80 0.64 0.36   1
+q81 0.68 0.46 0.54   1
 
 # alpha
-alpha(scale_name) # X
+alpha(readiness) # 0.81
 
 # Omega 
-omega(scale_name, nfactors = 1, n.obs = 95, flip = T, plot = T) # likes more than 1 factor, but still good to know Omega Total X (same as alpha)
+omega(readiness, nfactors = 1, n.obs = 95, flip = T, plot = T) # likes more than 1 factor, but still good to know Omega Total X (same as alpha)
 
 
+#######################################################################################
+######################### Future Orientation ##########################################
+#######################################################################################
+
+# The scale to factor analyze
+fut_or <- parent_w1 %>%
+  select(q105, q106, q107, q108, q109, q110) 
+
+## kmo Kaiser-Meyer-Olkin factor SAMPLING ADEQUACY (ABOVE 0.5, CLOSER TO 1 BEST)
+KMO(fut_or) # 0.86
+
+# Poly corr matrix
+poly <- polychoric(fut_or)
+cor.plot(poly$rho, numbers = T, upper = F, main = "Polychoric", show.legend = F) # looks very blue, not sure if there will be collinearity?
+
+# scree plot
+scree(fut_or, factors = TRUE, pc = FALSE, main = "Scree plot", hline = NULL, add = FALSE)
+# Scree plot clearly shows 1 factor solution
+
+# parallel test, anyways
+fa.parallel(fut_or, n.obs=NULL, fm="uls", fa="fa", main="Parallel Analysis Scree Plots", cor="poly", use="pairwise", plot=TRUE) # Parallel analysis suggests that the number of factors =  1, there are warnings, heywood case
+
+# EFA using ULS 
+factor_test_uls <- fa(fut_or, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 1) # warning: matrix non-positive def
+
+#    ULS1   h2    u2 com
+q105 0.88 0.77 0.230   1
+q106 0.99 0.98 0.016   1 #
+q107 0.95 0.90 0.098   1
+q108 0.98 0.96 0.045   1
+q109 0.96 0.92 0.080   1
+q110 0.72 0.52 0.481   1
+
+# although 106 is the one has highest factor load and h2, I want to check if taking 105, what happens
+fut_or <- parent_w1 %>%
+  select(q106, q107, q108, q109, q110) 
+
+# parallel test, anyways
+fa.parallel(fut_or, n.obs=NULL, fm="uls", fa="fa", main="Parallel Analysis Scree Plots", cor="poly", use="pairwise", plot=TRUE) # Parallel analysis suggests that the number of factors =  1, there are warnings, heywood case
+
+# EFA using ULS 
+factor_test_uls <- fa(fut_or, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 1) # no warnings
+
+#    ULS1   h2    u2 com
+q106 0.96 0.93 0.074   1
+q107 0.95 0.91 0.092   1
+q108 0.99 0.98 0.021   1 #
+q109 0.96 0.93 0.069   1
+q110 0.73 0.54 0.460   1
+
+fut_or <- parent_w1 %>%
+  select(q106, q107, q109, q110) # removing 108
+
+# parallel test, anyways
+fa.parallel(fut_or, n.obs=NULL, fm="uls", fa="fa", main="Parallel Analysis Scree Plots", cor="poly", use="pairwise", plot=TRUE) # Parallel analysis suggests that the number of factors =  1, there are warnings, heywood case
+
+# EFA using ULS 
+factor_test_uls <- fa(fut_or, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 1) # no warnings
+
+#    ULS1   h2    u2 com
+q106 0.96 0.93 0.070   1
+q107 0.96 0.92 0.085   1
+q109 0.96 0.92 0.083   1
+q110 0.74 0.54 0.457   1
+
+# alpha
+alpha(fut_or) # 0.87
+
+# Omega 
+omega(fut_or, nfactors = 1, n.obs = 95, flip = T, plot = T) # likes more than 1 factor, but still good to know Omega Total X (same as alpha)
 
 
+#######################################################################################
+############################# Structure ##############################################
+#######################################################################################
+
+# The scale to factor analyze
+struct <- parent_w1 %>%
+  select(q23, q24, q25, q26, q27, q28, q29, q30) 
+
+## kmo Kaiser-Meyer-Olkin factor SAMPLING ADEQUACY (ABOVE 0.5, CLOSER TO 1 BEST)
+KMO(struct) # 0.76
+
+# Poly corr matrix
+poly <- polychoric(struct)
+cor.plot(poly$rho, numbers = T, upper = F, main = "Polychoric", show.legend = F) # looks good
+
+# scree plot
+scree(struct, factors = TRUE, pc = FALSE, main = "Scree plot", hline = NULL, add = FALSE)
+# Scree plot clearly shows 1 factor solution
+
+# parallel test, anyways
+fa.parallel(struct, n.obs=NULL, fm="uls", fa="fa", main="Parallel Analysis Scree Plots", cor="poly", use="pairwise", plot=TRUE)
+# Parallel analysis suggests that the number of factors =  4, with warnings: heywood
+
+# testing 3 factors because 4 would be each made of 2 items.
+# EFA using ULS -- 3 factor
+factor_test_uls <- fa(struct, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 3) # warning heywood
+
+#    ULS1  ULS3  ULS2   h2      u2 com
+q23  0.59  0.04  0.28 0.63  0.3744 1.4
+q24  1.03 -0.01 -0.01 1.03 -0.0306 1.0 #
+q25 -0.04  0.12  0.55 0.34  0.6570 1.1
+q26  0.05  0.46  0.36 0.50  0.4962 1.9
+q27  0.38  0.32  0.24 0.59  0.4147 2.7
+q28  0.05 -0.01  0.97 1.00  0.0037 1.0
+q29 -0.03  0.99  0.03 0.98  0.0224 1.0
+q30  0.30  0.53 -0.24 0.44  0.5644 2.1
+
+# factors don't make sense conceptually. 
+
+# EFA using ULS -- 2 factor
+factor_test_uls <- fa(struct, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 2) # warning
+
+#   ULS1  ULS2   h2    u2 com
+q23 0.46  0.42 0.56 0.435 2.0
+q24 0.66  0.27 0.67 0.334 1.3
+q25 0.10  0.50 0.31 0.691 1.1
+q26 0.47  0.32 0.46 0.538 1.7
+q27 0.60  0.30 0.61 0.391 1.5
+q28 0.01  0.99 0.99 0.005 1.0
+q29 0.80  0.01 0.65 0.353 1.0
+q30 0.80 -0.27 0.52 0.483 1.2
+
+# factors don't make sense conceptually. 
+
+# EFA using ULS -- 1 factor
+factor_test_uls <- fa(struct, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 1) # no warnings
+
+#   ULS1   h2   u2 com
+q23 0.76 0.58 0.42   1
+q24 0.82 0.68 0.32   1
+q25 0.48 0.23 0.77   1
+q26 0.69 0.48 0.52   1
+q27 0.79 0.63 0.37   1
+q28 0.71 0.50 0.50   1
+q29 0.72 0.52 0.48   1
+q30 0.49 0.24 0.76   1
+
+# alpha
+alpha(struct) # 0.82
+
+# Omega 
+omega(struct, nfactors = 2, n.obs = 95, flip = T, plot = T) # likes more than 1 factor, but still good to know Omega Total X (same as alpha)
 
 
-
-
-
-
-
-
-
+## HERE ##
 
 
 
@@ -684,11 +827,7 @@ omega(scale_name, nfactors = 1, n.obs = 95, flip = T, plot = T) # likes more tha
 
 #######################################################################################
 ############################# Scale name ##############################################
-
-### The items ###
-#
-#
-#
+#######################################################################################
 
 # The scale to factor analyze
 scale_name <- datafile_name %>%
@@ -701,9 +840,6 @@ KMO(scale_name) #
 poly <- polychoric(scale_name)
 cor.plot(poly$rho, numbers = T, upper = F, main = "Polychoric", show.legend = F)
 
-# EFA using ULS 
-factor_test_uls <- fa(scale_name, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 1) 
-
 # scree plot
 scree(scale_name, factors = TRUE, pc = FALSE, main = "Scree plot", hline = NULL, add = FALSE)
 # Scree plot clearly shows X factor solution
@@ -711,6 +847,9 @@ scree(scale_name, factors = TRUE, pc = FALSE, main = "Scree plot", hline = NULL,
 # parallel test, anyways
 fa.parallel(scale_name, n.obs=NULL, fm="uls", fa="fa", main="Parallel Analysis Scree Plots", cor="poly", use="pairwise", plot=TRUE)
 # Parallel analysis suggests that the number of factors =  X
+
+# EFA using ULS 
+factor_test_uls <- fa(scale_name, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 1) 
 
 # alpha
 alpha(scale_name) # X

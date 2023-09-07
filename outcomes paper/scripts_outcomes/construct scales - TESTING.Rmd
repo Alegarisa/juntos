@@ -81,6 +81,7 @@ posi_rel_3 <- parent_w1 %>%
   select(q116, q117, q118, q121)
 alpha(posi_rel_3) # 0.84
 ```
+
 * Monitoring
 
 - Monitoring peers
@@ -109,7 +110,7 @@ monit_gen <- parent_w1 %>%
 alpha(monit_gen) # 0.67
 ```
 
--	Homework involvement
+* Homework involvement
 
 # all items: q82, q83, q84, q85, q86, q87, q88, q89, q90, q91, q92, q93, q94, q95, q96, q97, q98)
 
@@ -142,7 +143,8 @@ hw_invo_fa2 <- parent_w1 %>%
   select(q84, q85, q93)
 alpha(hw_invo_fa2) # 0.74 --> monitoring completion
 ```
--	Effective discipline 
+
+* Effective discipline 
 
 130.	Cada vez que mi joven hace algo mal, yo le respondo con una consecuencia específica (por ejemplo, una disciplina específica, quitándole privilegios, etc.) 
 131.	Cuando mi joven hace algo mal, le grito o le insulto 
@@ -160,7 +162,7 @@ limits_2 <- parent_w1 %>%
 alpha(limits_2) # 0.49
 ```
 
-- Problem solving
+* Trust (previously, Problem solving)
 
 122.	Cuando mi joven tiene que tomar decisiones importantes o cuando él / ella enfrenta un desafío, él / ella me pide por ayuda y apoyo
 123.	Mi joven y yo podemos hablar abiertamente de situaciones y temas difíciles (como sexo, drogas, la influencia de amigos y compañeros, etc.)
@@ -180,14 +182,79 @@ probs_sol <- parent_w1 %>%
 alpha(probs_sol) # 0.81
 ```
 
+* College readiness 
+
+En los últimos tres meses, usted ha tenido una conversación con su joven sobre…
+72	… las cosas que aprende en clase 
+73	… cómo contribuye al salón de clase.
+74	… cómo va en sus clases. 
+75	… sus futuros objetivos de carrera y educación (incluso los objetivos a corto plazo).
+80	… la importancia de prepararse para futuras trayectorias educativas o de carrera, como la planificación universitaria y / o pensando acerca de la escuela técnica o comercial, etc.
+81	… su involucro en actividades extracurriculares en la escuela y en la comunidad como en papeles de liderazgo, haciendo trabajo voluntario en la comunidad, deportes, etc.
+
+
+```{r}
+readiness <- parent_w1 %>%
+  select(q72, q73, q74, q75, q80, q81) 
+alpha(readiness) # 0.81
+
+# After EFA, see scale_testing.R
+# no changes
+```
+* Future orientation
+
+105.	… que mi joven se gradúe de la escuela secundaria.
+106.	… que mi joven continúe su educación después de la secundaria
+107.	… saber cuáles son las metas que tiene mi joven para su futuro
+108.	… ayudar a mi joven a hacer planes y dar pasos hacia sus metas para el futuro
+109.	… buscar información para ayudarle a mi joven a alcanzar sus metas futuras
+110.	… ayudar a mi joven a comenzar a prepararse para la educación superior, incluso mientras esté en la escuela intermedia
+
+```{r}
+fut_or <- parent_w1 %>%
+  select(q105, q106, q107, q108, q109, q110) 
+alpha(fut_or) # 0.91
+
+# After EFA, see scale_testing.R
+fut_or_2 <- parent_w1 %>%
+  select(q106, q107, q109, q110) 
+alpha(fut_or_2) # 0.87
+```
+
+* Structure
+
+Los últimos tres meses, he tomado medidas para apoyar a mi joven a...
+23	… desarrollar un plan para estudiar y hacer la tarea.
+24	… encontrar formas de involucrarse en las actividades escolares.
+25	… encontrar maneras de involucrarse en actividades de voluntario/a en la comunidad.
+26	… hacer metas para el año escolar.
+27	… cumplir fechas de limite.
+28	… participar en papeles de liderazgo en la escuela o comunidad.
+29	… enfocarse en hacer lo mejor posible.
+30	… desarrollar un horario para completar la tarea y los proyectos escolares a tiempo.
+
+```{r}
+struct <- parent_w1 %>%
+  select(q23, q24, q25, q26, q27, q28, q29, q30) 
+alpha(struct) # 0.82
+
+# After EFA, see scale_testing.R
+# no changes
+```
 
 ## HERE ##
 
-- College readiness 
 
-```{r}
 
-```
+
+
+
+
+
+
+
+
+
 
 
 
