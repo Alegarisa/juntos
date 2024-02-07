@@ -200,7 +200,7 @@ posi_inv <- parent_w1 %>%
 KMO(posi_inv) # 0.56 (ver 1 = pretty poor)
 
 # Poly corr matrix
-poly <- tetrachoric(posi_inv)
+poly <- tetrachoric(posi_inv) # because binary variables
 rho <- poly$rho
 cor.plot(rho, numbers = T, upper = F, main = "Tetrachoric", show.legend = F) # doesn't look great. 
 
@@ -276,6 +276,11 @@ fa.parallel(monit, n.obs=NULL, fm="uls", fa="fa", main="Parallel Analysis Scree 
 factor_test_uls <- fa(monit, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 1) 
 # No warnings
 # all factor loadings above 0.4
+
+# EFA using ULS - More than 1 factors 
+# factor_test_uls_2 <- fa(monit, n.obs = 95, rotate = "promax", fm = "pa", cor = "cor", nfactors = 2) # just for fun, to compare SPSS output and R output. 
+# # Note 007.02.24: I noticed discrepancies in SPSS and R output. I figured out that discrepancies are resolved when SPSS is put to exclude cases pairwise. 
+# I believe that is what R uses too. Discrepancies persist if I use uls, oblimin, with cor, which I thought were equivalent in SPSS
 
 # EFA using ULS - More than 1 factors 
 factor_test_uls_2 <- fa(monit, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 2)
