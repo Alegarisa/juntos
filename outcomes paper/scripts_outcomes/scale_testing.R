@@ -107,13 +107,22 @@ factor_test_uls <- fa(posi_rel_2, n.obs = 95, rotate = "oblimin", fm = "uls", co
 
 fa.diagram(factor_test_uls) # item 119 has a factor loading of 1
 
-# EFA using pa 
-factor_test_pa <- fa(posi_rel_2, n.obs = 95, rotate = "oblimin", fm = "pa", cor = "poly", nfactors = 1) # no warning message :)
+    ULS1   h2     u2 com
+q116 0.92 0.84 0.1606   1
+q117 0.84 0.71 0.2907   1
+q118 0.83 0.69 0.3123   1
+q119 1.00 0.99 0.0093   1 ##
+q121 0.81 0.66 0.3402   1
 
-fa.diagram(factor_test_pa) # item 119 has a factor loading of 1
+# EFA using pa 
+# factor_test_pa <- fa(posi_rel_2, n.obs = 95, rotate = "oblimin", fm = "pa", cor = "poly", nfactors = 1) # no warning message :)
+# 
+# fa.diagram(factor_test_pa) # item 119 has a factor loading of 1
+
+# alpha
+alpha(posi_rel_2) # 0.89
 
 # trying without 119 (check for SS loadings and Proportion Var (larger # better); and TLI larger, better)
-
 
 # The scale to factor analyze
 posi_rel_3 <- parent_w1 %>%
@@ -145,6 +154,11 @@ factor_test_pa <- fa(posi_rel_3, n.obs = 95, rotate = "oblimin", fm = "pa", cor 
 
 fa.diagram(factor_test_pa)
 
+      ULS1   h2   u2 com
+q116 0.93 0.87 0.13   1
+q117 0.84 0.70 0.30   1
+q118 0.82 0.67 0.33   1
+q121 0.81 0.66 0.34   1
 
 # Conclusion: I have to ignore the parallel analysis suggestion of 2 factors, because there is just 4 items. 
 # 
@@ -165,6 +179,11 @@ alpha(posi_rel_3) # 0.84
 # Omega 
 omega(posi_rel_3, nfactors = 1, n.obs = 95, flip = T, plot = T) # likes more than 1 factor, but still good to know Omega Total 0.84 (same as alpha)
 
+# new thoughts on 08/14/23: I am not sure if I want to leave out item 119 (that says)Mi joven y yo tenemos una relación cercana) 
+# 5 items alpha = 0.89 
+# 4 items alpha = 0.84 
+
+# More than an alpha aspect is the content of the item. I think I will create 2 variables and see how they behave in multiple regression. 
 ############ CFA ##############
 
 # el siguiente paso seria usar lavaan, especificar el modelo 
@@ -177,70 +196,70 @@ rp <- ("rp=~ q116 + q117 + q118 + q119 + q121") # aqui necesito un long format (
 ############################# positive involvement ####################################
 #######################################################################################
 
-# this scale is dichotomous
-
-### The items ###
-# 1.	Trabajamos en un pasatiempo o artesanía.
-# 2.	Participamos en una actividad al aire libre.
-# 3.	Leímos o hablamos acerca de un libro o historia.
-# 4.	Fuimos a un evento de entretenimiento.
-# 5.	Participamos en otras actividades (Fuimos al parque, nadamos, excursión a pie, etc.). 
-# 6.	Horneamos o cocinamos una comida.
-# 7.	Hicimos ejercicio o jugamos un juego al aire libre (baloncesto o béisbol, etc.)
-# 8.	Trabajamos alrededor de la casa o patio.
-# 9.	Fuimos a la Iglesia, sinagoga, u otro servicio religioso.
-
-# leaving 8 and 9 out because seem out of concept #kmo with was 0.6
-
-# The scale to factor analyze
-posi_inv <- parent_w1 %>%
-  select(q1, q2, q3, q4, q5, q6, q7)
-
-## kmo Kaiser-Meyer-Olkin factor SAMPLING ADEQUACY (ABOVE 0.5, CLOSER TO 1 BEST)
-KMO(posi_inv) # 0.56 (ver 1 = pretty poor)
-
-# Poly corr matrix
-poly <- tetrachoric(posi_inv) # because binary variables
-rho <- poly$rho
-cor.plot(rho, numbers = T, upper = F, main = "Tetrachoric", show.legend = F) # doesn't look great. 
-
-
-fa.parallel(rho, n.obs=95, fm="uls", fa="both", main="Parallel Analysis Scree Plots", cor="tet", use="pairwise", plot=TRUE) # says 2 factors, but kmo is not good enough; 
-
-# EFA using ULS 
-factor_test_uls <- fa(rho, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "tet", nfactors = 1) 
-
-# ULS1    h2   u2 com
-q1 0.37 0.134 0.87   1
-q2 0.63 0.403 0.60   1
-q3 0.16 0.027 0.97   1
-q4 0.19 0.038 0.96   1
-q5 0.70 0.490 0.51   1
-q6 0.25 0.061 0.94   1
-q7 0.79 0.621 0.38   1
-
-posi_inv <- parent_w1 %>%
-  select(q1, q2, q5, q7)
-
-## kmo Kaiser-Meyer-Olkin factor SAMPLING ADEQUACY (ABOVE 0.5, CLOSER TO 1 BEST)
-KMO(posi_inv) # 0.64 better
-
-# EFA using ULS 
-factor_test_uls <- fa(posi_inv, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "tet", nfactors = 1)
-# no warnings
-
-#  ULS1    h2   u2 com
-q1 0.31 0.095 0.90   1
-q2 0.62 0.382 0.62   1
-q5 0.71 0.507 0.49   1
-q7 0.83 0.694 0.31   1
-
-# Omega 
-omega(posi_inv, nfactors = 1, n.obs = 95, flip = T, plot = T) # 0.57
-
-# Conclusion: evidence of construct validity, but it has poor internal consistency (relation between items is not very high).  
-
-# make a CFA using wave 2 and 3, to check time invariance. [TBD]
+# # this scale is dichotomous
+# 
+# ### The items ###
+# # 1.	Trabajamos en un pasatiempo o artesanía.
+# # 2.	Participamos en una actividad al aire libre.
+# # 3.	Leímos o hablamos acerca de un libro o historia.
+# # 4.	Fuimos a un evento de entretenimiento.
+# # 5.	Participamos en otras actividades (Fuimos al parque, nadamos, excursión a pie, etc.). 
+# # 6.	Horneamos o cocinamos una comida.
+# # 7.	Hicimos ejercicio o jugamos un juego al aire libre (baloncesto o béisbol, etc.)
+# # 8.	Trabajamos alrededor de la casa o patio.
+# # 9.	Fuimos a la Iglesia, sinagoga, u otro servicio religioso.
+# 
+# # leaving 8 and 9 out because seem out of concept #kmo with was 0.6
+# 
+# # The scale to factor analyze
+# posi_inv <- parent_w1 %>%
+#   select(q1, q2, q3, q4, q5, q6, q7)
+# 
+# ## kmo Kaiser-Meyer-Olkin factor SAMPLING ADEQUACY (ABOVE 0.5, CLOSER TO 1 BEST)
+# KMO(posi_inv) # 0.56 (ver 1 = pretty poor)
+# 
+# # Poly corr matrix
+# poly <- tetrachoric(posi_inv) # because binary variables
+# rho <- poly$rho
+# cor.plot(rho, numbers = T, upper = F, main = "Tetrachoric", show.legend = F) # very low correlations
+# 
+# 
+# fa.parallel(rho, n.obs=95, fm="uls", fa="both", main="Parallel Analysis Scree Plots", cor="tet", use="pairwise", plot=TRUE) # says 2 factors, but kmo is not good enough; 
+# 
+# # EFA using ULS 
+# factor_test_uls <- fa(rho, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "tet", nfactors = 1) 
+# 
+# # ULS1    h2   u2 com
+# q1 0.37 0.134 0.87   1
+# q2 0.63 0.403 0.60   1
+# q3 0.16 0.027 0.97   1
+# q4 0.19 0.038 0.96   1
+# q5 0.70 0.490 0.51   1
+# q6 0.25 0.061 0.94   1
+# q7 0.79 0.621 0.38   1
+# 
+# posi_inv <- parent_w1 %>%
+#   select(q1, q2, q5, q7)
+# 
+# ## kmo Kaiser-Meyer-Olkin factor SAMPLING ADEQUACY (ABOVE 0.5, CLOSER TO 1 BEST)
+# KMO(posi_inv) # 0.64 better
+# 
+# # EFA using ULS 
+# factor_test_uls <- fa(posi_inv, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "tet", nfactors = 1)
+# # no warnings
+# 
+# #  ULS1    h2   u2 com
+# q1 0.31 0.095 0.90   1
+# q2 0.62 0.382 0.62   1
+# q5 0.71 0.507 0.49   1
+# q7 0.83 0.694 0.31   1
+# 
+# # Omega 
+# omega(posi_inv, nfactors = 1, n.obs = 95, flip = T, plot = T) # 0.57
+# 
+# # Conclusion: evidence of construct validity, but it has poor internal consistency (relation between items is not very high).  
+# 
+# # make a CFA using wave 2 and 3, to check time invariance. [TBD]
 
 
 #######################################################################################
@@ -266,20 +285,30 @@ KMO(monit) # 0.78
 
 # Poly corr matrix
 poly <- polychoric(monit)
-cor.plot(poly$rho, numbers = T, upper = F, main = "Polychoric", show.legend = F) # looks good
+cor.plot(poly$rho, numbers = T, upper = F, main = "Polychoric", show.legend = F) # looks good, items 137 and 144 have lower corrs. 
 
 # parallel test, anyways
 fa.parallel(monit, n.obs=NULL, fm="uls", fa="fa", main="Parallel Analysis Scree Plots", cor="poly", use="pairwise", plot=TRUE)
-# Parallel analysis suggests that the number of factors =  2, warnings about ulta-heywood case
+# Parallel analysis suggests that the number of factors =  3, warnings about ultra-heywood case
 
 # EFA using ULS 
 factor_test_uls <- fa(monit, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 1) 
 # No warnings
 # all factor loadings above 0.4
 
+    ULS1   h2   u2 com
+q137 0.49 0.24 0.76   1
+q138 0.78 0.60 0.40   1
+q139 0.67 0.45 0.55   1
+q140 0.63 0.40 0.60   1
+q141 0.59 0.35 0.65   1
+q142 0.80 0.64 0.36   1
+q143 0.78 0.60 0.40   1
+q144 0.45 0.20 0.80   1
+
 # EFA using ULS - More than 1 factors 
 # factor_test_uls_2 <- fa(monit, n.obs = 95, rotate = "promax", fm = "pa", cor = "cor", nfactors = 2) # just for fun, to compare SPSS output and R output. 
-# # Note 007.02.24: I noticed discrepancies in SPSS and R output. I figured out that discrepancies are resolved when SPSS is put to exclude cases pairwise. 
+# # Note 07.02.24: I noticed discrepancies in SPSS and R output. I figured out that discrepancies are resolved when SPSS is put to exclude cases pairwise. 
 # I believe that is what R uses too. Discrepancies persist if I use uls, oblimin, with cor, which I thought were equivalent in SPSS
 
 # EFA using ULS - More than 1 factors 
@@ -310,12 +339,37 @@ q144 -0.15  0.69 0.36 0.64 1.1
 # loads into both
 q137  0.24  0.29 0.23 0.77 1.9
 
-monit <- parent_w1 %>%
+monit_2 <- parent_w1 %>%
   select(q138, q139, q140, q141, q142, q143, q144)
 
-# Omega
-omega(monit, nfactors = 2, n.obs = 95, flip = T, plot = T) # likes more than 1 factor, but still good to know Omega Total 0.82 (same as alpha)
+# EFA using ULS - 2 factors without item 137
+factor_test_uls_2 <- fa(monit_2, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 2)
 
+      ULS1  ULS2   h2   u2 com
+
+# Factor #1 : monitoring peers
+q140  0.72 -0.08 0.46 0.54 1.0
+q141  0.72 -0.06 0.47 0.53 1.0
+q142  0.80  0.05 0.70 0.30 1.0
+q143  0.69  0.17 0.65 0.35 1.1
+
+# Factor #2 : checking in (?)
+q138  0.23  0.64 0.65 0.35 1.2
+q139  0.09  0.70 0.58 0.42 1.0
+q144 -0.15  0.74 0.43 0.57 1.1
+
+# Omega
+omega(monit_2, nfactors = 2, n.obs = 95, flip = T, plot = T) # 0.78
+
+monit_peers <- parent_w1 %>%
+  select(q140, q141, q142, q143)
+# alpha
+alpha(monit_peers) # 0.76
+
+# checkin <- parent_w1 %>%
+#   select(q138, q139, q144)
+# # alpha
+# alpha(checkin) # 0.59 # too low. Keeping just monitoring peers. 
 
 #######################################################################################
 ############################# Homework Involvement ####################################
@@ -342,7 +396,7 @@ omega(monit, nfactors = 2, n.obs = 95, flip = T, plot = T) # likes more than 1 f
 
 # The scale to factor analyze
 hw_inv <- parent_w1 %>%
-  select(q84, q85, q86, q87, q88, q89, q90, q91, q92, q93, q94, q95, q96, q97, q98)
+  select(q84, q85, q86, q87, q88, q89, q90, q91, q92, q93, q94, q95, q96, q97, q98) # removed 82 and 83; almost all negative correlations, which make sense. 
 
 ## kmo Kaiser-Meyer-Olkin factor SAMPLING ADEQUACY (ABOVE 0.5, CLOSER TO 1 BEST)
 KMO(hw_inv) # 0.71 --> ok
@@ -352,9 +406,13 @@ poly <- polychoric(hw_inv)
 cor.plot(poly$rho, numbers = T, upper = F, main = "Polychoric", show.legend = F)
 # items 84, 89, 92 neg corr with other items
 
+# 84	Me aseguré de que tenga un cierto tiempo para hacer la tarea
+# 89	Ayudé a mi joven a prepararse para los exámenes haciéndole preguntas sobre el tema, etc.
+# 92	Le recordé a mi joven que hiciera su tarea
+
 # EFA using ULS 
 factor_test_uls <- fa(hw_inv, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 1) 
-# items 91 and 92 load at or below .31 
+# items 91 and 92 load at or below .31, so removing them.
 
 # new efa iteration without problematic items
 hw_inv_2 <- parent_w1 %>%
@@ -362,10 +420,25 @@ hw_inv_2 <- parent_w1 %>%
 
 # Poly corr matrix
 poly <- polychoric(hw_inv_2)
-cor.plot(poly$rho, numbers = T, upper = F, main = "Polychoric", show.legend = F) # looks better
+cor.plot(poly$rho, numbers = T, upper = F, main = "Polychoric", show.legend = F) # looks better, but 84 and 85 show some neg corrs.
 
 # EFA using ULS 
 factor_test_uls <- fa(hw_inv_2, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 1) 
+
+    ULS1   h2   u2 com
+q84 0.40 0.16 0.84   1
+q85 0.49 0.24 0.76   1
+q86 0.61 0.37 0.63   1
+q87 0.58 0.34 0.66   1
+q88 0.59 0.35 0.65   1
+q89 0.71 0.50 0.50   1
+q90 0.50 0.25 0.75   1
+q93 0.57 0.33 0.67   1
+q94 0.55 0.30 0.70   1
+q95 0.54 0.29 0.71   1
+q96 0.52 0.27 0.73   1
+q97 0.53 0.28 0.72   1
+q98 0.47 0.22 0.78   1
 
 # scree plot
 scree(hw_inv_2, factors = TRUE, pc = FALSE, main = "Scree plot", hline = NULL, add = FALSE)
@@ -373,7 +446,7 @@ scree(hw_inv_2, factors = TRUE, pc = FALSE, main = "Scree plot", hline = NULL, a
 
 # parallel test, anyways
 fa.parallel(hw_inv_2, n.obs=NULL, fm="uls", fa="fa", main="Parallel Analysis Scree Plots", cor="poly", use="pairwise", plot=TRUE)
-# Parallel analysis suggests that the number of factors =  3
+# Parallel analysis suggests that the number of factors =  3, ultra heywood cases detected
 
 # EFA using ULS - More than 1 factors 
 factor_test_uls <- fa(hw_inv_2, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 2) 
@@ -410,9 +483,51 @@ q93  0.22  0.65 0.51 0.49 1.2
 q95  0.34  0.37 0.30 0.70 2.0
 q98  0.30  0.32 0.23 0.77 2.0
 
-# Omega 
-omega(hw_inv_2, nfactors = 2, n.obs = 95, flip = T, plot = T) # likes more than 1 factor, but still good to know Omega Total X (same as alpha)
+# 95	Comprobé con la maestra/o para asegurarme que mi joven terminó su tarea 
+# 98	Limité el ruido y/o las distracciones mientras hacia su tarea
 
+# new efa iteration without 95 and 98
+hw_inv_3 <- parent_w1 %>%
+  select(q84, q85, q86, q87, q88, q89, q90, q93, q94, q96, q97)
+
+# EFA using ULS - More than 1 factors 
+factor_test_uls <- fa(hw_inv_3, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 2) 
+# no warning messages
+
+     ULS1  ULS2   h2   u2 com
+
+# Factor 1:
+q86  0.60  0.15 0.40 0.60 1.1
+q87  0.73 -0.07 0.53 0.47 1.0
+q88  0.85 -0.16 0.71 0.29 1.1
+q89  0.66  0.19 0.50 0.50 1.2
+q90  0.39  0.23 0.23 0.77 1.6
+q94  0.56  0.04 0.32 0.68 1.0
+q96  0.50  0.08 0.27 0.73 1.0
+q97  0.48  0.15 0.27 0.73 1.2
+
+# Factor 2:
+q84 -0.08  0.95 0.89 0.11 1.0
+q85  0.04  0.89 0.81 0.19 1.0
+q93  0.22  0.60 0.44 0.56 1.3
+
+hw_inv_fa1 <- parent_w1 %>%
+  select(q86, q87, q88, q89, q90, q94, q96, q97)
+# alpha
+alpha(hw_inv_fa1) # 0.78
+
+hw_inv_fa2 <- parent_w1 %>%
+  select(q84, q85, q93)
+# alpha
+alpha(hw_inv_fa2) # 0.77
+
+# Omega 
+omega(hw_inv_3, nfactors = 2, n.obs = 95, flip = T, plot = T) # alpha: 0.78, but the g latemt factor doesn't load on items: 87, 90, 94, 96
+
+# 87	Me hice disponible para mi joven cuando tenía preguntas sobre su tarea
+# 90	Le di a mi joven incentivos como privilegios especiales, regalos especiales, etc.
+# 94	Comprobé y corregí la tarea de mi hija/o 
+# 96	Le ayudé a mi joven acceder a otros recursos (biblioteca, materiales de arte, laboratorio de computación, etc.)
 
 #######################################################################################
 ############################# Discipline & limit setting ##############################
