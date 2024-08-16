@@ -103,7 +103,8 @@ fa.parallel(poly$rho, n.obs=95, fm="uls", fa="fa", main="Parallel Analysis Scree
 fa.parallel(poly$rho, n.obs=95, fm="pa", fa="fa", main="Parallel Analysis Scree Plots", cor="poly", use="pairwise", plot=TRUE) # Parallel analysis suggests that the number of factors =  1, BUT it throws warning messages: "Try a different factor score estimation method" and "An ultra-Heywood case was detected" ------- BTW: the number of warning messages change everytime i run the code. 
 
 # EFA using ULS 
-factor_test_uls <- fa(posi_rel_2, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 1) # no warning message :)
+factor_test_uls <- fa(posi_rel_2, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 1) 
+# no warning message :)
 
 fa.diagram(factor_test_uls) # item 119 has a factor loading of 1
 
@@ -179,7 +180,7 @@ alpha(posi_rel_3) # 0.84
 # Omega 
 omega(posi_rel_3, nfactors = 1, n.obs = 95, flip = T, plot = T) # likes more than 1 factor, but still good to know Omega Total 0.84 (same as alpha)
 
-# new thoughts on 08/14/23: I am not sure if I want to leave out item 119 (that says)Mi joven y yo tenemos una relación cercana) 
+# new thoughts on 08/14/23: I am not sure if I want to leave out item 119 (that says Mi joven y yo tenemos una relación cercana) 
 # 5 items alpha = 0.89 
 # 4 items alpha = 0.84 
 
@@ -475,7 +476,7 @@ q97  0.46  0.15 0.25 0.75 1.2
 # 96	Le ayudé a mi joven acceder a otros recursos (biblioteca, materiales de arte, laboratorio de computación, etc.)
 # 97	Le ayudé a mi joven practicar habilidades (lectura, revisión, problemas de práctica, etc.)
 
-# factor # 1: 
+# factor # 1: academic hw
 hw_inv_fa1 <- parent_w1 %>%
   select(q86, q87, q88, q89, q94, q96, q97)
 # alpha
@@ -489,7 +490,7 @@ q93  0.22  0.59 0.43 0.57 1.3
 # 85	Me aseguré de que él / ella tenga un cierto lugar para hacer la tarea
 # 93	Comprobé con mi joven para asegurarme de que él / ella hiciera su tarea
 
-# factor # 2: 
+# factor # 2: checkhwi
 hw_inv_fa2 <- parent_w1 %>%
   select(q84, q85, q93)
 # alpha
@@ -898,23 +899,429 @@ q110 0.72 0.52 0.476   1
 alpha(fut_or) # 0.89
 
 
+#######################################################################################
+############################# school involvement & others ##############################################
+#######################################################################################
 
-#NEXT: EFA for parent rel with school, educators, and other parents. 
+# En general, hago un esfuerzo para...
+# 31.	… conocer el personal y la administración de la escuela  ___ 
+# 32.	… conocer al menos uno de los maestros de mi joven ____ 
+# 33.	… entender las reglas y pólizas de la escuela  ____ 
+# 34.	… informarme sobre mis derechos como padre ____ 
+# 35.	… aprender sobre el sistema educativo en este estado ____
+# 36.	… entender la diferencia entre obtener un GED, graduarse con un diploma estándar de la escuela secundaria, o con un diploma de una secundaria internacional o con un diploma de Bachillerato Internacional.____ 
+# 37.	… involucrarse en las actividades escolares, en el salón de clase, y/u otras maneras (por ejemplo, organizaciones de padres, trabajo voluntario, etc.) 
+# 38.	… tener conversaciones con los otros padres para obtener información o aprender acerca de los recursos en la escuela. ____
+# 39.	…contactar los otros padres para obtener apoyo. ____
+# 40.	…entender la trayectoria hacia la preparación a la universidad y para una carrera ____
+# 41.	… asistir a la conferencia de padres y maestros cuando esté disponible. _____ 
 
 
+# The scale to factor analyze
+scho_inv <- parent_w1 %>%
+  select(q31, q32, q33, q34, q35, q36, q37, q38, q39, q40, q41)
+
+## kmo Kaiser-Meyer-Olkin factor SAMPLING ADEQUACY (ABOVE 0.5, CLOSER TO 1 BEST)
+KMO(scho_inv) # 0.83
+
+# Poly corr matrix
+poly <- polychoric(scho_inv)
+cor.plot(poly$rho, numbers = T, upper = F, main = "Polychoric", show.legend = F) # item 41 with 37-39 neg corrs.
+
+# scree plot
+scree(scho_inv, factors = TRUE, pc = FALSE, main = "Scree plot", hline = NULL, add = FALSE)
+# Scree plot  shows 2 factor solution
+
+# parallel test, anyways
+fa.parallel(scho_inv, n.obs=NULL, fm="uls", fa="fa", main="Parallel Analysis Scree Plots", cor="poly", use="pairwise", plot=TRUE)
+# Parallel analysis suggests that the number of factors =  3
+
+# EFA using ULS 
+factor_test_uls <- fa(scho_inv, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 2) 
+# warnings- try diff estimation methd
+# items 35, 40, 41 crossload
+
+     ULS1  ULS2   h2    u2 com
+q31  0.58  0.14 0.42 0.580 1.1
+q32  0.91 -0.07 0.78 0.224 1.0
+q33  0.98 -0.03 0.94 0.057 1.0
+q34  0.79  0.18 0.77 0.233 1.1
+
+q36  0.27  0.55 0.50 0.498 1.5
+q37 -0.07  0.86 0.69 0.313 1.0
+q38  0.03  0.81 0.68 0.318 1.0
+q39 -0.04  0.76 0.55 0.450 1.0
+
+q35  0.63  0.30 0.64 0.359 1.4
+q40  0.35  0.56 0.59 0.407 1.7
+q41  0.61 -0.31 0.32 0.684 1.5
+
+# without 35, 40, 41
+scho_inv <- parent_w1 %>%
+  select(q31, q32, q33, q34, q36, q37, q38, q39)
+
+factor_test_uls <- fa(scho_inv, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 2) 
+# no warning
+
+     ULS1  ULS2   h2    u2 com
+
+# 31.	… conocer el personal y la administración de la escuela  ___ 
+# 32.	… conocer al menos uno de los maestros de mi joven ____ 
+# 33.	… entender las reglas y pólizas de la escuela  ____ 
+# 34.	… informarme sobre mis derechos como padre ____ 
+
+# Factor 1: knowing school personnel and rules
+q31  0.60  0.17 0.47 0.533 1.2
+q32  1.00 -0.10 0.93 0.071 1.0
+q33  0.96  0.00 0.93 0.071 1.0
+q34  0.75  0.19 0.70 0.300 1.1
+
+# 36.	… entender la diferencia entre obtener un GED, graduarse con un diploma estándar de la escuela secundaria, o con un diploma de una secundaria internacional o con un diploma de Bachillerato Internacional.____ 
+# 37.	… involucrarse en las actividades escolares, en el salón de clase, y/u otras maneras (por ejemplo, organizaciones de padres, trabajo voluntario, etc.) 
+# 38.	… tener conversaciones con los otros padres para obtener información o aprender acerca de los recursos en la escuela. ____
+# 39.	…contactar los otros padres para obtener apoyo. ____
+
+# Factor 2: networking and...
+q36  0.26  0.50 0.43 0.575 1.5
+q37 -0.06  0.84 0.67 0.327 1.0
+q38  0.05  0.82 0.71 0.285 1.0
+q39 -0.02  0.76 0.57 0.431 1.0
 
 
+scho_inv_fa1 <- parent_w1 %>%
+  select(q31, q32, q33, q34)
+
+# alpha
+alpha(scho_inv_fa1) # 0.85
+
+scho_inv_fa2 <- parent_w1 %>%
+  select(q36, q37, q38, q39)
+
+# alpha
+alpha(scho_inv_fa2) # .78 (efforts to know school rules & personnel)
+
+# removing 36 because it doesn't jive as well with othe ritems conceptually
+scho_inv_fa2 <- parent_w1 %>%
+  select(q37, q38, q39)
+
+# alpha
+alpha(scho_inv_fa2) # .79 (networking with other parents)
+
+scho_inv <- parent_w1 %>%
+  select(q31, q32, q33, q34, q37, q38, q39)
+
+# Omega 
+omega(scho_inv, nfactors = 2, n.obs = 95, flip = T, plot = T) # alpha 0.82
+# warning : 3 factors are required fo identification
 
 
+#######################################################################################
+############################# self-efficacy ##############################################
+#######################################################################################
+
+# En general, estoy segura/o de que…
+# 42.	…yo entiendo cómo funciona la escuela de mi joven. ____
+# 43.	…puedo comunicar mis preguntas y preocupaciones con los maestros y el personal de la escuela.___
+# 44.	…puedo trabajar con la escuela para encontrar una solución positiva si surge un conflicto o un problema que involucre a mi joven en la escuela. ____
+# 45.	…estoy ayudando a mi joven hacer bien en la escuela. ____
+# 46.	… estoy ayudando a mi joven prepararse para sus futuras metas de educación y carrera. ____
 
 
+# The scale to factor analyze
+s_efficacy <- parent_w1 %>%
+  select(q42, q43, q44, q45, q46)
+
+## kmo Kaiser-Meyer-Olkin factor SAMPLING ADEQUACY (ABOVE 0.5, CLOSER TO 1 BEST)
+KMO(s_efficacy) # 0.71
+
+# Poly corr matrix
+poly <- polychoric(s_efficacy)
+cor.plot(poly$rho, numbers = T, upper = F, main = "Polychoric", show.legend = F) # all healthy corrs
+
+# scree plot
+scree(s_efficacy, factors = TRUE, pc = FALSE, main = "Scree plot", hline = NULL, add = FALSE)
+# Scree plot clearly shows 1 factor solution
+
+# parallel test, anyways
+fa.parallel(s_efficacy, n.obs=NULL, fm="uls", fa="fa", main="Parallel Analysis Scree Plots", cor="poly", use="pairwise", plot=TRUE)
+# Parallel analysis suggests that the number of factors =  3
+# warnings
+
+# EFA using ULS 
+factor_test_uls <- fa(s_efficacy, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 1) 
+# no warnings
+
+    ULS1   h2   u2 com
+q42 0.88 0.78 0.22   1
+q43 0.81 0.65 0.35   1
+q44 0.81 0.65 0.35   1
+q45 0.64 0.40 0.60   1
+q46 0.66 0.44 0.56   1
+
+# alpha
+alpha(s_efficacy) # 0.8 (parent self-efficacy working with school & supporting child)
+
+#######################################################################################
+############################# comfort ##############################################
+#######################################################################################
+
+# Como madre/padre de esta escuela, siento que soy…
+# 
+# 47.	…parte de una comunidad con el personal de la escuela y los otros padres. ____ 
+# 48.	…tratado/a con respeto, sabiendo que mis opiniones son importantes. ____
+# 49.	…cómoda/o preguntando por un traductor y por materiales en español si los necesito. ____ 
+# 50.	… capaz de hablar con maestros o administradores sobre grandes preocupaciones relacionados con mi joven. ___ 
+# 51.	…dedicada/o en creando un ambiente exitoso para todos los jóvenes. ____
+# 52.	 …feliz de que mi joven asista a esta escuela. ___
+# 53.	…bienvenido/a en la escuela de mi joven. ____
+
+# taps on parent comfort at school, except maybe item 51 about parent contributing 
+
+# The scale to factor analyze
+comfort <- parent_w1 %>%
+  select(q47, q48, q49, q50, q51, q52, q53)
+
+## kmo Kaiser-Meyer-Olkin factor SAMPLING ADEQUACY (ABOVE 0.5, CLOSER TO 1 BEST)
+KMO(comfort) # 0.83
+
+# Poly corr matrix
+poly <- polychoric(comfort)
+cor.plot(poly$rho, numbers = T, upper = F, main = "Polychoric", show.legend = F) # all healthy corrs
+
+# scree plot
+scree(comfort, factors = TRUE, pc = FALSE, main = "Scree plot", hline = NULL, add = FALSE)
+# Scree plot clearly shows 1 factor solution
+
+# parallel test, anyways
+fa.parallel(comfort, n.obs=NULL, fm="uls", fa="fa", main="Parallel Analysis Scree Plots", cor="poly", use="pairwise", plot=TRUE)
+# Parallel analysis suggests that the number of factors =  3
+# warnings
+
+# EFA using ULS 
+factor_test_uls <- fa(comfort, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 2) 
+# no warnings
+#going for 2, because at least a factor would be 2 items
+
+     ULS1  ULS2   h2    u2 com
+# 48.	…tratado/a con respeto, sabiendo que mis opiniones son importantes. ____
+# 49.	…cómoda/o preguntando por un traductor y por materiales en español si los necesito. ____ 
+# 52.	 …feliz de que mi joven asista a esta escuela. ___
+# 53.	…bienvenido/a en la escuela de mi joven. ____
+
+q48  0.84 -0.04 0.67 0.330 1.0
+q49  0.75  0.24 0.83 0.172 1.2
+q52  0.73  0.24 0.78 0.216 1.2
+q53  0.98 -0.12 0.85 0.150 1.0
+
+comfort_fa1 <- parent_w1 %>%
+  select(q48, q49, q52, q53)
+# alpha
+alpha(comfort_fa1) # 0.86
+
+# 47.	…parte de una comunidad con el personal de la escuela y los otros padres. ____ 
+# 50.	… capaz de hablar con maestros o administradores sobre grandes preocupaciones relacionados con mi joven. ___ 
+# 51.	…dedicada/o en creando un ambiente exitoso para todos los jóvenes. ____
+
+q47  0.13  0.44 0.27 0.732 1.2
+q50  0.19  0.83 0.91 0.087 1.1
+q51 -0.09  0.95 0.81 0.191 1.0
+
+comfort_fa2 <- parent_w1 %>%
+  select(q47, q50, q51)
+# alpha
+alpha(comfort_fa2) # 0.72
+
+# Omega 
+omega(comfort, nfactors = 2, n.obs = 95, flip = T, plot = T) # 0.84
 
 
+#######################################################################################
+############################# endorse & rels ##############################################
+#######################################################################################
+
+# Como madre/padre en esta escuela, estoy segura/o de que…	
+# 54.	… esta escuela es un buen lugar para mi joven. _____  
+# 55.	… el personal de la escuela de mi joven está haciendo cosas buenas por ella / el. _____  
+# 56.	… la gente en la escuela de mi joven es confiable. _____  
+# 57.	… la escuela de mi joven hace un buen trabajo preparando a los jóvenes para sus futuros. _____ 
+# 58.	… puedo encontrar ayuda para mi joven si él / ella está batallando en una clase. ___
+# 59.	… los maestros de mi joven se preocupan por ella/el. ____
+# 60.	… maestros y administradores trabajan juntos para crear un ambiente seguro y acogedor para todos. ____
+# 61.	… hay muchas oportunidades para la involucración de los padres. ____
+# 62.	… puedo tener una conversación honesta y respetuosa sobre mi joven con su maestro. ___
+# 63.	…puedo trabajar con un maestro para resolver cualquier problema que tenga mi joven en la escuela. _____
 
 
+# The scale to factor analyze
+rels <- parent_w1 %>%
+  select(q54, q55, q56, q57, q58, q59, q60, q61, q62, q63)
+
+## kmo Kaiser-Meyer-Olkin factor SAMPLING ADEQUACY (ABOVE 0.5, CLOSER TO 1 BEST)
+KMO(rels) # 0.88
+
+# Poly corr matrix
+poly <- polychoric(rels)
+cor.plot(poly$rho, numbers = T, upper = F, main = "Polychoric", show.legend = F) # all healthy corrs
+
+# scree plot
+scree(rels, factors = TRUE, pc = FALSE, main = "Scree plot", hline = NULL, add = FALSE)
+# Scree plot clearly shows 1 factor solution
+
+# parallel test, anyways
+fa.parallel(rels, n.obs=NULL, fm="uls", fa="fa", main="Parallel Analysis Scree Plots", cor="poly", use="pairwise", plot=TRUE)
+# Parallel analysis suggests that the number of factors =  2
+# warnings
+
+# EFA using ULS 
+factor_test_uls <- fa(rels, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 2) 
+# matrix nonpositive definite
+
+# trying only a couple of items that tap more closely on endorsemnet
+
+# 54.	… esta escuela es un buen lugar para mi joven. _____  
+# 55.	… el personal de la escuela de mi joven está haciendo cosas buenas por ella / el. _____  
+# 56.	… la gente en la escuela de mi joven es confiable. _____  
+# 57.	… la escuela de mi joven hace un buen trabajo preparando a los jóvenes para sus futuros. _____ 
+
+endorse <- parent_w1 %>%
+  select(q54, q55, q56, q57)
+
+factor_test_uls <- fa(endorse, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 1) 
+# warnings: ultra heywood case
+
+    ULS1   h2      u2 com
+q54 0.65 0.42  0.5776   1
+q55 1.00 1.00 -0.0032   1
+q56 0.96 0.93  0.0740   1
+q57 0.97 0.94  0.0572   1
+
+# removing 55 bec was redundant with 57
+endorse <- parent_w1 %>%
+  select(q54, q56, q57)
+
+factor_test_uls <- fa(endorse, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 1) 
+# no warnings
+
+    ULS1  h2     u2 com
+q54 0.63 0.4 0.6030   1
+q56 0.95 0.9 0.0961   1
+q57 1.00 1.0 0.0041   1
+
+# alpha
+alpha(endorse) # 0.81
 
 
+#######################################################################################
+############################# support ##############################################
+#######################################################################################
 
+# 58.	… puedo encontrar ayuda para mi joven si él / ella está batallando en una clase. ___
+# 59.	… los maestros de mi joven se preocupan por ella/el. ____
+# 60.	… maestros y administradores trabajan juntos para crear un ambiente seguro y acogedor para todos. ____
+# 61.	… hay muchas oportunidades para la involucración de los padres. ____
+# 62.	… puedo tener una conversación honesta y respetuosa sobre mi joven con su maestro. ___
+# 63.	…puedo trabajar con un maestro para resolver cualquier problema que tenga mi joven en la escuela. _____
+
+
+# The scale to factor analyze
+support <- parent_w1 %>%
+  select(q58, q59, q60, q61, q62, q63)
+
+## kmo Kaiser-Meyer-Olkin factor SAMPLING ADEQUACY (ABOVE 0.5, CLOSER TO 1 BEST)
+KMO(support) # 0.81
+
+# Poly corr matrix
+poly <- polychoric(support)
+cor.plot(poly$rho, numbers = T, upper = F, main = "Polychoric", show.legend = F) # all healthy corrs
+
+# scree plot
+scree(support, factors = TRUE, pc = FALSE, main = "Scree plot", hline = NULL, add = FALSE)
+# Scree plot shows 1 factor solution
+
+# parallel test, anyways
+fa.parallel(support, n.obs=NULL, fm="uls", fa="fa", main="Parallel Analysis Scree Plots", cor="poly", use="pairwise", plot=TRUE)
+# Parallel analysis suggests that the number of factors =  2
+# warnings
+
+# EFA using ULS 
+factor_test_uls <- fa(support, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 2) 
+# matrix nonpositive definite
+
+# EFA using ULS 
+factor_test_uls <- fa(support, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 1) 
+# matrix nonpositive definite
+
+
+support <- parent_w1 %>%
+  select(q58, q59, q62, q63)
+
+# EFA using ULS 
+factor_test_uls <- fa(support, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 1) 
+# no warnings!
+
+    ULS1   h2    u2 com
+q58 0.98 0.95 0.047   1
+q59 0.92 0.85 0.153   1
+q62 0.86 0.74 0.260   1
+q63 0.85 0.73 0.272   1
+
+# 58.	… puedo encontrar ayuda para mi joven si él / ella está batallando en una clase. ___
+# 59.	… los maestros de mi joven se preocupan por ella/el. ____
+# 62.	… puedo tener una conversación honesta y respetuosa sobre mi joven con su maestro. ___
+# 63.	…puedo trabajar con un maestro para resolver cualquier problema que tenga mi joven en la escuela. _____
+
+
+# conclusion: there appears to be something wrong with items 60 and/or 61
+
+# alpha
+alpha(support) # 0.88 (teacher support)
+
+
+#######################################################################################
+############################# p-t rel ##############################################
+#######################################################################################
+
+# The scale to factor analyze
+pt_rel <- parent_w1 %>%
+  select(q64, q65, q66, q67)
+
+## kmo Kaiser-Meyer-Olkin factor SAMPLING ADEQUACY (ABOVE 0.5, CLOSER TO 1 BEST)
+KMO(pt_rel) # 0.77
+
+# Poly corr matrix
+poly <- polychoric(pt_rel)
+cor.plot(poly$rho, numbers = T, upper = F, main = "Polychoric", show.legend = F) # very high corrs
+
+# scree plot
+scree(pt_rel, factors = TRUE, pc = FALSE, main = "Scree plot", hline = NULL, add = FALSE)
+# Scree plot clearly shows 1 factor solution
+
+# parallel test, anyways
+fa.parallel(pt_rel, n.obs=NULL, fm="uls", fa="fa", main="Parallel Analysis Scree Plots", cor="poly", use="pairwise", plot=TRUE)
+# Parallel analysis suggests that the number of factors =  1
+# warnings
+
+
+#warnings: ultraheywood
+
+ULS1   h2     u2 com
+q64 0.79 0.63  0.370   1
+q65 0.88 0.78  0.225   1
+q66 1.01 1.01 -0.011   1
+q67 0.99 0.98  0.017   1
+
+pt_rel <- parent_w1 %>%
+  select(q64, q65, q67)
+
+# without 66
+factor_test_uls <- fa(pt_rel, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 1) 
+
+ULS1   h2      u2 com
+q64 0.76 0.57  0.4290   1
+q65 0.90 0.81  0.1861   1
+q67 1.00 1.00 -0.0028   1
+
+# scale doesn't work. Makes no sense to have a scale with only 2 items. 
 
 
 ### 
@@ -959,3 +1366,14 @@ alpha(scale_name) # X
 
 # Omega 
 omega(scale_name, nfactors = 1, n.obs = 95, flip = T, plot = T) # likes more than 1 factor, but still good to know Omega Total X (same as alpha)
+
+
+#######################################################################################
+#######################################################################################
+#######################################################################################
+
+
+
+
+
+
