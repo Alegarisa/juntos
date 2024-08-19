@@ -33,8 +33,9 @@ parent_w1 <- read_sav(here("outcomes paper/data_outcomes", "primary_parent_w1.sa
 # Steps
 # 1. matrix polychoric
 # 2. kmo
-# 3. parallel analysis (with no warning messages)
-# if it shows more factors than sensible: look for communality above .4 (h2); factor loading above 0.4; 
+# 3. parallel analysis (ideally with no warning messages, but if there are, it's ok)
+#### if it shows more factors than sensible: look for communality above .4 (h2); factor loading above 0.4; 
+# 4. run fa() with number of factors that seem reasonable, warnings are unacceptable. 
 
 #######################################################################################
 ############################# Positive relationship ###################################
@@ -106,14 +107,14 @@ fa.parallel(poly$rho, n.obs=95, fm="pa", fa="fa", main="Parallel Analysis Scree 
 factor_test_uls <- fa(posi_rel_2, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 1) 
 # no warning message :)
 
-fa.diagram(factor_test_uls) # item 119 has a factor loading of 1
+fa.diagram(factor_test_uls) # item 119 has a factor loading of 1, but fa() didn't show warning messages. 
 
-    ULS1   h2     u2 com
-q116 0.92 0.84 0.1606   1
-q117 0.84 0.71 0.2907   1
-q118 0.83 0.69 0.3123   1
-q119 1.00 0.99 0.0093   1 ##
-q121 0.81 0.66 0.3402   1
+#     ULS1   h2     u2 com
+# q116 0.92 0.84 0.1606   1
+# q117 0.84 0.71 0.2907   1
+# q118 0.83 0.69 0.3123   1
+# q119 1.00 0.99 0.0093   1 ##
+# q121 0.81 0.66 0.3402   1
 
 # EFA using pa 
 # factor_test_pa <- fa(posi_rel_2, n.obs = 95, rotate = "oblimin", fm = "pa", cor = "poly", nfactors = 1) # no warning message :)
@@ -121,7 +122,7 @@ q121 0.81 0.66 0.3402   1
 # fa.diagram(factor_test_pa) # item 119 has a factor loading of 1
 
 # alpha
-alpha(posi_rel_2) # 0.89
+alpha(posi_rel_2) # 0.89 with 119
 
 # trying without 119 (check for SS loadings and Proportion Var (larger # better); and TLI larger, better)
 
@@ -155,16 +156,13 @@ factor_test_pa <- fa(posi_rel_3, n.obs = 95, rotate = "oblimin", fm = "pa", cor 
 
 fa.diagram(factor_test_pa)
 
-      ULS1   h2   u2 com
-q116 0.93 0.87 0.13   1
-q117 0.84 0.70 0.30   1
-q118 0.82 0.67 0.33   1
-q121 0.81 0.66 0.34   1
+#       ULS1   h2   u2 com
+# q116 0.93 0.87 0.13   1
+# q117 0.84 0.70 0.30   1
+# q118 0.82 0.67 0.33   1
+# q121 0.81 0.66 0.34   1
 
 # Conclusion: I have to ignore the parallel analysis suggestion of 2 factors, because there is just 4 items. 
-# 
-# SOOOO... i AM GOING TO KEEP ITEM 119 BECAUSE MAKES THE SOLUTION MORE INESTABLE.
-# IDEAL QUE NO HAYA WARNINGS EN PARALLEL, PERO SI SALEN, NI MODO. DONDE SI NO SE PUEDEN TENER WARNINGS ES EN EL fa()
 
 # Final items:
 # 116.	Cuando mi joven me pide hablar o cuando necesita hablar conmigo, escucho atentamente.
@@ -177,9 +175,6 @@ q121 0.81 0.66 0.34   1
 # alpha
 alpha(posi_rel_3) # 0.84
 
-# Omega 
-omega(posi_rel_3, nfactors = 1, n.obs = 95, flip = T, plot = T) # likes more than 1 factor, but still good to know Omega Total 0.84 (same as alpha)
-
 # new thoughts on 08/14/23: I am not sure if I want to leave out item 119 (that says Mi joven y yo tenemos una relación cercana) 
 # 5 items alpha = 0.89 
 # 4 items alpha = 0.84 
@@ -188,7 +183,7 @@ omega(posi_rel_3, nfactors = 1, n.obs = 95, flip = T, plot = T) # likes more tha
 ############ CFA ##############
 
 # el siguiente paso seria usar lavaan, especificar el modelo 
-rp <- ("rp=~ q116 + q117 + q118 + q119 + q121") # aqui necesito un long format (116 seria variable y row seria tiempo 1, 2 y 3)
+# rp <- ("rp=~ q116 + q117 + q118 + q119 + q121") # aqui necesito un long format (116 seria variable y row seria tiempo 1, 2 y 3)
 
 
 # [TBD]
@@ -297,15 +292,15 @@ factor_test_uls <- fa(monit, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "
 # No warnings
 # all factor loadings above 0.4
 
-    ULS1   h2   u2 com
-q137 0.49 0.24 0.76   1
-q138 0.78 0.60 0.40   1
-q139 0.67 0.45 0.55   1
-q140 0.63 0.40 0.60   1
-q141 0.59 0.35 0.65   1
-q142 0.80 0.64 0.36   1
-q143 0.78 0.60 0.40   1
-q144 0.45 0.20 0.80   1
+#     ULS1   h2   u2 com
+# q137 0.49 0.24 0.76   1
+# q138 0.78 0.60 0.40   1
+# q139 0.67 0.45 0.55   1
+# q140 0.63 0.40 0.60   1
+# q141 0.59 0.35 0.65   1
+# q142 0.80 0.64 0.36   1
+# q143 0.78 0.60 0.40   1
+# q144 0.45 0.20 0.80   1
 
 # EFA using ULS - More than 1 factors 
 # factor_test_uls_2 <- fa(monit, n.obs = 95, rotate = "promax", fm = "pa", cor = "cor", nfactors = 2) # just for fun, to compare SPSS output and R output. 
@@ -317,28 +312,28 @@ factor_test_uls_2 <- fa(monit, n.obs = 95, rotate = "oblimin", fm = "uls", cor =
 # No warnings
 
 # factor 1
-#     ULS1  ULS2   h2   u2 com
-q140  0.75 -0.08 0.49 0.51 1.0
-q141  0.71 -0.07 0.44 0.56 1.0
-q142  0.79  0.08 0.71 0.29 1.0
-q143  0.69  0.14 0.63 0.37 1.1
+# #     ULS1  ULS2   h2   u2 com
+# q140  0.75 -0.08 0.49 0.51 1.0
+# q141  0.71 -0.07 0.44 0.56 1.0
+# q142  0.79  0.08 0.71 0.29 1.0
+# q143  0.69  0.14 0.63 0.37 1.1
 
-140.	Conozco muy bien a los amigos de mi joven.
-141.	Los amigos de mi joven tienen una buena influencia en su vida.
-142.	Los amigos de mi joven se apoyan positivamente entre sí.
-143.	Por lo general yo sé con quién está mi joven
-
-# factor 2
-q138  0.13  0.76 0.73 0.27 1.1
-q139  0.04  0.74 0.58 0.42 1.0
-q144 -0.15  0.69 0.36 0.64 1.1
-
-138.	Hablo con mi joven en muchas ocasiones acerca de lo que él / ella aprendió en la escuela
-139.	A menudo hablo con mi joven acerca de sus amigos.
-144.	Sé lo que hace mi joven y dónde va cuando no está en casa
-
-# loads into both
-q137  0.24  0.29 0.23 0.77 1.9
+# 140.	Conozco muy bien a los amigos de mi joven.
+# 141.	Los amigos de mi joven tienen una buena influencia en su vida.
+# 142.	Los amigos de mi joven se apoyan positivamente entre sí.
+# 143.	Por lo general yo sé con quién está mi joven
+# 
+# # factor 2
+# q138  0.13  0.76 0.73 0.27 1.1
+# q139  0.04  0.74 0.58 0.42 1.0
+# q144 -0.15  0.69 0.36 0.64 1.1
+# 
+# 138.	Hablo con mi joven en muchas ocasiones acerca de lo que él / ella aprendió en la escuela
+# 139.	A menudo hablo con mi joven acerca de sus amigos.
+# 144.	Sé lo que hace mi joven y dónde va cuando no está en casa
+# 
+# # loads into both
+# q137  0.24  0.29 0.23 0.77 1.9
 
 monit_2 <- parent_w1 %>%
   select(q138, q139, q140, q141, q142, q143, q144)
@@ -346,18 +341,18 @@ monit_2 <- parent_w1 %>%
 # EFA using ULS - 2 factors without item 137
 factor_test_uls_2 <- fa(monit_2, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 2)
 
-      ULS1  ULS2   h2   u2 com
-
-# Factor #1 : monitoring peers
-q140  0.72 -0.08 0.46 0.54 1.0
-q141  0.72 -0.06 0.47 0.53 1.0
-q142  0.80  0.05 0.70 0.30 1.0
-q143  0.69  0.17 0.65 0.35 1.1
-
-# Factor #2 : checking in (?)
-q138  0.23  0.64 0.65 0.35 1.2
-q139  0.09  0.70 0.58 0.42 1.0
-q144 -0.15  0.74 0.43 0.57 1.1
+#       ULS1  ULS2   h2   u2 com
+# 
+# # Factor #1 : monitoring peers
+# q140  0.72 -0.08 0.46 0.54 1.0
+# q141  0.72 -0.06 0.47 0.53 1.0
+# q142  0.80  0.05 0.70 0.30 1.0
+# q143  0.69  0.17 0.65 0.35 1.1
+# 
+# # Factor #2 : checking in (?)
+# q138  0.23  0.64 0.65 0.35 1.2
+# q139  0.09  0.70 0.58 0.42 1.0
+# q144 -0.15  0.74 0.43 0.57 1.1
 
 # Omega
 omega(monit_2, nfactors = 2, n.obs = 95, flip = T, plot = T) # 0.78
@@ -365,7 +360,7 @@ omega(monit_2, nfactors = 2, n.obs = 95, flip = T, plot = T) # 0.78
 monit_peers <- parent_w1 %>%
   select(q140, q141, q142, q143)
 # alpha
-alpha(monit_peers) # 0.76
+alpha(monit_peers) # 0.77
 
 # checkin <- parent_w1 %>%
 #   select(q138, q139, q144)
@@ -421,30 +416,30 @@ factor_test_uls <- fa(hw_inv, n.obs = 95, rotate = "oblimin", fm = "uls", cor = 
 # EFA using ULS 2 factors
 factor_test_uls <- fa(hw_inv, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 2) 
 
-     ULS1  ULS2    h2   u2 com
+     # ULS1  ULS2    h2   u2 com
 
-# factor #1
-q86  0.57  0.13 0.371 0.63 1.1
-q87  0.74 -0.06 0.540 0.46 1.0
-q88  0.84 -0.18 0.691 0.31 1.1
-q89  0.64  0.18 0.482 0.52 1.1
-q94  0.56  0.09 0.343 0.66 1.0
-q96  0.51  0.09 0.282 0.72 1.1
-q97  0.47  0.16 0.270 0.73 1.2
-
-# factor #2
-q84 -0.12  0.84 0.689 0.31 1.0
-q85 -0.02  0.90 0.796 0.20 1.0
-q93  0.19  0.70 0.566 0.43 1.1
-
-#cross-loading
-q90  0.38  0.28 0.262 0.74 1.8
-q95  0.33  0.40 0.311 0.69 1.9
-q98  0.30  0.36 0.258 0.74 1.9
-
-# below .30
-q91  0.16  0.23 0.091 0.91 1.8
-q92  0.12  0.22 0.070 0.93 1.6
+# # factor #1
+# q86  0.57  0.13 0.371 0.63 1.1
+# q87  0.74 -0.06 0.540 0.46 1.0
+# q88  0.84 -0.18 0.691 0.31 1.1
+# q89  0.64  0.18 0.482 0.52 1.1
+# q94  0.56  0.09 0.343 0.66 1.0
+# q96  0.51  0.09 0.282 0.72 1.1
+# q97  0.47  0.16 0.270 0.73 1.2
+# 
+# # factor #2
+# q84 -0.12  0.84 0.689 0.31 1.0
+# q85 -0.02  0.90 0.796 0.20 1.0
+# q93  0.19  0.70 0.566 0.43 1.1
+# 
+# #cross-loading
+# q90  0.38  0.28 0.262 0.74 1.8
+# q95  0.33  0.40 0.311 0.69 1.9
+# q98  0.30  0.36 0.258 0.74 1.9
+# 
+# # below .30
+# q91  0.16  0.23 0.091 0.91 1.8
+# q92  0.12  0.22 0.070 0.93 1.6
 
 
 # Poly corr matrix
@@ -458,15 +453,15 @@ hw_inv_1 <- parent_w1 %>%
 # EFA using ULS 2 factors
 factor_test_uls <- fa(hw_inv_1, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 2) 
 
-     ULS1  ULS2   h2   u2 com
-
-q86  0.60  0.16 0.42 0.58 1.1
-q87  0.73 -0.06 0.52 0.48 1.0
-q88  0.88 -0.14 0.76 0.24 1.1
-q89  0.66  0.20 0.51 0.49 1.2
-q94  0.53  0.04 0.29 0.71 1.0
-q96  0.50  0.08 0.26 0.74 1.1
-q97  0.46  0.15 0.25 0.75 1.2
+#      ULS1  ULS2   h2   u2 com
+# 
+# q86  0.60  0.16 0.42 0.58 1.1
+# q87  0.73 -0.06 0.52 0.48 1.0
+# q88  0.88 -0.14 0.76 0.24 1.1
+# q89  0.66  0.20 0.51 0.49 1.2
+# q94  0.53  0.04 0.29 0.71 1.0
+# q96  0.50  0.08 0.26 0.74 1.1
+# q97  0.46  0.15 0.25 0.75 1.2
 
 # 86	Me senté con mi joven mientras él / ella hacía su tarea
 # 87	Me hice disponible para mi joven cuando tenía preguntas sobre su tarea
@@ -482,9 +477,9 @@ hw_inv_fa1 <- parent_w1 %>%
 # alpha
 alpha(hw_inv_fa1) # 0.78
 
-q84 -0.08  0.95 0.89 0.11 1.0
-q85  0.04  0.90 0.83 0.17 1.0
-q93  0.22  0.59 0.43 0.57 1.3
+# q84 -0.08  0.95 0.89 0.11 1.0
+# q85  0.04  0.90 0.83 0.17 1.0
+# q93  0.22  0.59 0.43 0.57 1.3
 
 # 84	Me aseguré de que tenga un cierto tiempo para hacer la tarea
 # 85	Me aseguré de que él / ella tenga un cierto lugar para hacer la tarea
@@ -579,10 +574,10 @@ posi_discipline <- parent_w1 %>%
 factor_test_uls <- fa(posi_discipline, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 1) 
 # no warnings :) but items crossload - this is not a good scale. 
 
-     ULS1   h2   u2 com
-q130 0.34 0.12 0.88   1
-q132 0.56 0.32 0.68   1
-q134 0.66 0.43 0.57   1
+#      ULS1   h2   u2 com
+# q130 0.34 0.12 0.88   1
+# q132 0.56 0.32 0.68   1
+# q134 0.66 0.43 0.57   1
 
 # 130.	Cada vez que mi joven hace algo mal, yo le respondo con una consecuencia específica (p. ej., una disciplina específica, quitándole privilegios, etc.) 
 # 132.	Puedo controlar mi enojo y mantenerme calmado/a cuando disciplino o discuto con mi joven cuando él / ella hace algo mal
@@ -611,7 +606,7 @@ alpha(neg_discipline) # 0.49 - really poor
 # conclusion: this is not a good scale. in discussion, review the alpha of other studies that have used similar scales.
 
 #######################################################################################
-############################# Scale name ##############################################
+############################# structure ##############################################
 #######################################################################################
 
 #Los últimos tres meses, he tomado medidas para apoyar a mi joven a...
@@ -700,12 +695,12 @@ trust <- parent_w1 %>%
 factor_test_uls <- fa(trust, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 1) 
 # no warnings
 
-ULS1   h2   u2 com
-q122 0.84 0.71 0.29   1
-q123 0.78 0.60 0.40   1
-q125 0.76 0.58 0.42   1
-q126 0.67 0.45 0.55   1
-q127 0.85 0.73 0.27   1
+# ULS1   h2   u2 com
+# q122 0.84 0.71 0.29   1
+# q123 0.78 0.60 0.40   1
+# q125 0.76 0.58 0.42   1
+# q126 0.67 0.45 0.55   1
+# q127 0.85 0.73 0.27   1
 
 # alpha
 alpha(trust) # .81
@@ -758,27 +753,27 @@ fa.parallel(convos, n.obs=NULL, fm="uls", fa="fa", main="Parallel Analysis Scree
 factor_test_uls <- fa(convos, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 3) 
 # no warnings. 
 
-     ULS1  ULS3  ULS2   h2   u2 com
-
-q76  0.75 -0.01  0.09 0.62 0.38 1.0
-q77  0.81  0.17 -0.02 0.85 0.15 1.1
-q78  0.96 -0.05  0.01 0.87 0.13 1.0
-q79  0.79  0.12 -0.01 0.75 0.25 1.0
-
-q68  0.23  0.52  0.04 0.50 0.50 1.4     
-q69  0.01  0.83  0.06 0.77 0.23 1.0
-q70  0.03  0.84 -0.09 0.66 0.34 1.0
-q71  0.04  0.77  0.05 0.68 0.32 1.0
-
-q75  0.24  0.02  0.73 0.79 0.21 1.2
-q80  0.14 -0.09  0.82 0.72 0.28 1.1
-q81 -0.26  0.16  0.79 0.60 0.40 1.3
-
-crossloading:
-
-q72  0.10  0.36  0.41 0.54 0.46 2.1
-q73  0.09  0.31  0.36 0.41 0.59 2.1
-q74  0.49  0.14  0.41 0.78 0.22 2.1
+#      ULS1  ULS3  ULS2   h2   u2 com
+# 
+# q76  0.75 -0.01  0.09 0.62 0.38 1.0
+# q77  0.81  0.17 -0.02 0.85 0.15 1.1
+# q78  0.96 -0.05  0.01 0.87 0.13 1.0
+# q79  0.79  0.12 -0.01 0.75 0.25 1.0
+# 
+# q68  0.23  0.52  0.04 0.50 0.50 1.4     
+# q69  0.01  0.83  0.06 0.77 0.23 1.0
+# q70  0.03  0.84 -0.09 0.66 0.34 1.0
+# q71  0.04  0.77  0.05 0.68 0.32 1.0
+# 
+# q75  0.24  0.02  0.73 0.79 0.21 1.2
+# q80  0.14 -0.09  0.82 0.72 0.28 1.1
+# q81 -0.26  0.16  0.79 0.60 0.40 1.3
+# 
+# crossloading:
+# 
+# q72  0.10  0.36  0.41 0.54 0.46 2.1
+# q73  0.09  0.31  0.36 0.41 0.59 2.1
+# q74  0.49  0.14  0.41 0.78 0.22 2.1
 
 # 72.	… las cosas que aprende en clase. ___
 # 73.	… cómo contribuye al salón de clase. ___
@@ -793,12 +788,12 @@ factor_test_uls <- fa(convos, n.obs = 95, rotate = "oblimin", fm = "uls", cor = 
 # no warnings. all loading above .30
 
       
-# factor 1: school climate & behavior
-     ULS3  ULS2   h2    u2 com
-q76  0.71  0.03  0.11 0.62 0.385 1.1
-q77  0.79  0.19  0.00 0.84 0.158 1.1
-q78  0.99 -0.07  0.02 0.91 0.089 1.0
-q79  0.78  0.13  0.01 0.75 0.250 1.1
+# # factor 1: school climate & behavior
+#      ULS3  ULS2   h2    u2 com
+# q76  0.71  0.03  0.11 0.62 0.385 1.1
+# q77  0.79  0.19  0.00 0.84 0.158 1.1
+# q78  0.99 -0.07  0.02 0.91 0.089 1.0
+# q79  0.78  0.13  0.01 0.75 0.250 1.1
 
 # 76.	… desafíos que surgen en la escuela (como intimidación, agresión, acoso, racismo, peleas, etc.) ___
 # 77.	… sus actitudes sobre la escuela ____
@@ -810,11 +805,11 @@ convos_climate <- parent_w1 %>%
 # alpha
 alpha(convos_climate) # 0.85
 
-# factor 2: socialization/social support
-q68  0.17  0.58  0.04 0.52 0.481 1.2
-q69 -0.03  0.89  0.07 0.83 0.174 1.0
-q70  0.06  0.80 -0.09 0.63 0.367 1.0
-q71  0.10  0.69  0.06 0.63 0.374 1.1
+# # factor 2: socialization/social support
+# q68  0.17  0.58  0.04 0.52 0.481 1.2
+# q69 -0.03  0.89  0.07 0.83 0.174 1.0
+# q70  0.06  0.80 -0.09 0.63 0.367 1.0
+# q71  0.10  0.69  0.06 0.63 0.374 1.1
 
 # 68.	… sus amistades en la escuela. ___ 
 # 69.	… su participación en actividades escolares. ____
@@ -826,10 +821,10 @@ convos_social <- parent_w1 %>%
 # alpha
 alpha(convos_social) # 0.8
 
-# factor 3: school climate & behavior
-q75  0.18  0.10  0.71 0.75 0.247 1.2
-q80  0.12 -0.09  0.87 0.79 0.214 1.1
-q81 -0.23  0.17  0.74 0.55 0.448 1.3
+# # factor 3: future prep
+# q75  0.18  0.10  0.71 0.75 0.247 1.2
+# q80  0.12 -0.09  0.87 0.79 0.214 1.1
+# q81 -0.23  0.17  0.74 0.55 0.448 1.3
 
 # 75.	… sus futuros objetivos de carrera y educación (incluso los objetivos a corto plazo). ____
 # 80.	… la importancia de prepararse para futuras trayectorias educativas o de carrera, como la planificación universitaria y / o pensando acerca de la escuela técnica o comercial, etc. _____
@@ -888,12 +883,12 @@ fut_or <- parent_w1 %>%
 # EFA without 106
 factor_test_uls <- fa(fut_or, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 1) # no warnings
 
-     ULS1   h2    u2 com
-q105 0.84 0.71 0.289   1
-q107 0.95 0.91 0.093   1
-q108 0.99 0.98 0.024   1
-q109 0.98 0.95 0.046   1
-q110 0.72 0.52 0.476   1
+#      ULS1   h2    u2 com
+# q105 0.84 0.71 0.289   1
+# q107 0.95 0.91 0.093   1
+# q108 0.99 0.98 0.024   1
+# q109 0.98 0.95 0.046   1
+# q110 0.72 0.52 0.476   1
 
 # alpha
 alpha(fut_or) # 0.89
@@ -941,20 +936,20 @@ factor_test_uls <- fa(scho_inv, n.obs = 95, rotate = "oblimin", fm = "uls", cor 
 # warnings- try diff estimation methd
 # items 35, 40, 41 crossload
 
-     ULS1  ULS2   h2    u2 com
-q31  0.58  0.14 0.42 0.580 1.1
-q32  0.91 -0.07 0.78 0.224 1.0
-q33  0.98 -0.03 0.94 0.057 1.0
-q34  0.79  0.18 0.77 0.233 1.1
-
-q36  0.27  0.55 0.50 0.498 1.5
-q37 -0.07  0.86 0.69 0.313 1.0
-q38  0.03  0.81 0.68 0.318 1.0
-q39 -0.04  0.76 0.55 0.450 1.0
-
-q35  0.63  0.30 0.64 0.359 1.4
-q40  0.35  0.56 0.59 0.407 1.7
-q41  0.61 -0.31 0.32 0.684 1.5
+#      ULS1  ULS2   h2    u2 com
+# q31  0.58  0.14 0.42 0.580 1.1
+# q32  0.91 -0.07 0.78 0.224 1.0
+# q33  0.98 -0.03 0.94 0.057 1.0
+# q34  0.79  0.18 0.77 0.233 1.1
+# 
+# q36  0.27  0.55 0.50 0.498 1.5
+# q37 -0.07  0.86 0.69 0.313 1.0
+# q38  0.03  0.81 0.68 0.318 1.0
+# q39 -0.04  0.76 0.55 0.450 1.0
+# 
+# q35  0.63  0.30 0.64 0.359 1.4
+# q40  0.35  0.56 0.59 0.407 1.7
+# q41  0.61 -0.31 0.32 0.684 1.5
 
 # without 35, 40, 41
 scho_inv <- parent_w1 %>%
@@ -963,7 +958,7 @@ scho_inv <- parent_w1 %>%
 factor_test_uls <- fa(scho_inv, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 2) 
 # no warning
 
-     ULS1  ULS2   h2    u2 com
+     # ULS1  ULS2   h2    u2 com
 
 # 31.	… conocer el personal y la administración de la escuela  ___ 
 # 32.	… conocer al menos uno de los maestros de mi joven ____ 
@@ -971,10 +966,10 @@ factor_test_uls <- fa(scho_inv, n.obs = 95, rotate = "oblimin", fm = "uls", cor 
 # 34.	… informarme sobre mis derechos como padre ____ 
 
 # Factor 1: knowing school personnel and rules
-q31  0.60  0.17 0.47 0.533 1.2
-q32  1.00 -0.10 0.93 0.071 1.0
-q33  0.96  0.00 0.93 0.071 1.0
-q34  0.75  0.19 0.70 0.300 1.1
+# q31  0.60  0.17 0.47 0.533 1.2
+# q32  1.00 -0.10 0.93 0.071 1.0
+# q33  0.96  0.00 0.93 0.071 1.0
+# q34  0.75  0.19 0.70 0.300 1.1
 
 # 36.	… entender la diferencia entre obtener un GED, graduarse con un diploma estándar de la escuela secundaria, o con un diploma de una secundaria internacional o con un diploma de Bachillerato Internacional.____ 
 # 37.	… involucrarse en las actividades escolares, en el salón de clase, y/u otras maneras (por ejemplo, organizaciones de padres, trabajo voluntario, etc.) 
@@ -982,10 +977,10 @@ q34  0.75  0.19 0.70 0.300 1.1
 # 39.	…contactar los otros padres para obtener apoyo. ____
 
 # Factor 2: networking and...
-q36  0.26  0.50 0.43 0.575 1.5
-q37 -0.06  0.84 0.67 0.327 1.0
-q38  0.05  0.82 0.71 0.285 1.0
-q39 -0.02  0.76 0.57 0.431 1.0
+# q36  0.26  0.50 0.43 0.575 1.5
+# q37 -0.06  0.84 0.67 0.327 1.0
+# q38  0.05  0.82 0.71 0.285 1.0
+# q39 -0.02  0.76 0.57 0.431 1.0
 
 
 scho_inv_fa1 <- parent_w1 %>%
@@ -1051,12 +1046,12 @@ fa.parallel(s_efficacy, n.obs=NULL, fm="uls", fa="fa", main="Parallel Analysis S
 factor_test_uls <- fa(s_efficacy, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 1) 
 # no warnings
 
-    ULS1   h2   u2 com
-q42 0.88 0.78 0.22   1
-q43 0.81 0.65 0.35   1
-q44 0.81 0.65 0.35   1
-q45 0.64 0.40 0.60   1
-q46 0.66 0.44 0.56   1
+#     ULS1   h2   u2 com
+# q42 0.88 0.78 0.22   1
+# q43 0.81 0.65 0.35   1
+# q44 0.81 0.65 0.35   1
+# q45 0.64 0.40 0.60   1
+# q46 0.66 0.44 0.56   1
 
 # alpha
 alpha(s_efficacy) # 0.8 (parent self-efficacy working with school & supporting child)
@@ -1099,19 +1094,19 @@ fa.parallel(comfort, n.obs=NULL, fm="uls", fa="fa", main="Parallel Analysis Scre
 
 # EFA using ULS 
 factor_test_uls <- fa(comfort, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 2) 
+#going for 2 factors, because at least one factor would have 2 items
 # no warnings
-#going for 2, because at least a factor would be 2 items
 
-     ULS1  ULS2   h2    u2 com
 # 48.	…tratado/a con respeto, sabiendo que mis opiniones son importantes. ____
 # 49.	…cómoda/o preguntando por un traductor y por materiales en español si los necesito. ____ 
 # 52.	 …feliz de que mi joven asista a esta escuela. ___
 # 53.	…bienvenido/a en la escuela de mi joven. ____
 
-q48  0.84 -0.04 0.67 0.330 1.0
-q49  0.75  0.24 0.83 0.172 1.2
-q52  0.73  0.24 0.78 0.216 1.2
-q53  0.98 -0.12 0.85 0.150 1.0
+#      ULS1  ULS2   h2    u2 com
+# q48  0.84 -0.04 0.67 0.330 1.0
+# q49  0.75  0.24 0.83 0.172 1.2
+# q52  0.73  0.24 0.78 0.216 1.2
+# q53  0.98 -0.12 0.85 0.150 1.0
 
 comfort_fa1 <- parent_w1 %>%
   select(q48, q49, q52, q53)
@@ -1122,9 +1117,9 @@ alpha(comfort_fa1) # 0.86
 # 50.	… capaz de hablar con maestros o administradores sobre grandes preocupaciones relacionados con mi joven. ___ 
 # 51.	…dedicada/o en creando un ambiente exitoso para todos los jóvenes. ____
 
-q47  0.13  0.44 0.27 0.732 1.2
-q50  0.19  0.83 0.91 0.087 1.1
-q51 -0.09  0.95 0.81 0.191 1.0
+# q47  0.13  0.44 0.27 0.732 1.2
+# q50  0.19  0.83 0.91 0.087 1.1
+# q51 -0.09  0.95 0.81 0.191 1.0
 
 comfort_fa2 <- parent_w1 %>%
   select(q47, q50, q51)
@@ -1189,11 +1184,11 @@ endorse <- parent_w1 %>%
 factor_test_uls <- fa(endorse, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 1) 
 # warnings: ultra heywood case
 
-    ULS1   h2      u2 com
-q54 0.65 0.42  0.5776   1
-q55 1.00 1.00 -0.0032   1
-q56 0.96 0.93  0.0740   1
-q57 0.97 0.94  0.0572   1
+#     ULS1   h2      u2 com
+# q54 0.65 0.42  0.5776   1
+# q55 1.00 1.00 -0.0032   1
+# q56 0.96 0.93  0.0740   1
+# q57 0.97 0.94  0.0572   1
 
 # removing 55 bec was redundant with 57
 endorse <- parent_w1 %>%
@@ -1202,10 +1197,10 @@ endorse <- parent_w1 %>%
 factor_test_uls <- fa(endorse, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 1) 
 # no warnings
 
-    ULS1  h2     u2 com
-q54 0.63 0.4 0.6030   1
-q56 0.95 0.9 0.0961   1
-q57 1.00 1.0 0.0041   1
+#     ULS1  h2     u2 com
+# q54 0.63 0.4 0.6030   1
+# q56 0.95 0.9 0.0961   1
+# q57 1.00 1.0 0.0041   1
 
 # alpha
 alpha(endorse) # 0.81
@@ -1251,7 +1246,6 @@ factor_test_uls <- fa(support, n.obs = 95, rotate = "oblimin", fm = "uls", cor =
 factor_test_uls <- fa(support, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 1) 
 # matrix nonpositive definite
 
-
 support <- parent_w1 %>%
   select(q58, q59, q62, q63)
 
@@ -1259,11 +1253,11 @@ support <- parent_w1 %>%
 factor_test_uls <- fa(support, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 1) 
 # no warnings!
 
-    ULS1   h2    u2 com
-q58 0.98 0.95 0.047   1
-q59 0.92 0.85 0.153   1
-q62 0.86 0.74 0.260   1
-q63 0.85 0.73 0.272   1
+#     ULS1   h2    u2 com
+# q58 0.98 0.95 0.047   1
+# q59 0.92 0.85 0.153   1
+# q62 0.86 0.74 0.260   1
+# q63 0.85 0.73 0.272   1
 
 # 58.	… puedo encontrar ayuda para mi joven si él / ella está batallando en una clase. ___
 # 59.	… los maestros de mi joven se preocupan por ella/el. ____
@@ -1304,11 +1298,11 @@ fa.parallel(pt_rel, n.obs=NULL, fm="uls", fa="fa", main="Parallel Analysis Scree
 
 #warnings: ultraheywood
 
-ULS1   h2     u2 com
-q64 0.79 0.63  0.370   1
-q65 0.88 0.78  0.225   1
-q66 1.01 1.01 -0.011   1
-q67 0.99 0.98  0.017   1
+# ULS1   h2     u2 com
+# q64 0.79 0.63  0.370   1
+# q65 0.88 0.78  0.225   1
+# q66 1.01 1.01 -0.011   1
+# q67 0.99 0.98  0.017   1
 
 pt_rel <- parent_w1 %>%
   select(q64, q65, q67)
@@ -1316,10 +1310,10 @@ pt_rel <- parent_w1 %>%
 # without 66
 factor_test_uls <- fa(pt_rel, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 1) 
 
-ULS1   h2      u2 com
-q64 0.76 0.57  0.4290   1
-q65 0.90 0.81  0.1861   1
-q67 1.00 1.00 -0.0028   1
+# ULS1   h2      u2 com
+# q64 0.76 0.57  0.4290   1
+# q65 0.90 0.81  0.1861   1
+# q67 1.00 1.00 -0.0028   1
 
 # scale doesn't work. Makes no sense to have a scale with only 2 items. 
 
