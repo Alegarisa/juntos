@@ -1,11 +1,40 @@
+---
+title: "finalized construct scales"
+output: html_document
+date: "2024-08-20"
+---
+
+This markdown has the finalized construct scales product of my revisions of my dissertation analyses EFAs. Initially developed to complete poster to be presented at postdoc symposium at UT on Sep 18, 2024.  
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(rio)
+library(here)
+library(tidyverse)
+library(haven)
+library(janitor)
+library(knitr)
+library(surveytoolbox)
+library(sjPlot)
+library(kableExtra)
+library(psych)
+library(sjmisc)
+library(MVN)
+
+theme_set(theme_minimal())
+```
 
 ### The dataset ###
+This dataset has items 82, 83, 131, 133, 136 reverse scored. Look at "creating dataset.Rmd" 
+
+```{r}
 parent_w1 <- read_sav(here("outcomes paper/data_outcomes", "primary_parent_w1.sav"))
+```
 
-view_df(parent_w1)
+### Construct scales ###
 
-### scales creation
-
+```{r}
 parent_scales <- parent_w1 %>%
   rowwise() %>% 
   mutate(posirel_1 = mean(c(q116, q117, q118, q119, q121), na.rm = TRUE),
@@ -25,6 +54,7 @@ parent_scales <- parent_w1 %>%
          included_1 = mean(c(q47, q50, q51), na.rm = TRUE),
          endorse_1 = mean(c(q54, q56, q57), na.rm = TRUE),
          supported_1 = mean(c(q58, q59, q62, q63), na.rm = TRUE))
+```
 
 ### posirel ### alpha = 0.89
 # 116.	Cuando mi joven me pide hablar o cuando necesita hablar conmigo, escucho atentamente.
@@ -33,11 +63,25 @@ parent_scales <- parent_w1 %>%
 # 119.	Mi joven y yo tenemos una relación cercana (decided to keep it, despite loading of 1.0 because there was no warning)
 # 121.	Como madre/padre, es mi trabajo reconocer y apoyar las fortalezas de mi joven
 
+```{r}
+posirel_1 <- parent_w1 %>%
+  select(q116, q117, q118, q119, q121)
+
+alpha(posirel_1)
+```
+
 ### monitpeers_1 ### alpha = 0.77
 # 140.	Conozco muy bien a los amigos de mi joven.
 # 141.	Los amigos de mi joven tienen una buena influencia en su vida.
 # 142.	Los amigos de mi joven se apoyan positivamente entre sí.
 # 143.	Por lo general yo sé con quién está mi joven
+
+```{r}
+monitpeers_1 <- parent_w1 %>%
+  select(q140, q141, q142, q143)
+
+alpha(monitpeers_1)
+```
 
 ### acadhwi_1 ### alpha = 0.78
 # 86	Me senté con mi joven mientras él / ella hacía su tarea
@@ -48,10 +92,24 @@ parent_scales <- parent_w1 %>%
 # 96	Le ayudé a mi joven acceder a otros recursos (biblioteca, materiales de arte, laboratorio de computación, etc.)
 # 97	Le ayudé a mi joven practicar habilidades (lectura, revisión, problemas de práctica, etc.)
 
+```{r}
+acadhwi_1 <- parent_w1 %>%
+  select(q86, q87, q88, q89, q94, q96, q97)
+
+alpha(acadhwi_1)
+```
+
 ### checkhwi_1 ### alpha = 0.77
 # 84	Me aseguré de que tenga un cierto tiempo para hacer la tarea
 # 85	Me aseguré de que él / ella tenga un cierto lugar para hacer la tarea
 # 93	Comprobé con mi joven para asegurarme de que él / ella hiciera su tarea
+
+```{r}
+checkhwi_1 <- parent_w1 %>%
+  select(q84, q85, q93)
+
+alpha(checkhwi_1)
+```
 
 # ### struct_1 ### alpha = 0.82
 #Los últimos tres meses, he tomado medidas para apoyar a mi joven a...
@@ -64,6 +122,13 @@ parent_scales <- parent_w1 %>%
 # 29.	… enfocarse en hacer lo mejor posible
 # 30.	… desarrollar un horario para completar la tarea y los proyectos escolares a tiempo
 
+```{r}
+struct_1 <- parent_w1 %>%
+  select(q23, q24, q25, q26, q27, q28, q29, q30)
+
+alpha(struct_1)
+```
+
 # ### trust_1 ### alpha = 0.81 -- child trusting parent
 # 122.	Cuando mi joven tiene que tomar decisiones importantes o cuando él / ella enfrenta un desafío, él / ella me pide por ayuda y apoyo____
 # 123.	Mi joven y yo podemos hablar abiertamente de situaciones y temas difíciles (como sexo, drogas, la influencia de amigos y compañeros, etc.) ____
@@ -71,11 +136,25 @@ parent_scales <- parent_w1 %>%
 # 126.	Si mi joven tiene problemas en la escuela, sé cómo conseguirle la ayuda que él / ella necesita___
 # 127.	Si mi joven tiene un problema en la escuela, estoy segura/o de que él / ella podría hablar conmigo al respecto ___
 
+```{r}
+trust_1 <- parent_w1 %>%
+  select(q122, q123, q125, q126, q127)
+
+alpha(trust_1)
+```
+
 # ### convclimate_1 ### alpha = 0.85 -- convos with child
 # 76.	… desafíos que surgen en la escuela (como intimidación, agresión, acoso, racismo, peleas, etc.) ___
 # 77.	… sus actitudes sobre la escuela ____
 # 78.	… su comportamiento en la escuela ____
 # 79.	… las cosas que suceden en la escuela (el ambiente escolar en general) ____
+
+```{r}
+convclimate_1 <- parent_w1 %>%
+  select(q76, q77, q78, q79)
+
+alpha(convclimate_1)
+```
 
 # ### convsocial_1 ### alpha = 0.8 -- convos with child
 # 68.	… sus amistades en la escuela. ___ 
@@ -83,10 +162,24 @@ parent_scales <- parent_w1 %>%
 # 70.	… eventos que van a pasar en la escuela. ___ 
 # 71.	… sus profesores. ___
 
+```{r}
+convsocial_1 <- parent_w1 %>%
+  select(q68, q69, q70, q71)
+
+alpha(convsocial_1)
+```
+
 # ### convfut_1 ### alpha = 0.77 -- convos with child
 # 75.	… sus futuros objetivos de carrera y educación (incluso los objetivos a corto plazo). ____
 # 80.	… la importancia de prepararse para futuras trayectorias educativas o de carrera, como la planificación universitaria y / o pensando acerca de la escuela técnica o comercial, etc. _____
 # 81.	… su involucro en actividades extracurriculares en la escuela y en la comunidad como en papeles de liderazgo, haciendo trabajo voluntario en la comunidad, deportes, etc._____
+
+```{r}
+convfut_1 <- parent_w1 %>%
+  select(q75, q80, q81)
+
+alpha(convfut_1)
+```
 
 # ### futorient_1 ### alpha = 0.8 -- parent orientation to future/expectations
 # 105.	… que mi joven se gradúe de la escuela secundaria. _____
@@ -95,16 +188,37 @@ parent_scales <- parent_w1 %>%
 # 109.	… buscar información para ayudarle a mi joven a alcanzar sus metas futuras _____
 # 110.	… ayudar a mi joven a comenzar a prepararse para la educación superior, incluso mientras esté en la escuela intermedia
 
+```{r}
+futorient_1 <- parent_w1 %>%
+  select(q105, q107, q108, q109, q110)
+
+alpha(futorient_1)
+```
+
 # ### knowschool_1 ### alpha = 0.85 -- parent efforts to know school
 # 31.	… conocer el personal y la administración de la escuela  ___ 
 # 32.	… conocer al menos uno de los maestros de mi joven ____ 
 # 33.	… entender las reglas y pólizas de la escuela  ____ 
 # 34.	… informarme sobre mis derechos como padre ____ 
 
+```{r}
+knowschool_1 <- parent_w1 %>%
+  select(q31, q32, q33, q34)
+
+alpha(knowschool_1)
+```
+
 # ### parnets_1 ### alpha = 0.79 -- parent networking 
 # 37.	… involucrarse en las actividades escolares, en el salón de clase, y/u otras maneras (por ejemplo, organizaciones de padres, trabajo voluntario, etc.) 
 # 38.	… tener conversaciones con los otros padres para obtener información o aprender acerca de los recursos en la escuela. ____
 # 39.	…contactar los otros padres para obtener apoyo. ____
+
+```{r}
+parnets_1 <- parent_w1 %>%
+  select(q37, q38, q39)
+
+alpha(parnets_1)
+```
 
 # ### selfeffic_1 ### alpha = 0.80
 # En general, estoy segura/o de que…
@@ -114,25 +228,107 @@ parent_scales <- parent_w1 %>%
 # 45.	…estoy ayudando a mi joven hacer bien en la escuela. ____
 # 46.	… estoy ayudando a mi joven prepararse para sus futuras metas de educación y carrera. ____
 
+```{r}
+selfeffic_1 <- parent_w1 %>%
+  select(q42, q43, q44, q45, q46)
+
+alpha(selfeffic_1)
+```
+
 # ### welcome_1 ### alpha = 0.86
 # 48.	…tratado/a con respeto, sabiendo que mis opiniones son importantes. ____
 # 49.	…cómoda/o preguntando por un traductor y por materiales en español si los necesito. ____ 
 # 52.	 …feliz de que mi joven asista a esta escuela. ___
 # 53.	…bienvenido/a en la escuela de mi joven. ____
 
+```{r}
+welcome_1 <- parent_w1 %>%
+  select(q48, q49, q52, q53)
+
+alpha(welcome_1)
+```
+
 # ### included_1 ### alpha = 0.72
 # 47.	…parte de una comunidad con el personal de la escuela y los otros padres. ____ 
 # 50.	… capaz de hablar con maestros o administradores sobre grandes preocupaciones relacionados con mi joven. ___ 
 # 51.	…dedicada/o en creando un ambiente exitoso para todos los jóvenes. ____
+
+```{r}
+included_1 <- parent_w1 %>%
+  select(q47, q50, q51)
+
+alpha(included_1)
+```
 
 # ### endorse_1 ### alpha = 0.81
 # 54.	… esta escuela es un buen lugar para mi joven. _____  
 # 56.	… la gente en la escuela de mi joven es confiable. _____  
 # 57.	… la escuela de mi joven hace un buen trabajo preparando a los jóvenes para sus futuros. _____ 
 
+```{r}
+endorse_1 <- parent_w1 %>%
+  select(q54, q56, q57)
+
+alpha(endorse_1)
+```
+
 # ### supported_1 ### alpha = 0.88
 # 58.	… puedo encontrar ayuda para mi joven si él / ella está batallando en una clase. ___
 # 59.	… los maestros de mi joven se preocupan por ella/el. ____
 # 62.	… puedo tener una conversación honesta y respetuosa sobre mi joven con su maestro. ___
 # 63.	…puedo trabajar con un maestro para resolver cualquier problema que tenga mi joven en la escuela. _____
+
+```{r}
+supported_1 <- parent_w1 %>%
+  select(q58, q59, q62, q63)
+
+alpha(supported_1)
+```
+# covariates
+
+```{r}
+hv1_demo <- read_sav(here("outcomes paper/data_outcomes", "Juntos HV Parent #1 Survey_August 20, 2018_11.37_deidentified.sav"))
+
+view_df(hv1_demo)
+```
+
+1 Nunca asistí a la escuela
+2 Asistí la escuela primaria/elementaría hasta el _____ grado
+3 Escuela primaria/elementaría ( jardín de niños hasta el quinto grado)
+4 Escuela intermedia (6-8 grado)
+5 Asistí la secundaria hasta el ____ grado
+6 Escuela secundaria (grado 9 hasta 12)
+7 GED
+8 Recibí un curso de entrenamiento especializado en negocios, secretaria u otro entrenamiento técnico (electricista, fontanero, enfermera, asistente dental, técnico médico, etc.)
+9 Título de Asociado en Artes (dos años)
+10 Licenciatura
+11 Licenciatura avanzada: Maestría o un Doctorado
+
+re-categorize to:
+1 -> 1 - 3:  elementary or less
+2 -> 4 - 5: middle school
+3 -> 6 - 8: high schol and/or certificate
+4 -> 9: associate
+5 -> 10: bachelor degree
+6 -> 11: graduate degree
+
+note: look at creation of d4.R to check what vars I chose from youth and how to join datasets. 
+
+```{r}
+covariates <- parent_w1 %>%
+  rename(parent_role = participant) %>%
+  mutate(parent_role = as.factor(parent_role),
+         parent_age = as.numeric(q4_3_text_hv1),
+         parent_age = 2018 - parent_age,
+         parent_ed = as.factor(q36_hv1),
+         parent_eng_comf = as.factor(q173_3_p1),
+         youth_age = as.numeric(q17_1_text_hv1),
+         youth_gender = as.factor(q231_y1),
+         youth_grades = as.factor(q4_y1),
+         youth_grlevel = as.factor(q2_y1)) %>%
+  select(1:4, parent_role, parent_age, parent_ed, parent_eng_comf, youth_age, youth_gender, youth_grades, youth_grlevel)
+
+view_df(covariates)  # need to join this to d_w_scales
+```
+
 
