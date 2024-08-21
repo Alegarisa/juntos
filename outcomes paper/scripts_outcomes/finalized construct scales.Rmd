@@ -4,7 +4,7 @@ output: html_document
 date: "2024-08-20"
 ---
 
-This markdown has the finalized construct scales product of my revisions of my dissertation analyses EFAs. Initially developed to complete poster to be presented at postdoc symposium at UT on Sep 18, 2024.  
+This markdown has the finalized construct scales product of my revisions of my dissertation analyses EFAs conducted in 2022. The purpose of this markdown is to complete a poster to be presented at postdoc symposium at UT on Sep 18, 2024, but I could use the datasets for other papers.  
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -30,30 +30,6 @@ This dataset has items 82, 83, 131, 133, 136 reverse scored. Look at "creating d
 
 ```{r}
 parent_w1 <- read_sav(here("outcomes paper/data_outcomes", "primary_parent_w1.sav"))
-```
-
-### Construct scales ###
-
-```{r}
-parent_scales <- parent_w1 %>%
-  rowwise() %>% 
-  mutate(posirel_1 = mean(c(q116, q117, q118, q119, q121), na.rm = TRUE),
-         monitpeers_1 = mean(c(q140, q141, q142, q143), na.rm = TRUE),
-         acadhwi_1 = mean(c(q86, q87, q88, q89, q94, q96, q97), na.rm = TRUE),
-         checkhwi_1 = mean(c(q84, q85, q93), na.rm = TRUE),
-         struct_1 = mean(c(q23, q24, q25, q26, q27, q28, q29, q30), na.rm = TRUE),
-         trust_1 = mean(c(q122, q123, q125, q126, q127), na.rm = TRUE),
-         convclimate_1 = mean(c(q76, q77, q78, q79), na.rm = TRUE),
-         convsocial_1 = mean(c(q68, q69, q70, q71), na.rm = TRUE),
-         convfut_1 = mean(c(q75, q80, q81), na.rm = TRUE),
-         futorient_1 = mean(c(q105, q107, q108, q109, q110), na.rm = TRUE),
-         knowschool_1 = mean(c(q31, q32, q33, q34), na.rm = TRUE),
-         parnets_1 = mean(c(q37, q38, q39), na.rm = TRUE),
-         selfeffic_1 = mean(c(q42, q43, q44, q45, q46), na.rm = TRUE),
-         welcome_1 = mean(c(q48, q49, q52, q53), na.rm = TRUE),
-         included_1 = mean(c(q47, q50, q51), na.rm = TRUE),
-         endorse_1 = mean(c(q54, q56, q57), na.rm = TRUE),
-         supported_1 = mean(c(q58, q59, q62, q63), na.rm = TRUE))
 ```
 
 ### posirel ### alpha = 0.89
@@ -284,6 +260,8 @@ supported_1 <- parent_w1 %>%
 
 alpha(supported_1)
 ```
+
+
 # covariates
 
 ```{r}
@@ -291,6 +269,27 @@ hv1_demo <- read_sav(here("outcomes paper/data_outcomes", "Juntos HV Parent #1 S
 
 view_df(hv1_demo)
 ```
+# joining parent dataset with homevisit dataset
+```{r}
+parent_w1_demo <- right_join(hv1_demo, parent_w1) %>%
+    select(school_id, condition, wave, family_id, participant_id, participant, participant_4_text, gender, year_born, country_born, ed_level, youth_age, youth_country_born, adults_at_home, minors_at_home, 42:350)
+```
+
+
+
+```{r}
+parent_w1_demo_2 <- parent_w1_demo %>%
+  rename(parent_role = participant,
+         parent_role_text = participant_4_text) %>%
+  mutate(parent_role = as.factor(parent_role),
+         parent_age = as.numeric(year_born),
+         parent_age = 2018 - parent_age,
+         parent_eng_comf = as.factor(q173_3)) %>%
+  select(school_id, condition, wave, family_id, participant_id, parent_role, parent_role_text, gender, parent_age, country_born, ed_level, parent_eng_comf, youth_age, youth_country_born, adults_at_home, minors_at_home, 16:324)
+
+view_df(parent_w1_demo_2) # I think this worked!
+```
+
 
 1 Nunca asistí a la escuela
 2 Asistí la escuela primaria/elementaría hasta el _____ grado
@@ -314,21 +313,41 @@ re-categorize to:
 
 note: look at creation of d4.R to check what vars I chose from youth and how to join datasets. 
 
-```{r}
+
 covariates <- parent_w1 %>%
   rename(parent_role = participant) %>%
   mutate(parent_role = as.factor(parent_role),
-         parent_age = as.numeric(q4_3_text_hv1),
+         parent_age = as.numeric(year_born),
          parent_age = 2018 - parent_age,
-         parent_ed = as.factor(q36_hv1),
-         parent_eng_comf = as.factor(q173_3_p1),
+         parent_ed = as.factor(ed_level),
+         parent_eng_comf = as.factor(q173_3),
          youth_age = as.numeric(q17_1_text_hv1),
          youth_gender = as.factor(q231_y1),
          youth_grades = as.factor(q4_y1),
          youth_grlevel = as.factor(q2_y1)) %>%
   select(1:4, parent_role, parent_age, parent_ed, parent_eng_comf, youth_age, youth_gender, youth_grades, youth_grlevel)
 
-view_df(covariates)  # need to join this to d_w_scales
+
+### Construct scales ###
+
+```{r}
+parent_scales <- parent_w1 %>%
+  rowwise() %>% 
+  mutate(posirel_1 = mean(c(q116, q117, q118, q119, q121), na.rm = TRUE),
+         monitpeers_1 = mean(c(q140, q141, q142, q143), na.rm = TRUE),
+         acadhwi_1 = mean(c(q86, q87, q88, q89, q94, q96, q97), na.rm = TRUE),
+         checkhwi_1 = mean(c(q84, q85, q93), na.rm = TRUE),
+         struct_1 = mean(c(q23, q24, q25, q26, q27, q28, q29, q30), na.rm = TRUE),
+         trust_1 = mean(c(q122, q123, q125, q126, q127), na.rm = TRUE),
+         convclimate_1 = mean(c(q76, q77, q78, q79), na.rm = TRUE),
+         convsocial_1 = mean(c(q68, q69, q70, q71), na.rm = TRUE),
+         convfut_1 = mean(c(q75, q80, q81), na.rm = TRUE),
+         futorient_1 = mean(c(q105, q107, q108, q109, q110), na.rm = TRUE),
+         knowschool_1 = mean(c(q31, q32, q33, q34), na.rm = TRUE),
+         parnets_1 = mean(c(q37, q38, q39), na.rm = TRUE),
+         selfeffic_1 = mean(c(q42, q43, q44, q45, q46), na.rm = TRUE),
+         welcome_1 = mean(c(q48, q49, q52, q53), na.rm = TRUE),
+         included_1 = mean(c(q47, q50, q51), na.rm = TRUE),
+         endorse_1 = mean(c(q54, q56, q57), na.rm = TRUE),
+         supported_1 = mean(c(q58, q59, q62, q63), na.rm = TRUE))
 ```
-
-
