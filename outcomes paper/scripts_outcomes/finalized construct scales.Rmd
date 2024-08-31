@@ -437,7 +437,7 @@ full_par_you_w1 <- inner_join(parent_scales, youth_scales)
 
 # outputing primary caregiver parent wave 3 dataset 
 ```{r}
-full_par_you_w1 %>%
-  haven::write_sav(here("outcomes paper/data_outcomes", "p_y_w1_for_poster.sav"))
+# full_par_you_w1 %>%
+#   haven::write_sav(here("outcomes paper/data_outcomes", "p_y_w1_for_poster.sav"))
 ```
 

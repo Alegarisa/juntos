@@ -1,0 +1,541 @@
+---
+title: "Regressions"
+author: "Alejandra Garcia Isaza"
+date: '2022-07-12'
+output: html_document
+---
+
+Diss Research questions:
+
+1. Can both structural and relational components of family-school connections be identified using exploratory factor analysis approaches in the Conexiones parents’ assessment data? --> addressed with Exploratory Factor Analyses, not included here.
+    
+    I identified *15 predictors* in the EFA part of my study. They are different parent engagement practices, some are considered structural     and some are considered relational ("hwi_1"    "hwi_2"    "hwi_3"      "monit"    "str_home" "convos_1" "convos_2" "convos_3" "sbi_1"        "sbi_2"    "belong"  "endorse"  "value_ed" "rel_1"    "rel_2" )
+    
+    The *outcome* is youth engagement (called "engage")
+    
+    The *covariates* are parent's educational level (q36_hv1) and parent's comfort with ENG (q173_3_p1)
+    
+
+2. What specific structural and relational components of family-school connections in the Conexiones parents’ assessment data are significantly and positively associated with positive students’ school engagement? --> to be addressed with simple linear regression models
+
+
+3. What model best predicts positive students’ school engagement, a structural components only model or a combined structural plus relational components model? --> to be addressed with a step-wise multiple linear regression model, with predictor blocks
+
+     demo vars: if effects hold when demo vars included... 
+     
+     model 1a: what is the univar association of each predictor with the outcome (15 models)
+     model 1b: what is the multivar assicition of each predictor with th outcome adjusting for demo charcs (covariates) (15 models)
+     
+     model 2a: what is the multivar effect of the structural predictors with th outcome (1 model, 10 composire scores simultaneously)
+     model 2b: what is the multivar effect of the structural predictors with th outcome adjusting for demo charcr (1 model, 10 composite scores simultaneously + demo vars: block 1 demos, block 2: structural (10 scores))
+     
+     model 3a: what is the multivar effect of the relational predictors with th outcome (1 model, 5 composite scores simultaneously)
+     model 3b: what is the multivar effect of the relational predictors with th outcome adjusting for demo charcr (1 model, 5 composite scores simultaneously + demo vars: block 1 demos, block 2: relational (5 scores))
+     
+     model 4a: what is the multivar effect of structural and relational predictors on the outcome (1 model,  15 scores simultaneosuly)
+     model 4b: what is the multivar effect of structural and relational predictors on the outcome adjusting for demo charcr (1 model,  15 scores simultaneosuly + demo vars: block 1 demos, block 2: structural + block 3: relational; if RQ changes and is that interest is above and beyond structural)
+     
+     moderation
+     
+     Ed. level: look at distruibution and dichotomize hoe it makes more sense: option could be HS, Bachelor, higher
+     lang comf: look at distruibution and dichotomize hoe it makes more sense.
+     
+     
+     this is exploratory: use the benjamini correction: test the effects of moderation on model 1a (if covariates don't matter) or 1b (if covariates do matter) = 30 models (say in analysis plan the test of moderation are exploratory and adjustment to p value will be done)
+   
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(rio)
+library(here)
+library(tidyverse)
+library(haven)
+library(janitor)
+library(knitr)
+library(surveytoolbox)
+library(sjPlot)
+library(kableExtra)
+library(psych)
+library(sjmisc)
+library(MVN)
+library(stats)
+library(AICcmodavg)
+
+theme_set(theme_minimal())
+```
+Elementary or less 23.4
+Middle school 17 + Some HS  20.2 = 37.2 (reference)
+Complete HS or GED 32.2
+Post secondary ed 7.4
+
+
+# Loading the dataset (only analysis vars)
+```{r}
+d <- read_sav(here("outcomes paper/data_outcomes", "p_y_w1_for_poster.sav"))
+
+d <- d %>%
+  mutate(parent_role = factor(parent_role),
+         parent_role = relevel(parent_role, ref = "1"), # mom
+         parent_ed = factor(parent_ed),
+         parent_ed = relevel(parent_ed, ref = "2"),
+         parent_eng_comf = as.numeric(parent_eng_comf), # average comfort
+         youth_gender = factor(youth_gender),
+         youth_gender = relevel(youth_gender, ref = "1"), # male
+         youth_age = as.numeric(youth_age), # average youth age
+         grade_lev = factor(grade_lev),
+         grade_lev = relevel(grade_lev, ref = "2")) # 7th grade
+```
+
+
+# descriptive stats function
+```{r include=FALSE}
+
+# function that takes a df and returns a df with only the numeric columns
+only_numeric <- function(df) {
+  select_numeric <- dplyr::select_if(df, is.numeric)
+  return(select_numeric)
+}
+
+# a list with the functions we want
+smry <- list(n = function(x) length(x),
+             n_valid = function(x) sum(!is.na(x)),
+             na = function(x) sum(is.na(x)),
+             M = function(x) round(mean(x, na.rm = TRUE), 2), 
+             SD = function(x) round(sd(x, na.rm = TRUE), 2),
+             Min = function(x) round(min(x, na.rm = TRUE), 2),
+             Max = function(x) round(max(x, na.rm = TRUE), 2))
+
+# wrapping solution in a function
+descriptives <- function(df) {
+  select_numeric <- only_numeric(df)
+  mean_sd <- map_df(select_numeric, function(col) map_df(smry, ~.x(col)),
+       .id = "column")
+  return(mean_sd)
+}
+```
+
+
+```{r}
+only_scales <- d %>%
+  select(parent_age, parent_eng_comf, youth_age, 17:33, youth_eng_comf, sch_eng)
+
+descrip_table <- descriptives(only_scales) %>%
+  rename(c("Scale" = "column"))
+```
+
+```{r}
+ggplot(d, aes(sch_eng)) + 
+  geom_histogram() # approxiamtes normality, shows one outlier z-score greater than 3.0 or -3.0 (converting to Z-scores)
+
+# extreme outlier were removed from analysis and result did not meaningfully changed. 
+
+d$sch_eng
+```
+
+
+# correlation matrix 
+```{r}
+library(Hmisc)
+rcorr(as.matrix(only_scales), type = "pearson")
+```
+
+```{r}
+names(d)
+```
+
+------------------------------
+# RESEARCH QUESTION 2
+------------------------------
+
+     model 1a: what is the univar association of each predictor with the outcome (17 models)
+     model 1b: what is the multivar assiciation of each predictor with th outcome adjusting for      demo charcs (covariates) (15 models)
+
+# 2.1. Academic approach to hwi
+
+### acadhwi_1 ### alpha = 0.78
+# 86	Me senté con mi joven mientras él / ella hacía su tarea
+# 87	Me hice disponible para mi joven cuando tenía preguntas sobre su tarea
+# 88	Ayudé a mi joven cuando estaba atascado/a en una tarea
+# 89	Ayudé a mi joven a prepararse para los exámenes haciéndole preguntas sobre el tema, etc
+# 94	Comprobé y corregí la tarea de mi hija/o 
+# 96	Le ayudé a mi joven acceder a otros recursos (biblioteca, materiales de arte, laboratorio de computación, etc.)
+# 97	Le ayudé a mi joven practicar habilidades (lectura, revisión, problemas de práctica, etc.)
+```{r}
+m_hwi_1a <- lm(sch_eng ~ acadhwi_1, d)
+summary(m_hwi_1a) # p = 0.15
+
+m_hwi_1b <- lm(sch_eng ~ parent_ed + parent_eng_comf + youth_age + youth_gender + grade_lev + acadhwi_1, d)
+summary(m_hwi_1b) # p = 0.06 - trending
+```
+
+# 2.2. checking HWI
+
+### checkhwi_1 ### alpha = 0.77
+# 84	Me aseguré de que tenga un cierto tiempo para hacer la tarea
+# 85	Me aseguré de que él / ella tenga un cierto lugar para hacer la tarea
+# 93	Comprobé con mi joven para asegurarme de que él / ella hiciera su tarea
+```{r}
+m_hwi_2a <- lm(sch_eng ~ checkhwi_1, d)
+summary(m_hwi_2a)# p = 0.002 *
+
+m_hwi_2b <- lm(sch_eng ~ parent_ed + parent_eng_comf + youth_age + youth_gender + grade_lev + checkhwi_1, d)
+summary(m_hwi_2b)# p = 0.006 *
+```
+
+# 2.3. structure at home
+
+# ### struct_1 ### alpha = 0.82
+#Los últimos tres meses, he tomado medidas para apoyar a mi joven a...
+# 23.	… desarrollar un plan para estudiar y hacer la tarea
+# 24.	… encontrar formas de involucrarse en las actividades escolares
+# 25.	… encontrar maneras de involucrarse en actividades de voluntario/a en la comunidad
+# 26.	… hacer metas para el año escolar
+# 27.	… cumplir fechas de limite
+# 28.	… participar en papeles de liderazgo en la escuela o comunidad
+# 29.	… enfocarse en hacer lo mejor posible
+# 30.	… desarrollar un horario para completar la tarea y los proyectos escolares a tiempo
+```{r}
+m_str_home_a <- lm(sch_eng ~ struct_1, d)
+summary(m_str_home_a) # p = 0.06
+
+m_str_home_b <- lm(sch_eng ~ parent_ed + parent_eng_comf + youth_age + youth_gender + grade_lev + struct_1, d)
+summary(m_str_home_b) # p = 0.03 *
+```
+
+```{r}
+#effectsize::cohens_f(m_str_home_b, partial = FALSE)
+```
+eta_squared(m, )
+
+
+# 2.4. convos: child beh & school climate
+```{r}
+m_convos_1a <- lm(sch_eng ~ convclimate_1, d)
+summary(m_convos_1a) # p = 0.88
+
+m_convos_1b <- lm(sch_eng ~ parent_ed + parent_eng_comf + youth_age + youth_gender + grade_lev + convclimate_1, d)
+summary(m_convos_1b) # p = 0.98
+```
+
+
+# 2.5. convos: future
+```{r}
+m_convos_2a <- lm(sch_eng ~ convfut_1, d)
+summary(m_convos_2a) # p = 0.31
+
+m_convos_2b <- lm(sch_eng ~ parent_ed + parent_eng_comf + youth_age + youth_gender + grade_lev + convfut_1, d)
+summary(m_convos_2b) # p = 0.36
+```
+
+
+# 2.6. convos: child's social involvement
+```{r}
+m_convos_3a <- lm(sch_eng ~ convsocial_1, d)
+summary(m_convos_3a) # p = 0.46
+
+m_convos_3b <- lm(sch_eng ~ parent_ed + parent_eng_comf + youth_age + youth_gender + grade_lev + convsocial_1, d)
+summary(m_convos_3b) # p = 0.38
+```
+# 2.7. knowing school staff & rules
+```{r}
+m_sbi_1a <- lm(sch_eng ~ knowschool_1, d)
+summary(m_sbi_1a) # p = 0.12
+
+m_sbi_1b <- lm(sch_eng ~ parent_ed + parent_eng_comf + youth_age + youth_gender + grade_lev + knowschool_1, d)
+summary(m_sbi_1b) # p = 0.08 - trending
+```
+
+
+# 2.8. parents future orientation 
+
+# ### futorient_1 ### alpha = 0.8 -- parent orientation to future/expectations
+# 105.	… que mi joven se gradúe de la escuela secundaria. _____
+# 107.	… saber cuáles son las metas que tiene mi joven para su futuro _____
+# 108.	… ayudar a mi joven a hacer planes y dar pasos hacia sus metas para el futuro_____
+# 109.	… buscar información para ayudarle a mi joven a alcanzar sus metas futuras _____
+# 110.	… ayudar a mi joven a comenzar a prepararse para la educación superior, incluso mientras esté en la escuela intermedia
+```{r}
+m_sbi_2a <- lm(sch_eng ~ futorient_1, d)
+summary(m_sbi_2a) # p = 0.95
+
+m_sbi_2b <- lm(sch_eng ~  parent_ed + parent_eng_comf + youth_age + youth_gender + grade_lev + futorient_1, d)
+summary(m_sbi_2b) # p = 0.72
+```
+ 
+
+# 2.9. included - part of community
+```{r}
+m_belong_a <- lm(sch_eng ~ included_1, d)
+summary(m_belong_a) # p = 0.19
+
+m_belong_b <- lm(sch_eng ~  parent_ed + parent_eng_comf + youth_age + youth_gender + grade_lev + included_1, d)
+summary(m_belong_b) # p = 0.07 - trending
+```
+
+
+# 2.10. Endorsemnt
+```{r}
+m_endorse_a <- lm(sch_eng ~ endorse_1, d)
+summary(m_endorse_a) # p = 0.87
+
+m_endorse_b <- lm(sch_eng ~  parent_ed + parent_eng_comf + youth_age + youth_gender + grade_lev + endorse_1, d)
+summary(m_endorse_b) # p = 0.66
+```
+
+
+# 2.11. teacher support
+```{r}
+m_value_ed_a <- lm(sch_eng ~ supported_1, d)
+summary(m_value_ed_a) # p = 0.35
+
+m_value_ed_b <- lm(sch_eng ~  parent_ed + parent_eng_comf + youth_age + youth_gender + grade_lev + supported_1, d)
+summary(m_value_ed_b) # p = 0.80
+```
+
+# 2.12. welcome at school
+```{r}
+m_rel_1a <- lm(sch_eng ~ welcome_1, d)
+summary(m_rel_1a) # p = 0.85
+
+m_rel_1b <- lm(sch_eng ~  parent_ed + parent_eng_comf + youth_age + youth_gender + grade_lev + welcome_1, d)
+summary(m_rel_1b) # p = 0.57
+```
+
+
+# 2.13. parent self-efficacy to solve probs with school
+```{r}
+m_rel_2a <- lm(sch_eng ~ selfeffic_1, d)
+summary(m_rel_2a) # p = 0.94
+
+m_rel_2b <- lm(sch_eng ~  parent_ed + parent_eng_comf + youth_age + youth_gender + grade_lev + selfeffic_1, d)
+summary(m_rel_2b) # p = 0.56
+```
+# 2.14. parent peer rels
+
+# ### parnets_1 ### alpha = 0.79 -- parent networking 
+# 37.	… involucrarse en las actividades escolares, en el salón de clase, y/u otras maneras (por ejemplo, organizaciones de padres, trabajo voluntario, etc.) 
+# 38.	… tener conversaciones con los otros padres para obtener información o aprender acerca de los recursos en la escuela. ____
+# 39.	…contactar los otros padres para obtener apoyo. ____
+```{r}
+m_rel_2a <- lm(sch_eng ~ parnets_1, d)
+summary(m_rel_2a) # p = 0.04 *
+
+m_rel_2b <- lm(sch_eng ~  parent_ed + parent_eng_comf + youth_age + youth_gender + grade_lev + parnets_1, d)
+summary(m_rel_2b) # p = 0.04 *
+```
+
+
+# 2.15. parent-youth positive rel
+```{r}
+m_py_rel_2a <- lm(sch_eng ~ posirel_1, d)
+summary(m_py_rel_2a) # p = 0.48
+
+m_py_rel_2b <- lm(sch_eng ~  parent_ed + parent_eng_comf + youth_age + youth_gender + grade_lev + posirel_1, d)
+summary(m_py_rel_2b) # p = 0.34
+```
+
+# 2.16. monitoring peers
+```{r}
+m_monitp_2a <- lm(sch_eng ~ monitpeers_1, d)
+summary(m_monitp_2a) # p = 0.55
+
+m_monitp_2b <- lm(sch_eng ~  parent_ed + parent_eng_comf + youth_age + youth_gender + grade_lev + monitpeers_1, d)
+summary(m_monitp_2b) # p = 0.44
+```
+
+# 2.17. youth trust in parent - parent report
+```{r}
+m_py_tru_2a <- lm(sch_eng ~ trust_1, d)
+summary(m_py_tru_2a) # p = 68
+
+m_py_tru_2b <- lm(sch_eng ~  parent_ed + parent_eng_comf + youth_age + youth_gender + grade_lev + trust_1, d)
+summary(m_py_tru_2b) # p = 0.24
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+------------------------------
+# RESEARCH QUESTION 3
+------------------------------
+
+```{r}
+# Block 0: demo only
+m_demo <- lm(sch_eng ~  parent_ed + parent_eng_comf + youth_age + youth_gender + grade_lev, d)
+summary(m_demo) # p = 0.89 (full model p-value)
+```
+
+
+     model 2a: what is the multivar effect of the structural predictors with th outcome (1 model, 10 composire scores simultaneously)
+```{r}
+m_structs_2a <- lm(sch_eng ~ hwi_1 + hwi_2 + str_home + convos_1 + convos_2 + convos_3 + sbi_1 + sbi_2, d)
+summary(m_structs_2a) # p = 0.10 (full model p-value)
+```
+
+################### Adjusted, Structural only on outcome ######################
+
+     model 2b: what is the multivar effect of the structural predictors with th outcome adjusting for demo charcr (1 model, 10 composite scores simultaneously + demo vars: block 1 demos, block 2: structural (10 scores))
+```{r}
+m_structs_2b <- lm(sch_eng ~  parent_ed + parent_eng_comf + youth_age + youth_gender + grade_lev + hwi_1 + hwi_2 + str_home + convos_1 + convos_2 + convos_3 + sbi_1 + sbi_2, d)
+summary(m_structs_2b) # p = 0.35 (full model p-value)
+```
+
+
+     model 3a: what is the multivar effect of the relational predictors with th outcome (1 model, 5 composite scores simultaneously)
+```{r}
+m_rels_3a <- lm(sch_eng ~ belong + endorse + value_ed + rel_1 + rel_2, d)
+summary(m_rels_3a) # p = 0.47 (full model p-value)
+```
+
+################### Adjusted, Relational only on outcome ######################
+
+     model 3b: what is the multivar effect of the relational predictors with th outcome adjusting for demo charcr (1 model, 5 composite scores simultaneously + demo vars: block 1      demos, block 2: relational (5 scores))
+```{r}
+m_rels_3b <- lm(sch_eng ~  parent_ed + parent_eng_comf + youth_age + youth_gender + grade_lev + belong + endorse + value_ed + rel_1 + rel_2, d)
+summary(m_rels_3b) # p = 0.60 (full model p-value)
+```
+
+      model 4a: what is the multivar effect of structural and relational predictors on the outcome (1 model,  15 scores simultaneosuly)
+```{r}
+m_combi_4a <- lm(sch_eng ~ hwi_1 + hwi_2 + str_home + convos_1 + convos_2 + convos_3 + sbi_1 + sbi_2 + belong + endorse + value_ed + rel_1 + rel_2, d)
+summary(m_combi_4a) # p = 0.03 (full model p-value) HOW COME?
+```
+
+################### Adjusted, Combined: Structural + Relational only on outcome ######################
+    
+      model 4b: what is the multivar effect of structural and relational predictors on the outcome adjusting for demo charcr (1 model, 15 scores simultaneosuly + demo vars: block 1 demos, block 2: structural + block 3: relational
+```{r}
+# Block: demo + (combined structural + relational at once)
+m_combi_4b <- lm(sch_eng ~  parent_ed + parent_eng_comf + youth_age + youth_gender + grade_lev + hwi_1 + hwi_2 + str_home + convos_1 + convos_2 + convos_3 + sbi_1 + sbi_2 + belong + endorse + value_ed + rel_1 + rel_2, d)
+summary(m_combi_4b) # p = 0.09 (full model p-value)
+```
+
+------------------------------
+# Model comparisons
+------------------------------
+
+Adjusted, structural predictors model:
+m_structs_2b
+
+Adjusted, relational predictors model:
+m_rels_3b
+
+Adjusted, combined (structural + relational) predictors model:
+m_combi_4a
+
+```{r}
+summary(m_demo) # 11 observations due to missingness 
+summary(m_structs_2b) # 12 observations due to missingness 
+summary(m_rels_3b) # 11 observations due to missingness 
+summary(m_combi_4b) # 12 observations due to missingness 
+```
+
+```{r}
+anova(m_demo, m_rels_3b) # p = 0.1718
+```
+
+RSS - I think this is the residual sum of squares. "The smaller the residual sum of squares, the better your model fits your data". Although the relational model did reduce the RSS (by 2.5) when compared to the demo only model, this was not significant (p = 0.1718)
+
+```{r}
+anova(m_structs_2b, m_combi_4b) 
+```
+
+the 
+
+```{r}
+summary(m_demo)$r.squared
+summary(m_rels_3b)$r.squared
+summary(m_structs_2b)$r.squared
+summary(m_combi_4b)$r.squared
+```
+#unique variance accounted for by rels
+```{r}
+summary(m_rels_3b)$r.squared - summary(m_demo)$r.squared # 0.10
+```
+#unique variance accounted for by structs
+```{r}
+summary(m_structs_2b)$r.squared - summary(m_demo)$r.squared # 0.18
+```
+
+#AIC weights - the probability that model i is, in fact, the K-L best model for the data
+```{r}
+AIC(m_demo)
+AIC(m_rels_3b)
+AIC(m_structs_2b)
+AIC(m_combi_4b)
+```
+```{r}
+# all models
+sundry::aic_weights(m_demo, m_rels_3b) # weight m1 = 0.58, m2 = 0.42
+sundry::aic_weights(m_demo, m_structs_2b) # weight m1 = 0.26, m2 (str) = 0.74
+sundry::aic_weights(m_rels_3b, m_structs_2b) # weight m1 (rel) = 0.2, m2 (str) = 0.8
+sundry::aic_weights(m_structs_2b, m_combi_4b) # weight m1 = 0.03, m2 = 0.97
+
+##### RQs really are ####
+
+# demo block: 
+AIC(m_demo)# 154.5824
+# then demo plus str
+AIC(m_structs_2b) # 152.5012
+test <- sundry::aic_weights(m_demo, m_structs_2b) # weight m1 = 0.26, m2 (str) = 0.74 
+# then demo plus str plus rels
+AIC(m_combi_4b) # 145.7984
+sundry::aic_weights(m_structs_2b, m_combi_4b) # weight m1 = 0.03, m2 (str) = 0.97
+```
+
+The model that displays the best fit to the data is the adjusted, combined structural plus relational predictors model.
+
+First, the analysis of the proportion of the variance, R^2, accounted for by each of the three models in the outcome indicated that the demographics only model accounted for approximately 6.33% (p-value: 0.8935) of the total variance in the outcome. The demographic plus relational components block of predictors  model  accounted for 16.33% (p-value: 0.5973) of the total variance in the outcome. The demographic plus structural components block of predictors  model  accounted for 24.29% (p-value: 0.3525) of the total variance in the outcome.Finally, the adjusted combined model, of structural plus relational block of predictor accounted for 38.25% (p-value: 0.08717) of the total variance in the outcome. Th elast model is the only one that was closer to reaching significance.
+
+Second, the analysis of variance indicated that including the relational block of predictors to the adjusted structural model significantly reduced the residual variance (p = 0.03329). 
+
+Finally, the AIC weights test of the demographic model and the intervention model indicated that, indisputably, the intervention model had the best possible probability of being the model that best fits the data. On the other hand, the comparison of the AIC weights of the intervention model (parallel slopes) and the interaction model (non-parallel slopes) indicated that the probability of one or the other model providing a better fit to the data was almost 50:50.
+
+
+##### just for fun ####
+
+```{r}
+test_model <- lm(sch_eng ~  parent_ed + parent_eng_comf + youth_age + youth_gender + grade_lev + hwi_2 +  convos_1 + value_ed + rel_1, d)
+
+summary(test_model)
+```
+
+```{r}
+test_model <- lm(sch_eng ~  parent_ed + parent_eng_comf + youth_age + youth_gender + grade_lev + convos_1 + value_ed + rel_1, d)
+
+summary(test_model)
+```
+
+```{r}
+test_model <- lm(sch_eng ~  parent_ed + parent_eng_comf + youth_age + youth_gender + grade_lev + hwi_2 + convos_1 + rel_1, d)
+
+summary(test_model)
+```
+
+```{r}
+test_model <- lm(sch_eng ~  parent_ed + parent_eng_comf + youth_age + youth_gender + grade_lev + hwi_2 + convos_1 + value_ed, d)
+
+summary(test_model)
+```
+
+```{r}
+# Block: demo + (combined structural + relational at once)
+withou_hw2 <- lm(sch_eng ~  parent_ed + parent_eng_comf + youth_age + youth_gender + grade_lev + hwi_1 + str_home + convos_1 + convos_2 + convos_3 + sbi_1 + sbi_2 + belong + endorse + value_ed + rel_1 + rel_2, d)
+summary(withou_hw2) 
+```
+HW seems to be playing a suppresing role; probably also other of convos_1, value_ed, and rel_1 supressing role. 
