@@ -1,0 +1,91 @@
+---
+title: "relations paper"
+output: html_document
+date: "2025-01-14"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(rio)
+library(here)
+library(tidyverse)
+library(haven)
+library(janitor)
+library(knitr)
+library(surveytoolbox)
+library(sjPlot)
+library(kableExtra)
+library(psych)
+library(sjmisc)
+library(MVN)
+
+theme_set(theme_minimal())
+```
+
+### The dataset ###
+This dataset has items 82, 83, 131, 133, 136 reverse scored. Look at "creating dataset.Rmd" 
+
+```{r}
+parent_w1 <- read_sav(here("outcomes paper/data_outcomes", "primary_parent_w1.sav"))
+```
+A relational question not included in poster
+
+En esta escuela, siento que hay por lo menos un maestro…
+64.	… que se preocupa por mi joven. 
+65.	… quien está interesado en conocerme 
+66.	… con quien me siento/a cómodo/a hablando sobre mi joven. 
+67.	… de quien puedo hacer preguntas o hacer sugerencias sobre mi joven. 
+
+```{r}
+par_teach_rel <- parent_w1 %>%
+  select(q64, q65, q66, q67)
+
+alpha(par_teach_rel) # 0.87
+```
+
+
+Looking at variables that could serve as alternative outcomes
+
+*These suggest traditional parental involvement 
+q15 - help with youth extracurricular activities (binary: 0, 1)
+q16 - frequency of this help (likert: 1-4.Item seems faulty, though: responses on q15 of 0 have responses in q16 from 1-2 & options 2-3 are virtually the same)
+q17 - attendance to pta organized events (binary: 0, 1)
+q18 - frequency of contact with teacher (likert: 1-4; could index issues)
+q19 - frequency of contact with other school staff member (likert: 1-4; could even more so, index issues)
+q20 - satisfaction with contact any school staff (likert: 1-4)
+
+Could a composite variable be made using binary and likert response items? (q15, q17, q20)
+
+*Other forms of youth school outcomes
+q12_1 - how youth does in LA (likert: 1-5; higher is worse)
+q12_2 - how youth does in SOC STUD (likert: 1-5; higher is worse)
+q12_3 - how youth does in MATH (likert: 1-5; higher is worse)
+q12_4 - how youth does in SCIENCE (likert: 1-5; higher is worse)
+q14 - overall how youth does academically (likert: 1-8; higher is worse)
+
+
+```{r}
+
+```
+
+YOUTH 
+
+*alternative outcomes
+q4 - overall grades
+q7-q15 homework questions (i like q8, q9, q10)
+
+*youth's perception of parental support (in the last 3 months...) 
+q18 - find ways to take part in school activities (likert: 1-4)
+q19 - find ways to do volunteer activities in the community (likert: 1-4)
+q20 - take leadership roles in school or in the community (likert: 1-4)
+q21 - do your best in school (likert: 1-4)
+q22 - make a schedule for completing homework and school projects on time (likert: 1-4)
+
+*youth's perception of parental involvement (in the last 3 months...) 
+q36.	… visited your school for a special event (activity nights, choir performance, dances, etc.) (likert: 1-4)
+q37.	… attended a parent-teacher conference (likert: 1-4)
+q38.	… attended a parent group meeting (likert: 1-4)
+q39.	…volunteered for a school activity, event, or project (likert: 1-4)
+q40.	… had at least some type of contact with at least one of your teachers (by telephone, text, email, or an in-person meeting)? (likert: 1-4)
+

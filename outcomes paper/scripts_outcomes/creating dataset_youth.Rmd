@@ -1,0 +1,132 @@
+---
+title: "creating dataset_youth"
+output: html_document
+date: "2025-01-14"
+---
+This script is menat to be added on while I identify additional variables of interest. initially created on jan.12.25
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(rio)
+library(here)
+library(tidyverse)
+library(haven)
+library(janitor)
+library(knitr)
+library(surveytoolbox)
+library(sjPlot)
+library(kableExtra)
+library(psych)
+library(sjmisc)
+library(MVN)
+
+theme_set(theme_minimal())
+```
+
+# youth w1
+```{r}
+youth_w1_raw <- read_sav(here("outcomes paper/data_outcomes", "all_youth_wave1.sav")) # it has 88, 99, -99, etc.
+
+youth_w1 <- youth_w1_raw %>%
+  select(school_id, condition, id, wave, q2, q4, q7:q13, q18:q22, q36:q40, q83:q91, q98, q231, q232_2, q232_3, q232_99) %>%
+   rename(c("family_id" = "id"),
+         c("grade_lev" = "q2"),
+         c("grades" = "q4"),
+         c("hw_1" = "q7"),
+         c("hw_2" = "q8"),
+         c("hw_3" = "q9"),
+         c("hw_4" = "q10"),
+         c("hw_5" = "q11"),
+         c("hw_6" = "q12"),
+         c("hw_7" = "q13"),
+         c("pi_1" = "q18"),
+         c("pi_2" = "q19"),
+         c("pi_3" = "q20"),
+         c("pi_4" = "q21"),
+         c("pi_5" = "q22"),
+         c("pi_6" = "q36"),
+         c("pi_7" = "q37"),
+         c("pi_8" = "q38"),
+         c("pi_9" = "q39"),
+         c("pi_10" = "q40"),
+         c("se_1" = "q83"),
+         c("se_2" = "q84"),
+         c("se_3" = "q85"),
+         c("se_4" = "q86"),
+         c("se_5" = "q87"),
+         c("se_6" = "q88"),
+         c("se_7" = "q89"),
+         c("se_8" = "q90"),
+         c("se_9" = "q91"),
+         c("youth_eng_comf" = "q98"),
+         c("youth_gender" = "q231"),
+         c("y_latino" = "q232_2"),
+         c("y_indigenous_americas" = "q232_3"),
+         c("y_race_ethnicity_no_response" = "q232_99")) 
+
+view_df(youth_w1) 
+```
+
+# Data prep: recoding missing variables as N/A
+```{r include=FALSE}
+# recoding missing values as N/A with function
+
+# vector with missing values in dataset
+missing_vals <- c(0, 88, 99, -99) # note: very specific to student dataset
+
+# function that returns true if values in vector are equal to missing_vals. The function takes a vector x, and specified values of missing data
+recode_missing <- function(x, missing_vals = c(0, 88, 99, -99)) {
+  test <- x %in% missing_vals
+  ifelse(test, NA, x)
+}
+
+# function that recodes missing values to NA. The function takes a dataframe with variables with missing data, and specified values of missing data
+recode_missing_df <- function(df, missing_vals = c(0, 88, 99, -99)) {
+  modify(df, ~recode_missing(.x, missing_vals)) # here uses the function created above
+}
+
+youth_w1_2 <- recode_missing_df(youth_w1) # the function strips out variable labels
+```
+
+# Data prep: reverse scoring negatively worded items
+```{r}
+youth_w1_3 <- youth_w1_2 %>%
+  mutate(se_2 = likert_reverse(se_2, top = 5, bottom = 1),
+         se_4 = likert_reverse(se_4, top = 5, bottom = 1),
+         se_5 = likert_reverse(se_5, top = 5, bottom = 1))
+
+view_df(youth_w1_3) 
+```
+
+```{r}
+youth_hw <- youth_w1_3 %>%
+  select(hw_1, hw_2, hw_3, hw_4, hw_5, hw_6, hw_7)
+
+alpha(youth_hw) # 0.82
+```
+
+```{r}
+youth_pi <- youth_w1_3 %>%
+  select(pi_1, pi_2, pi_3, pi_4, pi_5, pi_6, pi_7, pi_8, pi_9, pi_10)
+
+alpha(youth_pi) # 0.78
+
+
+youth_par_sup <- youth_w1_3 %>%
+  select(pi_1, pi_2, pi_3, pi_4, pi_5)
+
+alpha(youth_par_sup) # 0.72
+
+
+youth_par_inv <- youth_w1_3 %>%
+  select(pi_6, pi_7, pi_8, pi_9, pi_10)
+
+alpha(youth_par_inv) # 0.67
+```
+# outputing youth wave 1 dataset 
+```{r}
+# youth_w1_3 %>%
+#   haven::write_sav(here("outcomes paper/data_outcomes", "youth_w1_jan2025.sav"))
+```
