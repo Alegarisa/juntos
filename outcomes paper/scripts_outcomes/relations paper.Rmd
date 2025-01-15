@@ -29,7 +29,7 @@ This dataset has items 82, 83, 131, 133, 136 reverse scored. Look at "creating d
 ```{r}
 parent_w1 <- read_sav(here("outcomes paper/data_outcomes", "primary_parent_w1.sav"))
 ```
-A relational question not included in poster
+A relational question not included in poster due to EFA solution showing difficulties
 
 En esta escuela, siento que hay por lo menos un maestro…
 64.	… que se preocupa por mi joven. 
@@ -74,6 +74,18 @@ YOUTH
 *alternative outcomes
 q4 - overall grades
 q7-q15 homework questions (i like q8, q9, q10)
+
+6.	I have a specific place (i.e., after school program, my desk at home, etc.) for doing my homework ____
+7.	I have a specific time for doing my homework ____
+8.	When I do my homework I turn off my cell phone and other distractions ____
+9.	Doing homework is an important part of my daily routine ____
+10.	Doing a good job on my homework is important to me ____
+11.	Doing well in school is important to me ____
+12.	If I have challenges with certain parts of my homework, I take active steps to get the help I need ____
+13.	I have a daily planner or other way of keeping my homework organized ____
+14.	I can rely on my parents to help me make plans and take steps toward my future education and career goals ____
+15.	My parents and I argue about my homework ___
+
 
 *youth's perception of parental support (in the last 3 months...) 
 q18 - find ways to take part in school activities (likert: 1-4)

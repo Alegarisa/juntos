@@ -66,7 +66,7 @@ youth_w1 <- youth_w1_raw %>%
          c("y_indigenous_americas" = "q232_3"),
          c("y_race_ethnicity_no_response" = "q232_99")) 
 
-view_df(youth_w1) 
+view_df(youth_w1_raw) 
 ```
 
 # Data prep: recoding missing variables as N/A
@@ -102,28 +102,59 @@ view_df(youth_w1_3)
 
 ```{r}
 youth_hw <- youth_w1_3 %>%
-  select(hw_1, hw_2, hw_3, hw_4, hw_5, hw_6, hw_7)
+  select(hw_2, hw_3, hw_4, hw_5, hw_6, hw_7)
 
-alpha(youth_hw) # 0.82
+alpha(youth_hw) # 0.83
+
+# Poly corr matrix
+poly <- polychoric(youth_hw)
+cor.plot(poly$rho, numbers = T, upper = F, main = "Polychoric", show.legend = F)
 ```
 
+*youth's perception of parental support (in the last 3 months...) 
+q18 - find ways to take part in school activities (likert: 1-4)
+q19 - find ways to do volunteer activities in the community (likert: 1-4)
+q20 - take leadership roles in school or in the community (likert: 1-4)
+q21 - do your best in school (likert: 1-4)
+q22 - make a schedule for completing homework and school projects on time (likert: 1-4)
 ```{r}
-youth_pi <- youth_w1_3 %>%
-  select(pi_1, pi_2, pi_3, pi_4, pi_5, pi_6, pi_7, pi_8, pi_9, pi_10)
-
-alpha(youth_pi) # 0.78
-
 
 youth_par_sup <- youth_w1_3 %>%
   select(pi_1, pi_2, pi_3, pi_4, pi_5)
 
 alpha(youth_par_sup) # 0.72
 
+# Poly corr matrix
+poly <- polychoric(youth_par_sup)
+cor.plot(poly$rho, numbers = T, upper = F, main = "Polychoric", show.legend = F)
 
-youth_par_inv <- youth_w1_3 %>%
-  select(pi_6, pi_7, pi_8, pi_9, pi_10)
+```
+*youth's perception of parental involvement (in the last 3 months...) 
+q36.	… visited your school for a special event (activity nights, choir performance, dances, etc.) (likert: 1-4)
+q37.	… attended a parent-teacher conference (likert: 1-4)
+q38.	… attended a parent group meeting (likert: 1-4)
+q39.	…volunteered for a school activity, event, or project (likert: 1-4)
+q40.	… had at least some type of contact with at least one of your teachers (by telephone, text, email, or an in-person meeting)? (likert: 1-4)
 
-alpha(youth_par_inv) # 0.67
+```{r}
+# youth_par_inv <- youth_w1_3 %>%
+#   select(pi_6, pi_7, pi_8, pi_9, pi_10) # item 9 very low cor with other items
+# 
+# alpha(youth_par_inv) # 0.674
+# 
+# youth_par_inv <- youth_w1_3 %>%
+#   select(pi_6, pi_7, pi_8, pi_9)
+# 
+# alpha(youth_par_inv) # 0.669
+
+youth_sch_inv <- youth_w1_3 %>%
+  select(pi_6, pi_7, pi_8, pi_10) # item 9 very low cor with other items
+
+alpha(youth_sch_inv) # 0.667
+
+# Poly corr matrix
+poly <- polychoric(youth_sch_inv)
+cor.plot(poly$rho, numbers = T, upper = F, main = "Polychoric", show.legend = F)
 ```
 # outputing youth wave 1 dataset 
 ```{r}
