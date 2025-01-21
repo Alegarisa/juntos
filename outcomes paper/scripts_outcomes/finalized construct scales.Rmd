@@ -320,6 +320,16 @@ parent_w1_demo_2 <- parent_w1_demo %>%
 view_df(parent_w1_demo_2) # I think this worked!
 ```
 ```{r}
+test <- read_sav(here("outcomes paper/data_outcomes", "all_parent_wave1.sav"))
+
+view_df(test)
+
+ggplot(test, aes(q173_3)) +
+geom_bar(alpha = 0.7)
+```
+
+
+```{r}
 ggplot(parent_w1_demo_2, aes(ed_level)) +
 geom_bar(alpha = 0.7) # no participant had a graduate degree, so no 11
 ```
