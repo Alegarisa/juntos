@@ -26,13 +26,19 @@ theme_set(theme_minimal())
 ```
 
 ### The dataset ###
-This dataset has items 82, 83, 131, 133, 136 reverse scored. Look at "creating dataset.Rmd" 
 
 ```{r}
-d <- read_sav(here("outcomes paper/data_outcomes", "p_y_w1_for_analysesjan25.sav"))
+d <- read_sav(here("outcomes paper/data_outcomes", "p_y_w1_for_analysesjan25.sav")) # 94 rows
 
 view_df(d)
+
+data.frame(table(d$family_id)) # no dupped ids
 ```
+
+TO DO: EXPLORE HOW CAN DATA MISSINGNES CAN BE ADDRESSED. 
+
+RESEARCH HOE TO STANDARDIZE THE BETAS
+
 
 ```{r}
 d1 <- d %>%
@@ -47,7 +53,7 @@ d1 <- d %>%
          grade_lev = factor(grade_lev),
          grade_lev = relevel(grade_lev, ref = "2")) # 7th grade
 
-view_df(parent_w1)
+# view_df(parent_w1)
 ```
 
 
@@ -55,8 +61,8 @@ view_df(parent_w1)
 only_scales <- d1 %>%
   select(acadhwi_1, checkhwi_1, checkhwi_1, struct_1, convfut_1, knowschool_1, selfeffic_1, parnets_1, welcome_1, endorse_1, supported_1, ptrel_1)
 
-descrip_table <- descriptives(only_scales) %>%
-  rename(c("Scale" = "column"))
+# descrip_table <- descriptives(only_scales) %>%
+#   rename(c("Scale" = "column"))
 ```
 
 
@@ -65,9 +71,9 @@ library(Hmisc)
 rcorr(as.matrix(only_scales), type = "pearson")
 ```
 
-The expected school eng value is 2.84, when we consider average values of all predictors in the model and student is male.
+The expected school eng value is 2.55, when we consider average values of all predictors in the model and student is male.
 
-For every one-point increase in checking hw, school eng increases, on average, 0.24 points
+For every one-point increase in checking hw, school eng increases, on average, 0.23 points
 
 ```{r}
 # school engagement: youth report
@@ -79,11 +85,9 @@ summary(m_cov) # only checking hw came out significant 0.03
 
 ```
 
-The expected grades value is 3.45, when we consider average values of all predictors in the model and student is male.
+The expected grades value is 4.50, when we consider average values of all predictors in the model and student is male.
 
-When student is female, grades decreases, on average, 0.57 points
-
-Moderation needed?
+no predictors in the model are significantly related to youth grades.
 
 ```{r}
 # grades: youth report
@@ -91,10 +95,10 @@ m2 <- lm(grades ~ acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 +
 summary(m2) # only conversation about future came out significant 0.02
 
 m2_cov <- lm(grades ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + selfeffic_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1, d1)
-summary(m2_cov) # youth_gender negative and significant 0.03
+summary(m2_cov) # no significant relations
 ```
 
-The expected youth hw value is 1.85, when we consider average values of all predictors in the model and student is male.
+The expected youth hw value is 1.59, when we consider average values of all predictors in the model and student is male.
 
 no predictors in the model are significantly related to youth hw.
 
@@ -107,9 +111,9 @@ m3_cov <- lm(y_hw ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 + che
 summary(m3_cov) # no significant relations
 ```
 
-The expected youth-reported parent support value is 3.25, when we consider average values of all predictors in the model and student is male.
+The expected youth-reported parent support value is 2.76, when we consider average values of all predictors in the model and student is male.
 
-For every one-point increase in parents' knowing school, youth-reported parent support increases, on average, 0.45 points
+For every one-point increase in parents' knowing school, youth-reported parent support increases, on average, 0.43 points
 
 ```{r}
 # parent's support: youth report
@@ -146,9 +150,9 @@ m5_cov <- lm(y_parinv ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 +
 summary(m5_cov) # parent eng conf negative and significant 0.01, knowschool positive 0.03, welcome positive and significant < 0.05
 ```
 
-The expected parent-reported self-efficacy value is 0.40, when we consider average values of all predictors in the model and student is male.
+The expected parent-reported self-efficacy value is 0.39, when we consider average values of all predictors in the model and student is male.
 
-For every one-point increase in parents' feeling welcome and endorsing school, parent self efficacy increases, on average, 0.22 and 0.45 points, respectively. 
+For every one-point increase in parents' feeling welcome and endorsing school, parent self efficacy increases, on average, 0.23 and 0.45 points, respectively. 
 
 Also, For every one-point increase in parents' comfort with speaking english at school, parent's self efficacy increases by 0.05 points
 
@@ -161,11 +165,11 @@ m6_cov <- lm(selfeffic_1 ~ parent_eng_comf + youth_age + youth_gender + acadhwi_
 summary(m6_cov) # par eng conf positive significant 0.04, welcome positive 0.05, endorse positive 0.001
 ```
 
-The expected parent-reported youth general grades value is 3.71, when we consider average values of all predictors in the model and student is male.
+The expected parent-reported youth general grades value is 3.22, when we consider average values of all predictors in the model and student is male.
 
-For every one-point increase in parents' knowing school, parent-reported youth general grades increases, on average, 0.66 points.
+For every one-point increase in parents' knowing school, parent-reported youth general grades increases, on average, 0.76 points.
 
-When student is female, parent-report of general grades decreases, on average, 0.70 points
+When student is female, parent-report of general grades decreases, on average, 0.66 points
 
 
 ```{r}
