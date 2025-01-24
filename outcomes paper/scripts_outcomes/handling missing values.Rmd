@@ -1,0 +1,148 @@
+---
+title: "handling missing values"
+output: html_document
+date: "2025-01-24"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(rio)
+library(here)
+library(tidyverse)
+library(haven)
+library(janitor)
+library(knitr)
+library(surveytoolbox)
+library(sjPlot)
+library(kableExtra)
+library(psych)
+library(sjmisc)
+library(MVN)
+library(stats)
+library(AICcmodavg)
+
+library(mice)
+library(VIM)
+
+theme_set(theme_minimal())
+```
+
+Trying to handle trhe missing data 
+
+### The dataset ###
+
+```{r}
+d <- read_sav(here("outcomes paper/data_outcomes", "p_y_w1_for_analysesjan25.sav")) # 94 rows
+
+view_df(d)
+```
+
+
+```{r}
+d1 <- d %>%
+  select(school_id, family_id, participant_id, parent_eng_comf, youth_age, youth_gender, acadhwi_1, checkhwi_1, checkhwi_1, struct_1, convfut_1, knowschool_1, selfeffic_1, parnets_1, welcome_1, endorse_1, supported_1, ptrel_1, y_sch_eng, y_parsupp, y_parinv, y_hw, gen_grades, grades)
+
+view_df(d1)
+```
+
+```{r}
+d2 <- d1 %>%
+  mutate(parent_eng_comf = as.numeric(parent_eng_comf),
+         youth_gender = factor(youth_gender),
+         youth_age = as.numeric(youth_age))
+
+view_df(d2)
+```
+
+
+```{r}
+summary(d2)
+```
+
+outcomes with no NA:
+y_sch_eng       
+y_parsupp
+y_parinv          
+y_hw 
+selfeffic_1 
+
+
+outcomes with missing values:
+grades (youth report): 4 NA
+gen_grades (parent report):  3 NA
+
+predictors with no NA:
+
+youth_gender
+struct_1
+convfut_1
+knowschool_1
+selfeffic_1
+parnets_1
+welcome_1
+endorse_1      
+supported_1      
+ptrel_1
+
+predictors with missing values:
+parent_eng_comf: 8 
+acadhwi_1:  1      
+checkhwi_1: 1
+youth_age: 1
+
+
+This figure shows there are 17 missing values
+
+```{r}
+md.pattern(d2)
+```
+
+This plot shows that 86% is not missing 
+```{r}
+nice_plot <- aggr(d1, col = c ('navyblue', 'yellow'),
+                  numbers = TRUE, sortVars = TRUE,
+                  labels = names (d1), cex.axis = .7,
+                  gap = 4, ylab = c ("Missing data", "Pattern"))
+```
+
+```{r}
+imputed_data <- mice(d2, m = 5, maxit = 50,
+                     method = 'pmm', seed = 5000)
+
+summary(imputed_data)
+
+imputed_data$data$parent_eng_comf
+```
+
+```{r}
+d2$parent_eng_comf
+```
+```{r}
+complete_data <- complete(imputed_data, 2)
+```
+This plot show that there is no missing values now. 
+```{r}
+nice_plot <- aggr(complete_data, col = c ('navyblue', 'yellow'),
+                  numbers = TRUE, sortVars = TRUE,
+                  labels = names (d1), cex.axis = .7,
+                  gap = 4, ylab = c ("Missing data", "Pattern"))
+```
+```{r}
+complete_data
+```
+
+```{r}
+ggplot(d2, aes(parent_eng_comf)) +
+geom_bar(alpha = 0.7)
+```
+```{r}
+ggplot(complete_data, aes(parent_eng_comf)) +
+geom_bar(alpha = 0.7)
+```
+
+```{r}
+complete_data %>%
+  haven::write_sav(here("outcomes paper/data_outcomes", "p_y_w1_for_analysesjan25_imputted.sav"))
+```
+

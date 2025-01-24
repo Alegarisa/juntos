@@ -340,6 +340,8 @@ geom_bar(alpha = 0.7)
 ```{r}
 ggplot(parent_w1_demo_2, aes(ed_level)) +
 geom_bar(alpha = 0.7) # no participant had a graduate degree, so no 11
+
+view_df(parent_w1_demo_2)
 ```
 
 1 Nunca asistí a la escuela
@@ -368,7 +370,8 @@ parent_w1_demo_3 <- parent_w1_demo_2 %>%
                        ed_level == "1" | ed_level == "2" | ed_level == "3" ~ "1", #elementary or less
                        ed_level == "4" | ed_level == "5" ~ "2", #middle school
                        ed_level == "6" | ed_level == "7" | ed_level == "8" ~ "3", #high school/certificate
-                       ed_level == "9" | ed_level == "10" ~ "4")) %>% #post-secondary
+                       ed_level == "9" | ed_level == "10" ~ "4"), #post-secondary
+         parent_ed = factor(parent_ed)) %>% 
   select(school_id, condition, wave, family_id, participant_id, parent_role, parent_role_text, parent_age, country_born, parent_ed, parent_eng_comf, youth_age, youth_country_born, adults_at_home, minors_at_home, 16:323)
                 
 ggplot(parent_w1_demo_3, aes(parent_ed)) +
@@ -417,6 +420,15 @@ parent_scales <- parent_scales %>%
          c("help_extra" = "q15"),
          c("attend_pta" = "q17"),
          c("sats_contact" = "q20")) 
+```
+
+
+```{r}
+ggplot(parent_scales, aes(parent_ed)) +
+geom_bar(alpha = 0.7)
+
+ggplot(parent_scales, aes(parent_role)) +
+geom_bar(alpha = 0.7)
 ```
 
 
@@ -555,6 +567,12 @@ youth_scales <- youth_w1_3 %>%
 ```
 
 ```{r}
+ggplot(youth_scales, aes(grade_lev)) +
+geom_bar(alpha = 0.7)
+```
+
+
+```{r}
 all_par_you_w1 <- full_join(parent_scales, youth_scales, join_by(school_id, family_id, condition)) # 96 rows (ids 504 no youth data and 623 no parent data)
 
 data.frame(table(all_par_you_w1$family_id)) # id 313 is dupped - it has 
@@ -567,7 +585,43 @@ all_par_you_w1 %>%
 full_par_you_w1 <- inner_join(parent_scales, youth_scales) # 94 rows (id 504 and 623 removed )
 
 data.frame(table(full_par_you_w1$family_id)) # no dupped rows
+
+view_df(full_par_you_w1)
 ```
+```{r}
+ggplot(full_par_you_w1, aes(parent_ed)) +
+geom_bar(alpha = 0.7)
+
+ggplot(full_par_you_w1, aes(grade_lev)) +
+geom_bar(alpha = 0.7)
+
+ggplot(full_par_you_w1, aes(youth_gender)) +
+geom_bar(alpha = 0.7)
+```
+
+
+```{r}
+# full_par_you_w1 <- full_par_you_w1 %>%
+#   mutate(school_id = factor(school_id),
+#          condition = factor(condition),
+#          parent_role = factor(parent_role),
+#          youth_gender = factor(youth_gender),
+#          grade_lev = factor(grade_lev),
+#          y_latino = factor(y_latino),
+#          y_indigenous_americas = factor(y_indigenous_americas),
+#          y_race_ethnicity_no_response = factor(y_race_ethnicity_no_response),
+#          adults_at_home = as.numeric(adults_at_home),
+#          minors_at_home = as.numeric(minors_at_home),
+#          parent_eng_comf = as.numeric(parent_eng_comf),
+#          youth_age = as.numeric(youth_age))
+```
+
+
+```{r}
+ggplot(full_par_you_w1, aes(parent_ed)) +
+geom_bar(alpha = 0.7)
+```
+
 
 # outputing primary caregiver parent wave 1 dataset 
 ```{r}

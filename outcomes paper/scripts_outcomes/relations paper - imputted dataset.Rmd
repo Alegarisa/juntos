@@ -1,9 +1,10 @@
 ---
-title: "relations paper"
+title: "relations paper_impuuted dataset"
 output: html_document
 date: "2025-01-14"
 ---
 
+# I copied the relations paper Rmd and ran everything exactly as it was, except that now with the imputted dataset I created. Look "handling missing values" Rmd
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
@@ -28,7 +29,7 @@ theme_set(theme_minimal())
 ### The dataset ###
 
 ```{r}
-d <- read_sav(here("outcomes paper/data_outcomes", "p_y_w1_for_analysesjan25.sav")) # 94 rows
+d <- read_sav(here("outcomes paper/data_outcomes", "p_y_w1_for_analysesjan25_imputted.sav")) # 94 rows
 
 view_df(d)
 
