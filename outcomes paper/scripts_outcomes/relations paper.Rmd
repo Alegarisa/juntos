@@ -35,10 +35,20 @@ view_df(d)
 data.frame(table(d$family_id)) # no dupped ids
 ```
 
-TO DO: EXPLORE HOW CAN DATA MISSINGNES CAN BE ADDRESSED. 
+CM suggested to standardize the betas, however: 
 
-RESEARCH HOE TO STANDARDIZE THE BETAS
+* all structural and relational predictor variables are on a scale of 1-4
 
+* outcomes are on a:
+- 4-point scale (selfeffic_1, y_parsupp, y_parinv, y_hw)
+- 5-point scale (y_sch_eng)
+- 6-point scale (gen_grades)
+- 6-point scale (grades)
+
+* covariates are  
+- parent_eng_comf = 5-point scale 
+- youth_gender = categorical 2 levels
+- youth_age = range 10-13
 
 ```{r}
 d1 <- d %>%
@@ -65,64 +75,58 @@ library(Hmisc)
 rcorr(as.matrix(only_scales), type = "pearson")
 ```
 
-The expected school eng value is 2.55, when we consider average values of all predictors in the model and student is male.
+The expected school eng value is 2.46, when we consider average values of all predictors in the model and student is male.
 
 For every one-point increase in checking hw, school eng increases, on average, 0.23 points
 
 ```{r}
 # school engagement: youth report
-m <- lm(y_sch_eng ~ acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + selfeffic_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1, d1)
+m <- lm(y_sch_eng ~ acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1, d1)
 summary(m) # only checking hw came out significant 0.01
 
-m_cov <- lm(y_sch_eng ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + selfeffic_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1, d1)
-summary(m_cov) # only checking hw came out significant 0.03
+m_cov <- lm(y_sch_eng ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1, d1)
+summary(m_cov) # only checking hw came out significant 0.04
 
 ```
 
-The expected grades value is 4.50, when we consider average values of all predictors in the model and student is male.
+The expected grades value is 4.50, when we consider average values of all predictors in the model and student is male, but is not significant.
 
 no predictors in the model are significantly related to youth grades.
 
 ```{r}
 # grades: youth report
-m2 <- lm(grades ~ acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + selfeffic_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1, d1)
+m2 <- lm(grades ~ acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1, d1)
 summary(m2) # only conversation about future came out significant 0.02
 
-m2_cov <- lm(grades ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + selfeffic_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1, d1)
+m2_cov <- lm(grades ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1, d1)
 summary(m2_cov) # no significant relations
 ```
 
-The expected youth hw value is 1.59, when we consider average values of all predictors in the model and student is male.
+The expected youth hw value is 1.71, when we consider average values of all predictors in the model and student is male.
 
 no predictors in the model are significantly related to youth hw.
 
 ```{r}
 # hw best practices: youth report
-m3 <- lm(y_hw ~ acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + selfeffic_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1, d1)
-summary(m3) # only self efficacy came out significant 0.05
+m3 <- lm(y_hw ~ acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1, d1)
+summary(m3) # no significant relations
 
-m3_cov <- lm(y_hw ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + selfeffic_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1, d1)
+m3_cov <- lm(y_hw ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1, d1)
 summary(m3_cov) # no significant relations
 ```
 
-The expected youth-reported parent support value is 2.76, when we consider average values of all predictors in the model and student is male.
+The expected youth-reported parent support value is 2.60, when we consider average values of all predictors in the model and student is male.
 
 For every one-point increase in parents' knowing school, youth-reported parent support increases, on average, 0.43 points
 
 ```{r}
 # parent's support: youth report
-m4 <- lm(y_parsupp ~ acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + selfeffic_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1, d1)
-summary(m4) # knowing school positive 0.001, struct though negative 0.09 trend
+m4 <- lm(y_parsupp ~ acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1, d1)
+summary(m4) # knowing school positive 0.02
 
-m4_cov <- lm(y_parsupp ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + selfeffic_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1, d1)
-summary(m4_cov) # knowing school positive 0.01
+m4_cov <- lm(y_parsupp ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1, d1)
+summary(m4_cov) # knowing school positive 0.03
 ```
-
-The expected youth-reported parent involvement value is 4.15, when we consider average values of all predictors in the model and student is male.
-
-For every one-point increase in parents' knowing school and feeling welcome, youth-reported parent involvement increases, on average, 0.44 and 0.62 points, respectively. 
-
-Also, for every one-point increase in parents' english comfort, youth-reported parent involvement decreases, on average, 0.15 and points. (is this interpretation correct?)
 
 1 Nada cómodo
 2 Un poco cómodo
@@ -134,14 +138,17 @@ Also, for every one-point increase in parents' english comfort, youth-reported p
 ggplot(d1, aes(parent_eng_comf)) +
 geom_bar(alpha = 0.7)
 ```
+The expected youth-reported parent involvement value is 3.29, when we consider average values of all predictors in the model and student is male.
+
+For every one-point increase in parents' english comfort, youth-reported parent involvement decreases, on average, 0.17 and points. (is this interpretation correct?)
 
 ```{r}
 # parental involvement: youth report
-m5 <- lm(y_parinv ~ acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + selfeffic_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1, d1)
-summary(m5) # know school a trend 0.06
+m5 <- lm(y_parinv ~ acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1, d1)
+summary(m5) # no relations
 
-m5_cov <- lm(y_parinv ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + selfeffic_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1, d1)
-summary(m5_cov) # parent eng conf negative and significant 0.01, knowschool positive 0.03, welcome positive and significant < 0.05
+m5_cov <- lm(y_parinv ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1, d1)
+summary(m5_cov) # parent eng conf negative and significant < 0.01, trends: knowschool < 0.10, welcome < 0.10
 ```
 
 The expected parent-reported self-efficacy value is 0.39, when we consider average values of all predictors in the model and student is male.
@@ -156,7 +163,7 @@ m6 <- lm(selfeffic_1 ~ acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschoo
 summary(m6) # know school, welcome, endorse, ptrel trending
 
 m6_cov <- lm(selfeffic_1 ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1, d1)
-summary(m6_cov) # par eng conf positive significant 0.04, welcome positive 0.05, endorse positive 0.001
+summary(m6_cov) # par eng conf positive significant 0.03, welcome positive 0.05, endorse positive < 0.001
 ```
 
 The expected parent-reported youth general grades value is 3.22, when we consider average values of all predictors in the model and student is male.
@@ -165,14 +172,13 @@ For every one-point increase in parents' knowing school, parent-reported youth g
 
 When student is female, parent-report of general grades decreases, on average, 0.66 points
 
-
 ```{r}
 # grades in general: parent report
 m7 <- lm(gen_grades ~ acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1, d1)
 summary(m7) # know school trending, conv fut negative and significant 0.01
 
 m7_cov <- lm(gen_grades ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1, d1)
-summary(m7_cov) # know school positive and significant 0.03, gender negative and significant 0.004
+summary(m7_cov) # know school positive and significant 0.02, gender negative and significant 0.001
 ```
 
 Other parent report outcomes: 

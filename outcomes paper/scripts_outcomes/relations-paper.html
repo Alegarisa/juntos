@@ -1149,8 +1149,21 @@ y_hw
 ## 92  621    1
 ## 93  622    1
 ## 94  624    1</code></pre>
-<p>TO DO: EXPLORE HOW CAN DATA MISSINGNES CAN BE ADDRESSED.</p>
-<p>RESEARCH HOE TO STANDARDIZE THE BETAS</p>
+<p>CM suggested to standardize the betas, however:</p>
+<ul>
+<li><p>all structural and relational predictor variables are on a scale
+of 1-4</p></li>
+<li><p>outcomes are on a:</p></li>
+<li><p>4-point scale (selfeffic_1, y_parsupp, y_parinv, y_hw)</p></li>
+<li><p>5-point scale (y_sch_eng)</p></li>
+<li><p>6-point scale (gen_grades)</p></li>
+<li><p>6-point scale (grades)</p></li>
+<li><p>covariates are<br />
+</p></li>
+<li><p>parent_eng_comf = 5-point scale</p></li>
+<li><p>youth_gender = categorical 2 levels</p></li>
+<li><p>youth_age = range 10-13</p></li>
+</ul>
 <pre class="r"><code>d1 &lt;- d %&gt;%
   mutate(parent_eng_comf = as.numeric(parent_eng_comf), # average comfort
          youth_gender = factor(youth_gender),
@@ -1944,393 +1957,381 @@ y_hw
 ## endorse_1    0.3244    0.0000              0.0000      0.0000 
 ## supported_1  0.6277    0.0000    0.0000                0.0000 
 ## ptrel_1      0.1441    0.0000    0.0000    0.0000</code></pre>
-<p>The expected school eng value is 2.55, when we consider average
+<p>The expected school eng value is 2.46, when we consider average
 values of all predictors in the model and student is male.</p>
 <p>For every one-point increase in checking hw, school eng increases, on
 average, 0.23 points</p>
 <pre class="r"><code># school engagement: youth report
-m &lt;- lm(y_sch_eng ~ acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + selfeffic_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1, d1)
+m &lt;- lm(y_sch_eng ~ acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1, d1)
 summary(m) # only checking hw came out significant 0.01</code></pre>
 <pre><code>## 
 ## Call:
 ## lm(formula = y_sch_eng ~ acadhwi_1 + checkhwi_1 + struct_1 + 
-##     convfut_1 + knowschool_1 + selfeffic_1 + parnets_1 + welcome_1 + 
-##     endorse_1 + supported_1 + ptrel_1, data = d1)
+##     convfut_1 + knowschool_1 + parnets_1 + welcome_1 + endorse_1 + 
+##     supported_1 + ptrel_1, data = d1)
 ## 
 ## Residuals:
 ##      Min       1Q   Median       3Q      Max 
-## -1.22581 -0.31236 -0.02278  0.38588  0.88625 
+## -1.19549 -0.29662 -0.00999  0.38060  1.00020 
 ## 
 ## Coefficients:
-##               Estimate Std. Error t value Pr(&gt;|t|)    
-## (Intercept)   3.178759   0.541285   5.873 9.08e-08 ***
-## acadhwi_1     0.008278   0.098349   0.084   0.9331    
-## checkhwi_1    0.223889   0.086885   2.577   0.0118 *  
-## struct_1      0.180717   0.184540   0.979   0.3304    
-## convfut_1     0.009632   0.086150   0.112   0.9113    
-## knowschool_1  0.061652   0.146258   0.422   0.6745    
-## selfeffic_1  -0.174824   0.225180  -0.776   0.4398    
-## parnets_1     0.121761   0.114929   1.059   0.2925    
-## welcome_1     0.303407   0.216211   1.403   0.1644    
-## endorse_1     0.084502   0.259384   0.326   0.7454    
-## supported_1  -0.289176   0.260195  -1.111   0.2697    
-## ptrel_1      -0.254034   0.170318  -1.492   0.1397    
+##                Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)   3.1344803  0.5369662   5.837 1.02e-07 ***
+## acadhwi_1    -0.0003091  0.0974877  -0.003   0.9975    
+## checkhwi_1    0.2201656  0.0865425   2.544   0.0128 *  
+## struct_1      0.1773251  0.1840409   0.964   0.3381    
+## convfut_1     0.0067985  0.0858634   0.079   0.9371    
+## knowschool_1  0.0347301  0.1417429   0.245   0.8071    
+## parnets_1     0.1192787  0.1146063   1.041   0.3010    
+## welcome_1     0.2594940  0.2081756   1.247   0.2161    
+## endorse_1     0.0014855  0.2357459   0.006   0.9950    
+## supported_1  -0.2536095  0.2555096  -0.993   0.3238    
+## ptrel_1      -0.2774740  0.1672138  -1.659   0.1009    
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## 
-## Residual standard error: 0.4964 on 81 degrees of freedom
+## Residual standard error: 0.4952 on 82 degrees of freedom
 ##   (1 observation deleted due to missingness)
-## Multiple R-squared:  0.2063, Adjusted R-squared:  0.09848 
-## F-statistic: 1.914 on 11 and 81 DF,  p-value: 0.04936</code></pre>
-<pre class="r"><code>m_cov &lt;- lm(y_sch_eng ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + selfeffic_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1, d1)
-summary(m_cov) # only checking hw came out significant 0.03</code></pre>
+## Multiple R-squared:  0.2004, Adjusted R-squared:  0.1028 
+## F-statistic: 2.055 on 10 and 82 DF,  p-value: 0.03777</code></pre>
+<pre class="r"><code>m_cov &lt;- lm(y_sch_eng ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1, d1)
+summary(m_cov) # only checking hw came out significant 0.04</code></pre>
 <pre><code>## 
 ## Call:
 ## lm(formula = y_sch_eng ~ parent_eng_comf + youth_age + youth_gender + 
 ##     acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + 
-##     selfeffic_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + 
-##     ptrel_1, data = d1)
+##     parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1, 
+##     data = d1)
 ## 
 ## Residuals:
 ##      Min       1Q   Median       3Q      Max 
-## -1.19738 -0.29870 -0.00824  0.33246  0.90297 
+## -1.17577 -0.27176 -0.03908  0.30316  1.03043 
 ## 
 ## Coefficients:
-##                   Estimate Std. Error t value Pr(&gt;|t|)  
-## (Intercept)      2.5467212  1.0582866   2.406   0.0188 *
-## parent_eng_comf -0.0112247  0.0456943  -0.246   0.8067  
-## youth_age        0.0383127  0.0737152   0.520   0.6049  
-## youth_gender2    0.1672756  0.1207517   1.385   0.1704  
-## acadhwi_1        0.0455579  0.1155319   0.394   0.6946  
-## checkhwi_1       0.2275154  0.1097703   2.073   0.0419 *
-## struct_1         0.1913626  0.2005297   0.954   0.3433  
-## convfut_1        0.0009798  0.0946413   0.010   0.9918  
-## knowschool_1     0.0474910  0.1611130   0.295   0.7691  
-## selfeffic_1     -0.2202098  0.2553787  -0.862   0.3915  
-## parnets_1        0.1265398  0.1275503   0.992   0.3246  
-## welcome_1        0.3436504  0.2457076   1.399   0.1664  
-## endorse_1        0.1925519  0.2896510   0.665   0.5084  
-## supported_1     -0.3271693  0.3000155  -1.091   0.2793  
-## ptrel_1         -0.3075466  0.1941146  -1.584   0.1177  
+##                  Estimate Std. Error t value Pr(&gt;|t|)  
+## (Intercept)      2.460107   1.051577   2.339   0.0222 *
+## parent_eng_comf -0.021437   0.044052  -0.487   0.6280  
+## youth_age        0.040187   0.073548   0.546   0.5865  
+## youth_gender2    0.164050   0.120472   1.362   0.1777  
+## acadhwi_1        0.033546   0.114479   0.293   0.7704  
+## checkhwi_1       0.231278   0.109482   2.112   0.0382 *
+## struct_1         0.181507   0.199837   0.908   0.3668  
+## convfut_1       -0.008651   0.093808  -0.092   0.9268  
+## knowschool_1     0.024476   0.158595   0.154   0.8778  
+## parnets_1        0.118659   0.126989   0.934   0.3533  
+## welcome_1        0.292711   0.238063   1.230   0.2230  
+## endorse_1        0.092556   0.264937   0.349   0.7279  
+## supported_1     -0.285400   0.295536  -0.966   0.3375  
+## ptrel_1         -0.334375   0.191254  -1.748   0.0848 .
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## 
-## Residual standard error: 0.5171 on 69 degrees of freedom
+## Residual standard error: 0.5162 on 70 degrees of freedom
 ##   (10 observations deleted due to missingness)
-## Multiple R-squared:  0.2322, Adjusted R-squared:  0.07642 
-## F-statistic: 1.491 on 14 and 69 DF,  p-value: 0.1381</code></pre>
+## Multiple R-squared:  0.2239, Adjusted R-squared:  0.07981 
+## F-statistic: 1.554 on 13 and 70 DF,  p-value: 0.1204</code></pre>
 <p>The expected grades value is 4.50, when we consider average values of
-all predictors in the model and student is male.</p>
+all predictors in the model and student is male, but is not
+significant.</p>
 <p>no predictors in the model are significantly related to youth
 grades.</p>
 <pre class="r"><code># grades: youth report
-m2 &lt;- lm(grades ~ acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + selfeffic_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1, d1)
+m2 &lt;- lm(grades ~ acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1, d1)
 summary(m2) # only conversation about future came out significant 0.02</code></pre>
 <pre><code>## 
 ## Call:
 ## lm(formula = grades ~ acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + 
-##     knowschool_1 + selfeffic_1 + parnets_1 + welcome_1 + endorse_1 + 
-##     supported_1 + ptrel_1, data = d1)
+##     knowschool_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + 
+##     ptrel_1, data = d1)
 ## 
 ## Residuals:
 ##     Min      1Q  Median      3Q     Max 
-## -1.9341 -0.6737 -0.2215  0.5166  3.4030 
+## -1.9282 -0.6716 -0.2267  0.4946  3.4030 
 ## 
 ## Coefficients:
 ##              Estimate Std. Error t value Pr(&gt;|t|)  
-## (Intercept)   3.13668    1.30084   2.411   0.0183 *
-## acadhwi_1    -0.01702    0.24474  -0.070   0.9447  
-## checkhwi_1   -0.02296    0.20423  -0.112   0.9108  
-## struct_1     -0.42200    0.43673  -0.966   0.3369  
-## convfut_1    -0.48737    0.20349  -2.395   0.0190 *
-## knowschool_1  0.45753    0.34151   1.340   0.1843  
-## selfeffic_1   0.08167    0.52995   0.154   0.8779  
-## parnets_1     0.07335    0.28022   0.262   0.7942  
-## welcome_1     0.43046    0.52013   0.828   0.4105  
-## endorse_1    -0.25153    0.62513  -0.402   0.6885  
-## supported_1  -0.72023    0.66339  -1.086   0.2810  
-## ptrel_1       0.68854    0.43661   1.577   0.1189  
+## (Intercept)   3.15305    1.28836   2.447   0.0166 *
+## acadhwi_1    -0.01360    0.24220  -0.056   0.9554  
+## checkhwi_1   -0.02130    0.20267  -0.105   0.9166  
+## struct_1     -0.42186    0.43399  -0.972   0.3340  
+## convfut_1    -0.48590    0.20199  -2.406   0.0185 *
+## knowschool_1  0.47044    0.32900   1.430   0.1567  
+## parnets_1     0.07538    0.27815   0.271   0.7871  
+## welcome_1     0.45329    0.49546   0.915   0.3631  
+## endorse_1    -0.21149    0.56502  -0.374   0.7092  
+## supported_1  -0.74228    0.64372  -1.153   0.2524  
+## ptrel_1       0.70346    0.42308   1.663   0.1004  
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## 
-## Residual standard error: 1.154 on 77 degrees of freedom
+## Residual standard error: 1.147 on 78 degrees of freedom
 ##   (5 observations deleted due to missingness)
-## Multiple R-squared:  0.125,  Adjusted R-squared:  3.403e-05 
-## F-statistic:     1 on 11 and 77 DF,  p-value: 0.4541</code></pre>
-<pre class="r"><code>m2_cov &lt;- lm(grades ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + selfeffic_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1, d1)
+## Multiple R-squared:  0.1248, Adjusted R-squared:  0.01255 
+## F-statistic: 1.112 on 10 and 78 DF,  p-value: 0.3642</code></pre>
+<pre class="r"><code>m2_cov &lt;- lm(grades ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1, d1)
 summary(m2_cov) # no significant relations</code></pre>
 <pre><code>## 
 ## Call:
 ## lm(formula = grades ~ parent_eng_comf + youth_age + youth_gender + 
 ##     acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + 
-##     selfeffic_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + 
-##     ptrel_1, data = d1)
+##     parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1, 
+##     data = d1)
 ## 
 ## Residuals:
 ##     Min      1Q  Median      3Q     Max 
-## -2.2925 -0.7264 -0.0960  0.6335  3.6165 
+## -2.2930 -0.7288 -0.0967  0.6340  3.6161 
 ## 
 ## Coefficients:
-##                  Estimate Std. Error t value Pr(&gt;|t|)  
-## (Intercept)      4.498113   2.411166   1.866   0.0664 .
-## parent_eng_comf  0.037107   0.103526   0.358   0.7211  
-## youth_age       -0.037914   0.167098  -0.227   0.8212  
-## youth_gender2   -0.508125   0.275662  -1.843   0.0696 .
-## acadhwi_1       -0.086767   0.263692  -0.329   0.7431  
-## checkhwi_1      -0.205780   0.251748  -0.817   0.4166  
-## struct_1        -0.336443   0.458372  -0.734   0.4655  
-## convfut_1       -0.346086   0.215931  -1.603   0.1136  
-## knowschool_1     0.505747   0.365022   1.386   0.1704  
-## selfeffic_1     -0.004675   0.581751  -0.008   0.9936  
-## parnets_1        0.033742   0.292229   0.115   0.9084  
-## welcome_1        0.098859   0.582184   0.170   0.8657  
-## endorse_1       -0.097537   0.680302  -0.143   0.8864  
-## supported_1     -0.628104   0.741218  -0.847   0.3997  
-## ptrel_1          0.666493   0.458809   1.453   0.1509  
+##                 Estimate Std. Error t value Pr(&gt;|t|)  
+## (Intercept)      4.49651    2.38540   1.885   0.0636 .
+## parent_eng_comf  0.03689    0.09930   0.372   0.7114  
+## youth_age       -0.03787    0.16579  -0.228   0.8200  
+## youth_gender2   -0.50822    0.27340  -1.859   0.0673 .
+## acadhwi_1       -0.08699    0.26029  -0.334   0.7392  
+## checkhwi_1      -0.20573    0.24985  -0.823   0.4131  
+## struct_1        -0.33660    0.45463  -0.740   0.4616  
+## convfut_1       -0.34627    0.21319  -1.624   0.1089  
+## knowschool_1     0.50526    0.35740   1.414   0.1619  
+## parnets_1        0.03354    0.28903   0.116   0.9080  
+## welcome_1        0.09765    0.55821   0.175   0.8616  
+## endorse_1       -0.09979    0.61551  -0.162   0.8717  
+## supported_1     -0.62698    0.72260  -0.868   0.3886  
+## ptrel_1          0.66582    0.44783   1.487   0.1416  
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## 
-## Residual standard error: 1.172 on 68 degrees of freedom
+## Residual standard error: 1.163 on 69 degrees of freedom
 ##   (11 observations deleted due to missingness)
-## Multiple R-squared:  0.1703, Adjusted R-squared:  -0.0005136 
-## F-statistic: 0.997 on 14 and 68 DF,  p-value: 0.4664</code></pre>
-<p>The expected youth hw value is 1.59, when we consider average values
+## Multiple R-squared:  0.1703, Adjusted R-squared:  0.01399 
+## F-statistic: 1.089 on 13 and 69 DF,  p-value: 0.3827</code></pre>
+<p>The expected youth hw value is 1.71, when we consider average values
 of all predictors in the model and student is male.</p>
 <p>no predictors in the model are significantly related to youth hw.</p>
 <pre class="r"><code># hw best practices: youth report
-m3 &lt;- lm(y_hw ~ acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + selfeffic_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1, d1)
-summary(m3) # only self efficacy came out significant 0.05</code></pre>
+m3 &lt;- lm(y_hw ~ acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1, d1)
+summary(m3) # no significant relations</code></pre>
 <pre><code>## 
 ## Call:
 ## lm(formula = y_hw ~ acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + 
-##     knowschool_1 + selfeffic_1 + parnets_1 + welcome_1 + endorse_1 + 
-##     supported_1 + ptrel_1, data = d1)
+##     knowschool_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + 
+##     ptrel_1, data = d1)
 ## 
 ## Residuals:
 ##      Min       1Q   Median       3Q      Max 
-## -1.73569 -0.21054 -0.02288  0.26081  0.83698 
+## -1.83680 -0.21989 -0.05069  0.26163  0.79764 
 ## 
 ## Coefficients:
 ##              Estimate Std. Error t value Pr(&gt;|t|)    
-## (Intercept)   2.01714    0.47036   4.289 4.93e-05 ***
-## acadhwi_1     0.07469    0.08546   0.874   0.3847    
-## checkhwi_1    0.06855    0.07550   0.908   0.3666    
-## struct_1     -0.05020    0.16036  -0.313   0.7551    
-## convfut_1    -0.02084    0.07486  -0.278   0.7814    
-## knowschool_1  0.12113    0.12709   0.953   0.3434    
-## selfeffic_1   0.37534    0.19568   1.918   0.0586 .  
-## parnets_1    -0.04984    0.09987  -0.499   0.6191    
-## welcome_1    -0.26097    0.18788  -1.389   0.1686    
-## endorse_1    -0.08437    0.22540  -0.374   0.7091    
-## supported_1   0.33429    0.22610   1.478   0.1432    
-## ptrel_1      -0.14093    0.14800  -0.952   0.3438    
+## (Intercept)   2.11221    0.47532   4.444 2.74e-05 ***
+## acadhwi_1     0.09313    0.08630   1.079    0.284    
+## checkhwi_1    0.07655    0.07661   0.999    0.321    
+## struct_1     -0.04291    0.16291  -0.263    0.793    
+## convfut_1    -0.01476    0.07601  -0.194    0.846    
+## knowschool_1  0.17893    0.12547   1.426    0.158    
+## parnets_1    -0.04451    0.10145  -0.439    0.662    
+## welcome_1    -0.16669    0.18428  -0.905    0.368    
+## endorse_1     0.09386    0.20868   0.450    0.654    
+## supported_1   0.25793    0.22618   1.140    0.257    
+## ptrel_1      -0.09060    0.14802  -0.612    0.542    
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## 
-## Residual standard error: 0.4313 on 81 degrees of freedom
+## Residual standard error: 0.4383 on 82 degrees of freedom
 ##   (1 observation deleted due to missingness)
-## Multiple R-squared:  0.1643, Adjusted R-squared:  0.05077 
-## F-statistic: 1.447 on 11 and 81 DF,  p-value: 0.1683</code></pre>
-<pre class="r"><code>m3_cov &lt;- lm(y_hw ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + selfeffic_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1, d1)
+## Multiple R-squared:  0.1263, Adjusted R-squared:  0.01976 
+## F-statistic: 1.185 on 10 and 82 DF,  p-value: 0.3127</code></pre>
+<pre class="r"><code>m3_cov &lt;- lm(y_hw ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1, d1)
 summary(m3_cov) # no significant relations</code></pre>
 <pre><code>## 
 ## Call:
 ## lm(formula = y_hw ~ parent_eng_comf + youth_age + youth_gender + 
 ##     acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + 
-##     selfeffic_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + 
-##     ptrel_1, data = d1)
+##     parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1, 
+##     data = d1)
 ## 
 ## Residuals:
 ##      Min       1Q   Median       3Q      Max 
-## -1.68779 -0.18663 -0.01935  0.26744  0.83291 
+## -1.74852 -0.21406 -0.04553  0.26384  0.80817 
 ## 
 ## Coefficients:
 ##                  Estimate Std. Error t value Pr(&gt;|t|)  
-## (Intercept)      1.595636   0.921077   1.732   0.0877 .
-## parent_eng_comf  0.014084   0.039770   0.354   0.7243  
-## youth_age        0.033893   0.064158   0.528   0.5990  
-## youth_gender2    0.009182   0.105096   0.087   0.9306  
-## acadhwi_1        0.133724   0.100553   1.330   0.1879  
-## checkhwi_1       0.047358   0.095538   0.496   0.6217  
-## struct_1        -0.017283   0.174530  -0.099   0.9214  
-## convfut_1        0.002037   0.082371   0.025   0.9803  
-## knowschool_1     0.092045   0.140224   0.656   0.5137  
-## selfeffic_1      0.291143   0.222268   1.310   0.1946  
-## parnets_1       -0.064080   0.111013  -0.577   0.5657  
-## welcome_1       -0.226898   0.213851  -1.061   0.2924  
-## endorse_1       -0.030921   0.252097  -0.123   0.9027  
-## supported_1      0.309468   0.261118   1.185   0.2400  
-## ptrel_1         -0.174719   0.168947  -1.034   0.3047  
+## (Intercept)      1.710150   0.921595   1.856   0.0677 .
+## parent_eng_comf  0.027586   0.038607   0.715   0.4773  
+## youth_age        0.031415   0.064457   0.487   0.6275  
+## youth_gender2    0.013447   0.105581   0.127   0.8990  
+## acadhwi_1        0.149604   0.100328   1.491   0.1404  
+## checkhwi_1       0.042383   0.095950   0.442   0.6601  
+## struct_1        -0.004253   0.175135  -0.024   0.9807  
+## convfut_1        0.014770   0.082212   0.180   0.8579  
+## knowschool_1     0.122474   0.138992   0.881   0.3812  
+## parnets_1       -0.053661   0.111292  -0.482   0.6312  
+## welcome_1       -0.159550   0.208637  -0.765   0.4470  
+## endorse_1        0.101285   0.232189   0.436   0.6640  
+## supported_1      0.254244   0.259006   0.982   0.3297  
+## ptrel_1         -0.139249   0.167613  -0.831   0.4089  
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## 
-## Residual standard error: 0.4501 on 69 degrees of freedom
+## Residual standard error: 0.4524 on 70 degrees of freedom
 ##   (10 observations deleted due to missingness)
-## Multiple R-squared:  0.1551, Adjusted R-squared:  -0.01635 
-## F-statistic: 0.9046 on 14 and 69 DF,  p-value: 0.5577</code></pre>
-<p>The expected youth-reported parent support value is 2.76, when we
+## Multiple R-squared:  0.1341, Adjusted R-squared:  -0.02674 
+## F-statistic: 0.8337 on 13 and 70 DF,  p-value: 0.6237</code></pre>
+<p>The expected youth-reported parent support value is 2.60, when we
 consider average values of all predictors in the model and student is
 male.</p>
 <p>For every one-point increase in parents’ knowing school,
 youth-reported parent support increases, on average, 0.43 points</p>
 <pre class="r"><code># parent&#39;s support: youth report
-m4 &lt;- lm(y_parsupp ~ acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + selfeffic_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1, d1)
-summary(m4) # knowing school positive 0.001, struct though negative 0.09 trend</code></pre>
+m4 &lt;- lm(y_parsupp ~ acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1, d1)
+summary(m4) # knowing school positive 0.02</code></pre>
 <pre><code>## 
 ## Call:
 ## lm(formula = y_parsupp ~ acadhwi_1 + checkhwi_1 + struct_1 + 
-##     convfut_1 + knowschool_1 + selfeffic_1 + parnets_1 + welcome_1 + 
-##     endorse_1 + supported_1 + ptrel_1, data = d1)
+##     convfut_1 + knowschool_1 + parnets_1 + welcome_1 + endorse_1 + 
+##     supported_1 + ptrel_1, data = d1)
 ## 
 ## Residuals:
 ##     Min      1Q  Median      3Q     Max 
-## -1.2393 -0.4109  0.1274  0.3542  1.3213 
+## -1.3662 -0.3858  0.1481  0.3458  1.3281 
 ## 
 ## Coefficients:
-##              Estimate Std. Error t value Pr(&gt;|t|)   
-## (Intercept)   1.62356    0.63169   2.570   0.0120 * 
-## acadhwi_1     0.05004    0.11477   0.436   0.6640   
-## checkhwi_1    0.10391    0.10140   1.025   0.3085   
-## struct_1     -0.31987    0.21536  -1.485   0.1414   
-## convfut_1    -0.05706    0.10054  -0.568   0.5719   
-## knowschool_1  0.46266    0.17068   2.711   0.0082 **
-## selfeffic_1  -0.35268    0.26279  -1.342   0.1833   
-## parnets_1     0.19542    0.13412   1.457   0.1490   
-## welcome_1     0.33124    0.25232   1.313   0.1930   
-## endorse_1     0.34960    0.30271   1.155   0.2515   
-## supported_1  -0.35961    0.30365  -1.184   0.2398   
-## ptrel_1       0.11409    0.19876   0.574   0.5675   
+##              Estimate Std. Error t value Pr(&gt;|t|)  
+## (Intercept)   1.53424    0.63123   2.431   0.0173 *
+## acadhwi_1     0.03272    0.11460   0.286   0.7760  
+## checkhwi_1    0.09640    0.10174   0.948   0.3462  
+## struct_1     -0.32671    0.21635  -1.510   0.1349  
+## convfut_1    -0.06278    0.10094  -0.622   0.5357  
+## knowschool_1  0.40835    0.16663   2.451   0.0164 *
+## parnets_1     0.19041    0.13473   1.413   0.1613  
+## welcome_1     0.24265    0.24472   0.992   0.3243  
+## endorse_1     0.18213    0.27713   0.657   0.5129  
+## supported_1  -0.28786    0.30037  -0.958   0.3407  
+## ptrel_1       0.06681    0.19657   0.340   0.7348  
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## 
-## Residual standard error: 0.5793 on 81 degrees of freedom
+## Residual standard error: 0.5821 on 82 degrees of freedom
 ##   (1 observation deleted due to missingness)
-## Multiple R-squared:  0.1883, Adjusted R-squared:  0.07802 
-## F-statistic: 1.708 on 11 and 81 DF,  p-value: 0.08623</code></pre>
-<pre class="r"><code>m4_cov &lt;- lm(y_parsupp ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + selfeffic_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1, d1)
-summary(m4_cov) # knowing school positive 0.01</code></pre>
+## Multiple R-squared:  0.1702, Adjusted R-squared:  0.06901 
+## F-statistic: 1.682 on 10 and 82 DF,  p-value: 0.09891</code></pre>
+<pre class="r"><code>m4_cov &lt;- lm(y_parsupp ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1, d1)
+summary(m4_cov) # knowing school positive 0.03</code></pre>
 <pre><code>## 
 ## Call:
 ## lm(formula = y_parsupp ~ parent_eng_comf + youth_age + youth_gender + 
 ##     acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + 
-##     selfeffic_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + 
-##     ptrel_1, data = d1)
+##     parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1, 
+##     data = d1)
 ## 
 ## Residuals:
 ##     Min      1Q  Median      3Q     Max 
-## -1.2812 -0.2920  0.1173  0.3373  1.1644 
+## -1.4286 -0.3444  0.1181  0.3492  1.1914 
 ## 
 ## Coefficients:
 ##                 Estimate Std. Error t value Pr(&gt;|t|)  
-## (Intercept)      2.76038    1.17200   2.355   0.0214 *
-## parent_eng_comf -0.02334    0.05060  -0.461   0.6461  
-## youth_age       -0.09418    0.08164  -1.154   0.2526  
-## youth_gender2    0.13231    0.13373   0.989   0.3259  
-## acadhwi_1        0.07742    0.12795   0.605   0.5471  
-## checkhwi_1       0.03063    0.12157   0.252   0.8018  
-## struct_1        -0.19841    0.22208  -0.893   0.3747  
-## convfut_1       -0.08172    0.10481  -0.780   0.4382  
-## knowschool_1     0.42585    0.17842   2.387   0.0197 *
-## selfeffic_1     -0.40649    0.28282  -1.437   0.1552  
-## parnets_1        0.17761    0.14126   1.257   0.2129  
-## welcome_1        0.34862    0.27211   1.281   0.2044  
-## endorse_1        0.48740    0.32077   1.519   0.1332  
-## supported_1     -0.35314    0.33225  -1.063   0.2916  
-## ptrel_1          0.02549    0.21497   0.119   0.9060  
+## (Intercept)      2.60050    1.17556   2.212   0.0302 *
+## parent_eng_comf -0.04219    0.04925  -0.857   0.3946  
+## youth_age       -0.09072    0.08222  -1.103   0.2736  
+## youth_gender2    0.12635    0.13468   0.938   0.3514  
+## acadhwi_1        0.05525    0.12798   0.432   0.6673  
+## checkhwi_1       0.03758    0.12239   0.307   0.7597  
+## struct_1        -0.21660    0.22340  -0.970   0.3356  
+## convfut_1       -0.09950    0.10487  -0.949   0.3460  
+## knowschool_1     0.38336    0.17729   2.162   0.0340 *
+## parnets_1        0.16306    0.14196   1.149   0.2546  
+## welcome_1        0.25459    0.26613   0.957   0.3420  
+## endorse_1        0.30282    0.29617   1.022   0.3101  
+## supported_1     -0.27604    0.33038  -0.836   0.4063  
+## ptrel_1         -0.02404    0.21380  -0.112   0.9108  
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## 
-## Residual standard error: 0.5727 on 69 degrees of freedom
+## Residual standard error: 0.577 on 70 degrees of freedom
 ##   (10 observations deleted due to missingness)
-## Multiple R-squared:  0.2349, Adjusted R-squared:  0.07962 
-## F-statistic: 1.513 on 14 and 69 DF,  p-value: 0.1297</code></pre>
-<p>The expected youth-reported parent involvement value is 4.15, when we
-consider average values of all predictors in the model and student is
-male.</p>
-<p>For every one-point increase in parents’ knowing school and feeling
-welcome, youth-reported parent involvement increases, on average, 0.44
-and 0.62 points, respectively.</p>
-<p>Also, for every one-point increase in parents’ english comfort,
-youth-reported parent involvement decreases, on average, 0.15 and
-points. (is this interpretation correct?)</p>
+## Multiple R-squared:  0.212,  Adjusted R-squared:  0.06561 
+## F-statistic: 1.448 on 13 and 70 DF,  p-value: 0.1599</code></pre>
 <p>1 Nada cómodo 2 Un poco cómodo 3 Moderadamente cómodo 4 Cómodo 5 Muy
 cómodo</p>
 <pre class="r"><code>ggplot(d1, aes(parent_eng_comf)) +
 geom_bar(alpha = 0.7)</code></pre>
 <pre><code>## Warning: Removed 8 rows containing non-finite outside the scale range
 ## (`stat_count()`).</code></pre>
-<p><img role="img" src="data:image/png;base64,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" width="672" /></p>
+<p><img role="img" src="data:image/png;base64,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" width="672" />
+The expected youth-reported parent involvement value is 3.29, when we
+consider average values of all predictors in the model and student is
+male.</p>
+<p>For every one-point increase in parents’ english comfort,
+youth-reported parent involvement decreases, on average, 0.17 and
+points. (is this interpretation correct?)</p>
 <pre class="r"><code># parental involvement: youth report
-m5 &lt;- lm(y_parinv ~ acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + selfeffic_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1, d1)
-summary(m5) # know school a trend 0.06</code></pre>
+m5 &lt;- lm(y_parinv ~ acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1, d1)
+summary(m5) # no relations</code></pre>
 <pre><code>## 
 ## Call:
 ## lm(formula = y_parinv ~ acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + 
-##     knowschool_1 + selfeffic_1 + parnets_1 + welcome_1 + endorse_1 + 
-##     supported_1 + ptrel_1, data = d1)
-## 
-## Residuals:
-##     Min      1Q  Median      3Q     Max 
-## -1.5599 -0.5053  0.1516  0.5161  1.2492 
-## 
-## Coefficients:
-##               Estimate Std. Error t value Pr(&gt;|t|)   
-## (Intercept)   2.602670   0.793001   3.282  0.00152 **
-## acadhwi_1     0.099834   0.144084   0.693  0.49036   
-## checkhwi_1    0.143412   0.127290   1.127  0.26321   
-## struct_1     -0.293001   0.270358  -1.084  0.28169   
-## convfut_1    -0.072852   0.126212  -0.577  0.56539   
-## knowschool_1  0.395529   0.214272   1.846  0.06856 . 
-## selfeffic_1  -0.507980   0.329897  -1.540  0.12750   
-## parnets_1     0.006974   0.168376   0.041  0.96706   
-## welcome_1     0.495039   0.316757   1.563  0.12199   
-## endorse_1     0.118010   0.380007   0.311  0.75694   
-## supported_1  -0.170995   0.381195  -0.449  0.65494   
-## ptrel_1      -0.163727   0.249521  -0.656  0.51358   
-## ---
-## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
-## 
-## Residual standard error: 0.7272 on 81 degrees of freedom
-##   (1 observation deleted due to missingness)
-## Multiple R-squared:  0.09891,    Adjusted R-squared:  -0.02346 
-## F-statistic: 0.8083 on 11 and 81 DF,  p-value: 0.6316</code></pre>
-<pre class="r"><code>m5_cov &lt;- lm(y_parinv ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + selfeffic_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1, d1)
-summary(m5_cov) # parent eng conf negative and significant 0.01, knowschool positive 0.03, welcome positive and significant &lt; 0.05</code></pre>
-<pre><code>## 
-## Call:
-## lm(formula = y_parinv ~ parent_eng_comf + youth_age + youth_gender + 
-##     acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + 
-##     selfeffic_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + 
+##     knowschool_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + 
 ##     ptrel_1, data = d1)
 ## 
 ## Residuals:
 ##     Min      1Q  Median      3Q     Max 
-## -1.5021 -0.3892  0.0813  0.4789  1.1570 
+## -1.5047 -0.4715  0.1751  0.5407  1.2692 
 ## 
 ## Coefficients:
-##                 Estimate Std. Error t value Pr(&gt;|t|)  
-## (Intercept)      3.50207    1.36585   2.564   0.0125 *
-## parent_eng_comf -0.14512    0.05897  -2.461   0.0164 *
-## youth_age       -0.04926    0.09514  -0.518   0.6063  
-## youth_gender2    0.05843    0.15584   0.375   0.7089  
-## acadhwi_1        0.17842    0.14911   1.197   0.2356  
-## checkhwi_1       0.08311    0.14167   0.587   0.5593  
-## struct_1        -0.26868    0.25881  -1.038   0.3028  
-## convfut_1       -0.10397    0.12215  -0.851   0.3976  
-## knowschool_1     0.41503    0.20794   1.996   0.0499 *
-## selfeffic_1     -0.54231    0.32960  -1.645   0.1044  
-## parnets_1        0.02000    0.16462   0.121   0.9037  
-## welcome_1        0.65470    0.31712   2.065   0.0427 *
-## endorse_1        0.46156    0.37383   1.235   0.2211  
-## supported_1     -0.50909    0.38721  -1.315   0.1929  
-## ptrel_1         -0.30516    0.25053  -1.218   0.2273  
+##                Estimate Std. Error t value Pr(&gt;|t|)   
+## (Intercept)   2.4740108  0.7951515   3.111  0.00256 **
+## acadhwi_1     0.0748821  0.1443619   0.519  0.60536   
+## checkhwi_1    0.1325940  0.1281540   1.035  0.30388   
+## struct_1     -0.3028565  0.2725319  -1.111  0.26970   
+## convfut_1    -0.0810848  0.1271485  -0.638  0.52543   
+## knowschool_1  0.3173043  0.2098961   1.512  0.13445   
+## parnets_1    -0.0002393  0.1697116  -0.001  0.99888   
+## welcome_1     0.3674430  0.3082711   1.192  0.23672   
+## endorse_1    -0.1232058  0.3490978  -0.353  0.72505   
+## supported_1  -0.0676497  0.3783644  -0.179  0.85854   
+## ptrel_1      -0.2318350  0.2476139  -0.936  0.35188   
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## 
-## Residual standard error: 0.6674 on 69 degrees of freedom
+## Residual standard error: 0.7333 on 82 degrees of freedom
+##   (1 observation deleted due to missingness)
+## Multiple R-squared:  0.07253,    Adjusted R-squared:  -0.04058 
+## F-statistic: 0.6413 on 10 and 82 DF,  p-value: 0.7744</code></pre>
+<pre class="r"><code>m5_cov &lt;- lm(y_parinv ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1, d1)
+summary(m5_cov) # parent eng conf negative and significant &lt; 0.01, trends: knowschool &lt; 0.10, welcome &lt; 0.10</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = y_parinv ~ parent_eng_comf + youth_age + youth_gender + 
+##     acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + 
+##     parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1, 
+##     data = d1)
+## 
+## Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -1.50245 -0.42574  0.07568  0.46417  1.23655 
+## 
+## Coefficients:
+##                   Estimate Std. Error t value Pr(&gt;|t|)   
+## (Intercept)      3.2887654  1.3761643   2.390  0.01955 * 
+## parent_eng_comf -0.1702686  0.0576494  -2.954  0.00428 **
+## youth_age       -0.0446432  0.0962499  -0.464  0.64421   
+## youth_gender2    0.0504867  0.1576582   0.320  0.74975   
+## acadhwi_1        0.1488415  0.1498146   0.994  0.32389   
+## checkhwi_1       0.0923810  0.1432760   0.645  0.52118   
+## struct_1        -0.2929502  0.2615196  -1.120  0.26646   
+## convfut_1       -0.1276893  0.1227629  -1.040  0.30186   
+## knowschool_1     0.3583465  0.2075486   1.727  0.08866 . 
+## parnets_1        0.0005876  0.1661865   0.004  0.99719   
+## welcome_1        0.5292543  0.3115452   1.699  0.09380 . 
+## endorse_1        0.2152991  0.3467142   0.621  0.53664   
+## supported_1     -0.4062256  0.3867586  -1.050  0.29718   
+## ptrel_1         -0.3712332  0.2502874  -1.483  0.14250   
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 0.6755 on 70 degrees of freedom
 ##   (10 observations deleted due to missingness)
-## Multiple R-squared:  0.2459, Adjusted R-squared:  0.09295 
-## F-statistic: 1.608 on 14 and 69 DF,  p-value: 0.09904</code></pre>
+## Multiple R-squared:  0.2164, Adjusted R-squared:  0.07083 
+## F-statistic: 1.487 on 13 and 70 DF,  p-value: 0.1444</code></pre>
 <p>The expected parent-reported self-efficacy value is 0.39, when we
 consider average values of all predictors in the model and student is
 male.</p>
@@ -2373,7 +2374,7 @@ summary(m6) # know school, welcome, endorse, ptrel trending</code></pre>
 ## Multiple R-squared:  0.6575, Adjusted R-squared:  0.6157 
 ## F-statistic: 15.74 on 10 and 82 DF,  p-value: 2.452e-15</code></pre>
 <pre class="r"><code>m6_cov &lt;- lm(selfeffic_1 ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1, d1)
-summary(m6_cov) # par eng conf positive significant 0.04, welcome positive 0.05, endorse positive 0.001</code></pre>
+summary(m6_cov) # par eng conf positive significant 0.03, welcome positive 0.05, endorse positive &lt; 0.001</code></pre>
 <pre><code>## 
 ## Call:
 ## lm(formula = selfeffic_1 ~ parent_eng_comf + youth_age + youth_gender + 
@@ -2450,7 +2451,7 @@ summary(m7) # know school trending, conv fut negative and significant 0.01</code
 ## Multiple R-squared:  0.1695, Adjusted R-squared:  0.06439 
 ## F-statistic: 1.612 on 10 and 79 DF,  p-value: 0.1183</code></pre>
 <pre class="r"><code>m7_cov &lt;- lm(gen_grades ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1, d1)
-summary(m7_cov) # know school positive and significant 0.03, gender negative and significant 0.004</code></pre>
+summary(m7_cov) # know school positive and significant 0.02, gender negative and significant 0.001</code></pre>
 <pre><code>## 
 ## Call:
 ## lm(formula = gen_grades ~ parent_eng_comf + youth_age + youth_gender + 

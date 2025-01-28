@@ -24,6 +24,7 @@ library(AICcmodavg)
 
 library(mice)
 library(VIM)
+# library(miceadds)
 
 theme_set(theme_minimal())
 ```
@@ -51,7 +52,7 @@ d2 <- d1 %>%
   mutate(parent_eng_comf = as.numeric(parent_eng_comf),
          youth_gender = factor(youth_gender),
          youth_age = as.numeric(youth_age))
-
+View(d2)
 view_df(d2)
 ```
 
@@ -59,6 +60,7 @@ view_df(d2)
 ```{r}
 summary(d2)
 ```
+# Inspect missingness patterns
 
 outcomes with no NA:
 y_sch_eng       
@@ -67,82 +69,198 @@ y_parinv
 y_hw 
 selfeffic_1 
 
-
-outcomes with missing values:
-grades (youth report): 4 NA
-gen_grades (parent report):  3 NA
-
 predictors with no NA:
-
 youth_gender
 struct_1
 convfut_1
 knowschool_1
-selfeffic_1
 parnets_1
 welcome_1
 endorse_1      
 supported_1      
 ptrel_1
 
-predictors with missing values:
-parent_eng_comf: 8 
-acadhwi_1:  1      
-checkhwi_1: 1
-youth_age: 1
-
-
-This figure shows there are 17 missing values
+This figure shows:
+80 rows have no missing values
+5 rows are missing parent_eng_comf 
+1 row is missing grades
+3 rows are missing grades and parent_eng_comf
+3 rows are missing gen_grades
+1 row is missing acadhwi_1 and checkhwi_1
+1 row is missing youth_age
 
 ```{r}
 md.pattern(d2)
 ```
 
-This plot shows that 86% is not missing 
+# Inspect missingness proportions
+
+This plot shows proportion of missingness: 85% is not missing 
 ```{r}
-nice_plot <- aggr(d1, col = c ('navyblue', 'yellow'),
+nice_plot <- aggr(d2, col = c ('cornflowerblue', 'yellow'),
                   numbers = TRUE, sortVars = TRUE,
                   labels = names (d1), cex.axis = .7,
                   gap = 4, ylab = c ("Missing data", "Pattern"))
 ```
+# Create a missingness or margin plot to further inspect missingness
+```{r}
+marginplot(d2[, c("acadhwi_1", "checkhwi_1")], col = mdc(1:2), cex = 1.2, cex.lab = 1.2, cex.numbers = 1.3, pch = 19) # only 2 variables at a time
+```
+
+### Imputation preprocessing
+
+Following this instructions: https://library.virginia.edu/data/articles/getting-started-with-multiple-imputation-in-r
+
+This person suggest to remove variables that have more than 25% misingness, character variables, and to remove variables that are highly correlated with others as that might mess up the imputations. Also they suggest not make any transformations at this point. 
+
+# Specify a separate imputation model for variables of interest is they are not numerical (code from link above)
+
+# Ordered categorical variables 
+poly <- c("patriot_amident", "pid_x")
+
+# Dichotomous variable
+log <- c("manuf")
+
+# Unordered categorical variable 
+poly2 <- c("china_econ")
+
+meth[poly] <- "polr"
+meth[log] <- "logreg"
+meth[poly2] <- "polyreg"
 
 ```{r}
-imputed_data <- mice(d2, m = 5, maxit = 50,
-                     method = 'pmm', seed = 5000)
+d3 <- d2 %>%
+  select(-school_id, -family_id, -participant_id)
+
+view_df(d3)
+
+str(d3) # all except gender (factor) are numerical variables. 
+```
+
+### Imputation
+```{r}
+# We run the mice code with 0 iterations 
+imp <- mice(d3, maxit=0)
+
+# Extract predictorMatrix and methods of imputation 
+predM <- imp$predictorMatrix
+meth <- imp$method # Empty cells in the method matrix mean those variables will not be imputed
+
+head(predM)
+```
+# Basic imputation using predictive mean matching (PMM), changing default number of imputed data sets from 5 to 20.
+```{r}
+imputed_data <- mice(d3, 
+                     m = 50,
+                     method = 'pmm',
+                     print =  FALSE)
 
 summary(imputed_data)
 
-imputed_data$data$parent_eng_comf
+imputed_data$data$parent_eng_comf # this is still showing missing data
 ```
 
+# Check out one of the complete data sets (the second of 20, in this case)
 ```{r}
-d2$parent_eng_comf
-```
-```{r}
-complete_data <- complete(imputed_data, 2)
-```
-This plot show that there is no missing values now. 
-```{r}
-nice_plot <- aggr(complete_data, col = c ('navyblue', 'yellow'),
+imputed_data_set2 <- complete(imputed_data, action = 2)
+View(imputed_data_set2) # if we were doing single imputation, we'd stop here, but we are not.
+
+nice_plot <- aggr(imputed_data_set2, col = c ('cornflowerblue', 'yellow'),
                   numbers = TRUE, sortVars = TRUE,
                   labels = names (d1), cex.axis = .7,
-                  gap = 4, ylab = c ("Missing data", "Pattern"))
+                  gap = 4, ylab = c ("Missing data", "Pattern")) # This plot show that there is no missing values now. 
+
+imputed_data_set2$parent_eng_comf # checking completeness
 ```
+## Now going back to the imputed_data
+
+# Examine strip plot 
 ```{r}
-complete_data
+stripplot(imputed_data, pch = 20, cex = 1.2) # Red dots are imputed values, blue are observed values
 ```
 
+# Examine kernel density plot
 ```{r}
-ggplot(d2, aes(parent_eng_comf)) +
-geom_bar(alpha = 0.7)
-```
-```{r}
-ggplot(complete_data, aes(parent_eng_comf)) +
-geom_bar(alpha = 0.7)
+densityplot(imputed_data, scales = list(x = list(relation = "free")), layout = c(3, 1)) # Red lines are imputed value distributions, blue are observed value distributions
 ```
 
+### Analytic model fitting example
+
+# Multiple regression, outcome: y_sch_eng
 ```{r}
-complete_data %>%
-  haven::write_sav(here("outcomes paper/data_outcomes", "p_y_w1_for_analysesjan25_imputted.sav"))
+fit1 <- with(imputed_data, lm(y_sch_eng ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1))
+
+est1 <- pool(fit1)
+summary(est1) # checkhwi_1  beta = 0.24, p < 0.01
+
+pool.r.squared(fit1) # 0.23
 ```
+
+# Multiple regression, outcome: grades (youth report)
+```{r}
+fit2 <- with(imputed_data, lm(grades ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1))
+
+est2 <- pool(fit2)
+summary(est2) # youth being female: beta = -0.56, p = 0.03
+
+pool.r.squared(fit2) # 0.16
+```
+# Multiple regression, outcome: hw best practices (youth report)
+```{r}
+fit3 <- with(imputed_data, lm(y_hw ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1))
+
+est3 <- pool(fit3)
+summary(est3) # no predictors were significantly related with the outcome
+
+pool.r.squared(fit3) # 0.15
+```
+# Multiple regression, outcome: y_parsupp (youth report)
+```{r}
+fit4 <- with(imputed_data, lm(y_parsupp ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1))
+
+est4 <- pool(fit4)
+summary(est4) # knowschool_1  beta = 0.41 p = 0.02
+
+pool.r.squared(fit4) # 0.23
+```
+
+# Multiple regression, outcome: y_parinv (youth report)
+```{r}
+fit5 <- with(imputed_data, lm(y_parinv ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1))
+
+est5 <- pool(fit5)
+summary(est5) 
+
+# parent_eng_comf beta = -0.15, p = 0.02
+# knowschool_1  beta = 0.41, p = 0.05
+
+pool.r.squared(fit5) # 0.18
+```
+# Multiple regression, outcome: self efficacy (parent report)
+```{r}
+fit6 <- with(imputed_data, lm(selfeffic_1 ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1))
+
+est6 <- pool(fit6)
+summary(est6) 
+
+# parent_eng_comf beta = 0.05, p = 0.02
+# welcome_1 beta = 0.24, p = 0.02
+# endorse_1  beta = 0.44, p < 0.001
+
+pool.r.squared(fit6) # 0.68
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
