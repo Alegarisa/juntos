@@ -42,8 +42,8 @@ CM suggested to standardize the betas, however:
 * outcomes are on a:
 - 4-point scale (selfeffic_1, y_parsupp, y_parinv, y_hw)
 - 5-point scale (y_sch_eng)
-- 6-point scale (gen_grades)
-- 6-point scale (grades)
+- 8-point scale (gen_grades)
+- 8-point scale (grades)
 
 * covariates are  
 - parent_eng_comf = 5-point scale 
@@ -187,9 +187,3 @@ attend_pta		range: 0-1 (binary)
 sats_contact 	range: 1-4 (multiple)
 
 Can a composite be made with these? 
-
-
-
-For discussion: acknowledge that if kids were born in the US, that parents have been living in the US for at least 12-14 years, which is different for someone who just got here, but at the same time, it is Oregon. 
-
-
