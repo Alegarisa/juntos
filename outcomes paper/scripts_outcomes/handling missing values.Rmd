@@ -36,7 +36,7 @@ Trying to handle trhe missing data
 ```{r}
 d <- read_sav(here("outcomes paper/data_outcomes", "p_y_w1_for_analysesjan25.sav")) # 94 rows
 
-view_df(d)
+# view_df(d)
 ```
 
 
@@ -44,7 +44,7 @@ view_df(d)
 d1 <- d %>%
   select(school_id, family_id, participant_id, parent_eng_comf, youth_age, youth_gender, acadhwi_1, checkhwi_1, checkhwi_1, struct_1, convfut_1, knowschool_1, selfeffic_1, parnets_1, welcome_1, endorse_1, supported_1, ptrel_1, y_sch_eng, y_parsupp, y_parinv, y_hw, gen_grades, grades)
 
-view_df(d1)
+# view_df(d1)
 ```
 
 ```{r}
@@ -52,8 +52,8 @@ d2 <- d1 %>%
   mutate(parent_eng_comf = as.numeric(parent_eng_comf),
          youth_gender = factor(youth_gender),
          youth_age = as.numeric(youth_age))
-View(d2)
-view_df(d2)
+# View(d2)
+# view_df(d2)
 ```
 
 
@@ -132,7 +132,7 @@ meth[poly2] <- "polyreg"
 d3 <- d2 %>%
   select(-school_id, -family_id, -participant_id)
 
-view_df(d3)
+# view_df(d3)
 
 str(d3) # all except gender (factor) are numerical variables. 
 ```
@@ -163,7 +163,7 @@ imputed_data$data$parent_eng_comf # this is still showing missing data
 # Check out one of the complete data sets (the second of 20, in this case)
 ```{r}
 imputed_data_set2 <- complete(imputed_data, action = 2)
-View(imputed_data_set2) # if we were doing single imputation, we'd stop here, but we are not.
+# View(imputed_data_set2) # if we were doing single imputation, we'd stop here, but we are not.
 
 nice_plot <- aggr(imputed_data_set2, col = c ('cornflowerblue', 'yellow'),
                   numbers = TRUE, sortVars = TRUE,
@@ -184,9 +184,47 @@ stripplot(imputed_data, pch = 20, cex = 1.2) # Red dots are imputed values, blue
 densityplot(imputed_data, scales = list(x = list(relation = "free")), layout = c(3, 1)) # Red lines are imputed value distributions, blue are observed value distributions
 ```
 
-### Analytic model fitting example
+################################################################## standarizing variables ##################################################################
 
-# Multiple regression, outcome: y_sch_eng
+# Step 1: Convert to long format for processing
+```{r}
+imputed_long <- complete(imputed_data, action = "long", include = TRUE)
+
+imputed_long <- imputed_long %>%
+  mutate(youth_gender = as.numeric(youth_gender))
+
+colnames(imputed_long)
+```
+
+# Step 2: Function to standardize within each imputed dataset
+```{r}
+standardize <- function(df) {
+  df <- df %>%
+    mutate(across(c(selfeffic_1, y_sch_eng, y_parsupp, y_parinv, y_hw, gen_grades, grades, parent_eng_comf, youth_age, acadhwi_1, checkhwi_1, struct_1, convfut_1, knowschool_1, parnets_1, welcome_1, endorse_1, supported_1, ptrel_1), ~ scale(.)[,1]))  # Standardizing variables
+  return(df)
+} # STANDARDIZING ALL EXCEPT GENDER THAT IS A FACTOR
+```
+
+# Step 3: Apply standardization within each imputed dataset
+```{r}
+imputed_long <- imputed_long %>%
+  group_by(.imp) %>%
+  group_modify(~ standardize(.x))
+
+imputed_long <- imputed_long %>%
+  mutate(youth_gender = factor(youth_gender),
+         youth_gender = relevel(youth_gender, ref = "1")) # male
+```
+
+# Step 4: Convert back to `mids` object
+```{r}
+imputed_data_std <- as.mids(as.data.frame(imputed_long))
+```
+
+
+### Analytic model fitting ###
+
+# Multiple regression, outcome: y_sch_eng (unstandardized)
 ```{r}
 fit1 <- with(imputed_data, lm(y_sch_eng ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1))
 
@@ -195,6 +233,18 @@ summary(est1) # checkhwi_1  beta = 0.24, p < 0.01
 
 pool.r.squared(fit1) # 0.23
 ```
+# Multiple regression, outcome: y_sch_eng (standardized)
+```{r}
+fit1 <- with(imputed_data_std, lm(y_sch_eng ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1))
+
+est1 <- pool(fit1)
+summary(est1) # checkhwi_1  beta = 0.31, p < 0.01
+
+pool.r.squared(fit1) # 0.23
+```
+
+HERE
+
 
 # Multiple regression, outcome: grades (youth report)
 ```{r}
@@ -248,17 +298,82 @@ summary(est6)
 # endorse_1  beta = 0.44, p < 0.001
 
 pool.r.squared(fit6) # 0.68
+
+est6$pooled$b
 ```
 
 
+# trying chatGPT code
+
+# Step 1: Convert to long format for processing
+```{r}
+imputed_long <- complete(imputed_data, action = "long", include = TRUE)
+
+imputed_long <- imputed_long %>%
+  mutate(youth_gender = as.numeric(youth_gender))
+
+colnames(imputed_long)
+```
+
+# Step 2: Function to standardize within each imputed dataset
+```{r}
+standardize <- function(df) {
+  df <- df %>%
+    mutate(across(c(selfeffic_1, y_sch_eng, y_parsupp, y_parinv, y_hw, gen_grades, grades, parent_eng_comf, youth_age, acadhwi_1, checkhwi_1, struct_1, convfut_1, knowschool_1, parnets_1, welcome_1, endorse_1, supported_1, ptrel_1), ~ scale(.)[,1]))  # Standardizing variables
+  return(df)
+} # STANDARDIZING ALL EXCEPT GENDER THAT IS A FACTOR
+```
+
+# Step 3: Apply standardization within each imputed dataset
+```{r}
+imputed_long <- imputed_long %>%
+  group_by(.imp) %>%
+  group_modify(~ standardize(.x))
+
+imputed_long <- imputed_long %>%
+  mutate(youth_gender = factor(youth_gender),
+         youth_gender = relevel(youth_gender, ref = "1")) # male
+```
+
+# Step 4: Convert back to `mids` object
+```{r}
+imputed_data_std <- as.mids(as.data.frame(imputed_long))
+```
+
+# Step 5: Run regression on standardized data
+```{r}
+model_std <- with(imputed_data_std, lm(selfeffic_1 ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1))
+```
 
 
+# Step 6: Pool the results to get standardized betas
+```{r}
+pooled_results <- pool(model_std)
+```
+
+# Show standardized betas
+```{r}
+summary(pooled_results)
+
+# parent_eng_comf beta = 0.16, p = 0.03
+# welcome_1 beta = 0.26, p = 0.02
+# endorse_1  beta = 0.46, p < 0.001
+
+pool.r.squared(pooled_results) # 0.68
+```
+# compare to not standardized:
+```{r}
+summary(est6) 
+
+# parent_eng_comf beta = 0.05, p = 0.02
+# welcome_1 beta = 0.24, p = 0.02
+# endorse_1  beta = 0.44, p < 0.001
+
+pool.r.squared(fit6) # 0.68
+```
 
 
-
-
-
-
+y_sch_eng, y_parsupp, y_parinv, y_hw, gen_grades, grades
 
 
 
