@@ -184,7 +184,7 @@ stripplot(imputed_data, pch = 20, cex = 1.2) # Red dots are imputed values, blue
 densityplot(imputed_data, scales = list(x = list(relation = "free")), layout = c(3, 1)) # Red lines are imputed value distributions, blue are observed value distributions
 ```
 
-################################################################## standarizing variables ##################################################################
+############################################################ standarizing variables - start ##################################################################
 
 # Step 1: Convert to long format for processing
 ```{r}
@@ -222,9 +222,12 @@ imputed_data_std <- as.mids(as.data.frame(imputed_long))
 ```
 
 
+############################################################# standarizing variables  - end ###############################################################
+
+
 ### Analytic model fitting ###
 
-# Multiple regression, outcome: y_sch_eng (unstandardized)
+# Multiple regression, outcome: y_sch_eng
 ```{r}
 fit1 <- with(imputed_data, lm(y_sch_eng ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1))
 
@@ -233,28 +236,46 @@ summary(est1) # checkhwi_1  beta = 0.24, p < 0.01
 
 pool.r.squared(fit1) # 0.23
 ```
+# Step 5: Run regression on standardized data
+# Step 6: Pool the results to get standardized betas
+
 # Multiple regression, outcome: y_sch_eng (standardized)
 ```{r}
-fit1 <- with(imputed_data_std, lm(y_sch_eng ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1))
+fit1_st <- with(imputed_data_std, lm(y_sch_eng ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1))
 
-est1 <- pool(fit1)
-summary(est1) # checkhwi_1  beta = 0.31, p < 0.01
+est1_st <- pool(fit1_st)
+summary(est1_st) # checkhwi_1  beta = 0.31, p < 0.01
 
-pool.r.squared(fit1) # 0.23
+pool.r.squared(fit1_st) # 0.23
 ```
-
-HERE
-
 
 # Multiple regression, outcome: grades (youth report)
 ```{r}
 fit2 <- with(imputed_data, lm(grades ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1))
 
 est2 <- pool(fit2)
-summary(est2) # youth being female: beta = -0.56, p = 0.03
+summary(est2) 
+# youth being female: beta = -0.56, p = 0.03
+# convfut_1: beta = -0.42, p = 0.04
 
-pool.r.squared(fit2) # 0.16
+pool.r.squared(fit2) # 0.17
 ```
+
+# Step 5: Run regression on standardized data
+# Step 6: Pool the results to get standardized betas
+# Multiple regression, outcome: grades (youth report) (standardized)
+```{r}
+fit2_st <- with(imputed_data_std, lm(grades ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1))
+
+est2_st <- pool(fit2_st)
+summary(est2_st)
+# youth being female: beta = -0.48, p = 0.03
+# convfut_1: beta = -0.26, p = 0.04
+
+pool.r.squared(fit2_st) # 0.17
+```
+
+
 # Multiple regression, outcome: hw best practices (youth report)
 ```{r}
 fit3 <- with(imputed_data, lm(y_hw ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1))
@@ -264,6 +285,18 @@ summary(est3) # no predictors were significantly related with the outcome
 
 pool.r.squared(fit3) # 0.15
 ```
+# Step 5: Run regression on standardized data
+# Step 6: Pool the results to get standardized betas
+# Multiple regression, outcome: hw best practices (standardized)
+```{r}
+fit3_st <- with(imputed_data_std, lm(y_hw ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1))
+
+est3_st <- pool(fit3_st)
+summary(est3_st) # no predictors were significantly related with the outcome
+
+pool.r.squared(fit3_st) # 0.15
+```
+
 # Multiple regression, outcome: y_parsupp (youth report)
 ```{r}
 fit4 <- with(imputed_data, lm(y_parsupp ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1))
@@ -273,6 +306,18 @@ summary(est4) # knowschool_1  beta = 0.41 p = 0.02
 
 pool.r.squared(fit4) # 0.23
 ```
+# Step 5: Run regression on standardized data
+# Step 6: Pool the results to get standardized betas
+# Multiple regression, outcome: y_parsupp (youth report) (standardized)
+```{r}
+fit4_st <- with(imputed_data_std, lm(y_parsupp ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1))
+
+est4_st <- pool(fit4_st)
+summary(est4_st) # knowschool_1  beta = 0.35 p = 0.02
+
+pool.r.squared(fit4_st) # 0.23
+```
+
 
 # Multiple regression, outcome: y_parinv (youth report)
 ```{r}
@@ -280,12 +325,26 @@ fit5 <- with(imputed_data, lm(y_parinv ~ parent_eng_comf + youth_age + youth_gen
 
 est5 <- pool(fit5)
 summary(est5) 
-
-# parent_eng_comf beta = -0.15, p = 0.02
+# parent_eng_comf beta = -0.15, p = 0.01
 # knowschool_1  beta = 0.41, p = 0.05
 
 pool.r.squared(fit5) # 0.18
 ```
+
+# Step 5: Run regression on standardized data
+# Step 6: Pool the results to get standardized betas
+# Multiple regression, outcome: y_parinv (youth report) (standardized)
+```{r}
+fit5_st <- with(imputed_data_std, lm(y_parinv ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1))
+
+est5_st <- pool(fit5_st)
+summary(est5_st)
+# parent_eng_comf beta = -0.29, p = 0.01
+# knowschool_1  beta = 0.30, p = 0.05
+
+pool.r.squared(fit5_st) # 0.18
+```
+
 # Multiple regression, outcome: self efficacy (parent report)
 ```{r}
 fit6 <- with(imputed_data, lm(selfeffic_1 ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1))
@@ -293,89 +352,41 @@ fit6 <- with(imputed_data, lm(selfeffic_1 ~ parent_eng_comf + youth_age + youth_
 est6 <- pool(fit6)
 summary(est6) 
 
-# parent_eng_comf beta = 0.05, p = 0.02
-# welcome_1 beta = 0.24, p = 0.02
-# endorse_1  beta = 0.44, p < 0.001
+# parent_eng_comf beta = 0.04, p = 0.03
+# welcome_1 beta = 0.25, p = 0.02
+# endorse_1  beta = 0.45, p < 0.001
 
 pool.r.squared(fit6) # 0.68
-
-est6$pooled$b
-```
-
-
-# trying chatGPT code
-
-# Step 1: Convert to long format for processing
-```{r}
-imputed_long <- complete(imputed_data, action = "long", include = TRUE)
-
-imputed_long <- imputed_long %>%
-  mutate(youth_gender = as.numeric(youth_gender))
-
-colnames(imputed_long)
-```
-
-# Step 2: Function to standardize within each imputed dataset
-```{r}
-standardize <- function(df) {
-  df <- df %>%
-    mutate(across(c(selfeffic_1, y_sch_eng, y_parsupp, y_parinv, y_hw, gen_grades, grades, parent_eng_comf, youth_age, acadhwi_1, checkhwi_1, struct_1, convfut_1, knowschool_1, parnets_1, welcome_1, endorse_1, supported_1, ptrel_1), ~ scale(.)[,1]))  # Standardizing variables
-  return(df)
-} # STANDARDIZING ALL EXCEPT GENDER THAT IS A FACTOR
-```
-
-# Step 3: Apply standardization within each imputed dataset
-```{r}
-imputed_long <- imputed_long %>%
-  group_by(.imp) %>%
-  group_modify(~ standardize(.x))
-
-imputed_long <- imputed_long %>%
-  mutate(youth_gender = factor(youth_gender),
-         youth_gender = relevel(youth_gender, ref = "1")) # male
-```
-
-# Step 4: Convert back to `mids` object
-```{r}
-imputed_data_std <- as.mids(as.data.frame(imputed_long))
 ```
 
 # Step 5: Run regression on standardized data
-```{r}
-model_std <- with(imputed_data_std, lm(selfeffic_1 ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1))
-```
-
-
 # Step 6: Pool the results to get standardized betas
+# Multiple regression, outcome: self efficacy (parent report) (standardized)
 ```{r}
-pooled_results <- pool(model_std)
-```
+fit6_st <- with(imputed_data_std, lm(selfeffic_1 ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1))
 
-# Show standardized betas
-```{r}
-summary(pooled_results)
-
+est6_st <- pool(fit6_st)
+summary(est6_st)
 # parent_eng_comf beta = 0.16, p = 0.03
 # welcome_1 beta = 0.26, p = 0.02
 # endorse_1  beta = 0.46, p < 0.001
 
-pool.r.squared(pooled_results) # 0.68
+pool.r.squared(fit6_st) # 0.68
 ```
-# compare to not standardized:
+
+MISSING THE UNSTANDARDIZED MODEL!!
+
+# Step 5: Run regression on standardized data
+# Step 6: Pool the results to get standardized betas
+# Multiple regression, outcome: self efficacy (parent report) (standardized)
 ```{r}
-summary(est6) 
+fit7_st <- with(imputed_data_std, lm(gen_grades ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1))
 
-# parent_eng_comf beta = 0.05, p = 0.02
-# welcome_1 beta = 0.24, p = 0.02
-# endorse_1  beta = 0.44, p < 0.001
+est7_st <- pool(fit7_st)
+summary(est7_st)
+# parent_eng_comf beta = 0.16, p = 0.03
+# welcome_1 beta = 0.26, p = 0.02
+# endorse_1  beta = 0.46, p < 0.001
 
-pool.r.squared(fit6) # 0.68
+pool.r.squared(fit7_st) # 0.68
 ```
-
-
-y_sch_eng, y_parsupp, y_parinv, y_hw, gen_grades, grades
-
-
-
-
-
