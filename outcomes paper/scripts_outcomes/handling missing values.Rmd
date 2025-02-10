@@ -373,20 +373,49 @@ summary(est6_st)
 
 pool.r.squared(fit6_st) # 0.68
 ```
+# Multiple regression, outcome: gen grades (parent report)
+```{r}
+fit7 <- with(imputed_data, lm(gen_grades ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1))
 
-MISSING THE UNSTANDARDIZED MODEL!!
+est7 <- pool(fit7)
+summary(est7) 
+
+# youth being female: beta = -0.66, p = 0.003
+# convfut_1 beta = -0.38, p = 0.03
+# knowschool_1 beta = 0.72, p = 0.01
+# parnets_1  beta = -0.45, p = 0.052 trending
+
+pool.r.squared(fit7) # 0.29
+```
+
 
 # Step 5: Run regression on standardized data
 # Step 6: Pool the results to get standardized betas
-# Multiple regression, outcome: self efficacy (parent report) (standardized)
+# Multiple regression, outcome: gen grades (parent report) (standardized)
 ```{r}
 fit7_st <- with(imputed_data_std, lm(gen_grades ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1))
 
 est7_st <- pool(fit7_st)
 summary(est7_st)
-# parent_eng_comf beta = 0.16, p = 0.03
-# welcome_1 beta = 0.26, p = 0.02
-# endorse_1  beta = 0.46, p < 0.001
 
-pool.r.squared(fit7_st) # 0.68
+# youth being female: beta = -0.66, p = 0.003
+# convfut_1 beta = -0.25, p = 0.03
+# knowschool_1 beta = 0.35, p = 0.01
+# parnets_1  beta = -0.24, p = 0.052 trending
+
+pool.r.squared(fit7_st) # 0.29
 ```
+# trying to get the partial R sqrd for each predictor 
+```{r}
+# predictors <- c("predictor1", "predictor2", "predictor3")
+# full_model_r2 <- pool.r.squared(full_model)$estimate[1]  # Full model R²
+# 
+# partial_r2_values <- sapply(predictors, function(pred) {
+#   reduced_model <- with(imputed_data, lm(as.formula(paste("Y ~", paste(setdiff(predictors, pred), collapse = " + ")))))
+#   reduced_r2 <- pool.r.squared(reduced_model)$estimate[1]
+#   full_model_r2 - reduced_r2  # Contribution of the predictor
+# })
+# 
+# partial_r2_values
+```
+
