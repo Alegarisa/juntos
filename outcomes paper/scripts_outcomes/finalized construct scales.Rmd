@@ -6,6 +6,8 @@ date: "2024-08-20"
 
 This markdown has the finalized construct scales product of my revisions of my dissertation analyses EFAs conducted in 2022; look at scale_testing.R. 
 
+It also has the creation of the dataset called "p_y_w1_for_analysesjan25.sav" that has parent and youth analyses scales and demo vars from home visit. 
+
 These constructs are used for the following projects:
 - poster to be presented at postdoc symposium at UT on Sep 18, 2024
 - paper to test structural and relational practices on student outcomes Jan-Feb, 2025.(I did multiple imputation to handle missing data, but these scales do not have that dataset because mi needs to use pooled results)
@@ -281,6 +283,8 @@ ptrel_1 <- parent_w1 %>%
 alpha(ptrel_1) # 0.87
 ```
 
+## UP UNTIL HERE, I ONLY RAN ALPHAS FOR 18 SCALES. NOT ALL OF THESE SCALES WERE INCLUDED IN ANALYSES FOR STRUCTURAL AND RELATIONAL PRACTICES PAPER.
+
 # additional outcomes (added Jan 2025)
 
 *These suggest traditional parental involvement 
@@ -297,7 +301,7 @@ q12_3 - how youth does in MATH (likert: 1-5; higher is worse)
 q12_4 - how youth does in SCIENCE (likert: 1-5; higher is worse)
 q14 - overall how youth does academically (likert: 1-8; higher is worse)
 
-# covariates
+# Additional covariates
 
 ```{r}
 hv1_demo <- read_sav(here("outcomes paper/data_outcomes", "Juntos HV Parent #1 Survey_August 20, 2018_11.37_deidentified.sav"))
@@ -306,13 +310,13 @@ view_df(hv1_demo) # 97 rows
 
 data.frame(table(hv1_demo$family_id)) # identified 112 is duplicated
 
-hv1_demo <- hv1_demo[-12,] # deleting 1 duped row (id 112 dad) that is row 12
+hv1_demo <- hv1_demo[-12,] # deleting 1 duped row (id 112 dad) that is row 12 -- now 96 rows total
 ```
 
 # joining parent dataset with homevisit dataset
 ```{r}
 parent_w1_demo <- right_join(hv1_demo, parent_w1) %>%
-    select(school_id, condition, wave, family_id, participant_id, participant, participant_4_text, year_born, country_born, ed_level, youth_age, youth_country_born, adults_at_home, minors_at_home, 42:350)
+    select(school_id, condition, wave, family_id, participant_id, participant, participant_4_text, year_born, country_born, age_arrival_us, white, latino, indigenous_lat_am, ed_level, youth_age, youth_country_born, adults_at_home, minors_at_home, 42:321) # on 02.25.25 included more variables to describe sample
 
 view_df(parent_w1_demo) # 95 rows
 
@@ -322,23 +326,25 @@ data.frame(table(parent_w1_demo$family_id)) # no dupped rows
 ```{r}
 parent_w1_demo_2 <- parent_w1_demo %>%
   rename(parent_role = participant,
-         parent_role_text = participant_4_text) %>%
+         parent_role_text = participant_4_text,
+         lang_arts = q12_1,
+         soc_stu = q12_2,
+         math = q12_3,
+         science = q12_4,
+         gen_grades = q14,
+         help_extra = q15,
+         attend_pta = q17,
+         sats_contact = q20, 
+         h_lang_eng = q170_1,
+         h_lang_spa = q170_2,
+         h_lang_ind = q170_3) %>%
   mutate(parent_role = as.factor(parent_role),
          parent_age = as.numeric(year_born),
          parent_age = 2018 - parent_age,
          parent_eng_comf = as.factor(q173_3)) %>%
-  select(school_id, condition, wave, family_id, participant_id, parent_role, parent_role_text, parent_age, country_born, ed_level, parent_eng_comf, youth_age, youth_country_born, adults_at_home, minors_at_home, 16:324)
-
+  select(school_id, condition, wave, family_id, participant_id, parent_role, parent_role_text, parent_age, country_born, age_arrival_us, white, latino, indigenous_lat_am, ed_level, parent_eng_comf, h_lang_eng, h_lang_spa, h_lang_ind, youth_age, youth_country_born, adults_at_home, minors_at_home, 19:300)
 
 view_df(parent_w1_demo_2) # I think this worked!
-```
-```{r}
-test <- read_sav(here("outcomes paper/data_outcomes", "all_parent_wave1.sav"))
-
-view_df(test)
-
-ggplot(test, aes(q173_3)) +
-geom_bar(alpha = 0.7)
 ```
 
 
@@ -377,15 +383,16 @@ parent_w1_demo_3 <- parent_w1_demo_2 %>%
                        ed_level == "6" | ed_level == "7" | ed_level == "8" ~ "3", #high school/certificate
                        ed_level == "9" | ed_level == "10" ~ "4"), #post-secondary
          parent_ed = factor(parent_ed)) %>% 
-  select(school_id, condition, wave, family_id, participant_id, parent_role, parent_role_text, parent_age, country_born, parent_ed, parent_eng_comf, youth_age, youth_country_born, adults_at_home, minors_at_home, 16:323)
-                
+  select(school_id, condition, wave, family_id, participant_id, parent_role, parent_role_text, parent_age, country_born, age_arrival_us, white, latino, indigenous_lat_am, parent_ed, parent_eng_comf, h_lang_eng, h_lang_spa, h_lang_ind, youth_age, youth_country_born, adults_at_home, minors_at_home, 16:300)
+
 ggplot(parent_w1_demo_3, aes(parent_ed)) +
 geom_bar(alpha = 0.7)
 
-view_df(parent_w1_demo_3) # 95 rows
+# view_df(parent_w1_demo_3) # 95 rows
 
 data.frame(table(parent_w1_demo_3$family_id)) # no dupped rows
 ```
+
 ### Construct scales ###
 
 ```{r}
@@ -409,22 +416,9 @@ parent_scales <- parent_w1_demo_3 %>%
          endorse_1 = mean(c(q54, q56, q57), na.rm = TRUE),
          supported_1 = mean(c(q58, q59, q62, q63), na.rm = TRUE),
          ptrel_1 = mean(c(q64, q65, q66, q67), na.rm = TRUE)) %>%
-  select(school_id, condition, family_id, participant_id, parent_role, parent_role_text, parent_age, country_born, parent_ed, parent_eng_comf, youth_age, youth_country_born, adults_at_home, minors_at_home, q12_1, q12_2, q12_3, q12_4, q14, q15, q17, q20, 326:341) 
+  select(school_id, condition, wave, family_id, participant_id, parent_role, parent_role_text, parent_age, country_born, age_arrival_us, white, latino, indigenous_lat_am, parent_ed, parent_eng_comf, h_lang_eng, h_lang_spa, h_lang_ind, youth_age, youth_country_born, adults_at_home, minors_at_home, lang_arts, soc_stu, math, science, gen_grades, help_extra, attend_pta, sats_contact, 302:317) 
 
 data.frame(table(parent_scales$family_id)) # no dupped rows
-```
-
-
-```{r}
-parent_scales <- parent_scales %>%
-   rename(c("lang_arts" = "q12_1"),
-         c("soc_stu" = "q12_2"),
-         c("math" = "q12_3"),
-         c("science" = "q12_4"),
-         c("gen_grades" = "q14"),
-         c("help_extra" = "q15"),
-         c("attend_pta" = "q17"),
-         c("sats_contact" = "q20")) 
 ```
 
 
@@ -435,7 +429,6 @@ geom_bar(alpha = 0.7)
 ggplot(parent_scales, aes(parent_role)) +
 geom_bar(alpha = 0.7)
 ```
-
 
 # youth dataset
 
@@ -466,7 +459,7 @@ youth_w1_raw <- youth_w1_raw %>%
 
 ```{r}
 youth_w1 <- youth_w1_raw %>%
-  select(school_id, condition, id, wave, q2, q4, q7:q13, q18:q22, q36:q40, q83:q91, q98, q231, q232_2, q232_3, q232_99) %>%
+  select(school_id, condition, id, wave, q2, q4, q7:q13, q18:q22, q36:q40, q83:q91, q92_1, q92_2, q98, q231, q232_2, q232_3, q232_99) %>%
    rename(c("family_id" = "id"),
          c("grade_lev" = "q2"),
          c("grades" = "q4"),
@@ -496,6 +489,8 @@ youth_w1 <- youth_w1_raw %>%
          c("se_7" = "q89"),
          c("se_8" = "q90"),
          c("se_9" = "q91"),
+         c("y_homel_eng" = "q92_1"),
+         c("y_homel_spa" = "q92_2"),
          c("youth_eng_comf" = "q98"),
          c("youth_gender" = "q231"),
          c("y_latino" = "q232_2"),
@@ -591,7 +586,7 @@ q40.	… had at least some type of contact with at least one of your teachers (b
 youth_sch_inv <- youth_w1_3 %>%
   select(pi_6, pi_7, pi_8, pi_10) # item 9 very low cor with other items
 
-alpha(youth_sch_inv) # 0.667
+alpha(youth_sch_inv) # 0.67
 ```
 
 ```{r}
@@ -605,66 +600,29 @@ youth_scales <- youth_w1_3 %>%
   select(-wave, -7:-32) # 95 rows, removing individual items & wave
 ```
 
-```{r}
-ggplot(youth_scales, aes(grade_lev)) +
-geom_bar(alpha = 0.7)
-```
-
-
+## Full join
 ```{r}
 all_par_you_w1 <- full_join(parent_scales, youth_scales, join_by(school_id, family_id, condition)) # 96 rows (ids 504 no youth data and 623 no parent data)
 
-data.frame(table(all_par_you_w1$family_id)) # id 313 is dupped - it has 
+data.frame(table(all_par_you_w1$family_id)) # no dupped rows
 
 all_par_you_w1 %>%
-  arrange(family_id)
+  arrange(family_id) # 96 rows
 ```
 
+## Inner join
 ```{r}
-full_par_you_w1 <- inner_join(parent_scales, youth_scales) # 94 rows (id 504 and 623 removed )
+compl_par_you_w1 <- inner_join(parent_scales, youth_scales) # 94 rows (id 504 and 623 removed )
 
-data.frame(table(full_par_you_w1$family_id)) # no dupped rows
+data.frame(table(compl_par_you_w1$family_id)) # no dupped rows
 
-view_df(full_par_you_w1)
+view_df(compl_par_you_w1)
 ```
-```{r}
-ggplot(full_par_you_w1, aes(parent_ed)) +
-geom_bar(alpha = 0.7)
-
-ggplot(full_par_you_w1, aes(grade_lev)) +
-geom_bar(alpha = 0.7)
-
-ggplot(full_par_you_w1, aes(youth_gender)) +
-geom_bar(alpha = 0.7)
-```
-
-
-```{r}
-# full_par_you_w1 <- full_par_you_w1 %>%
-#   mutate(school_id = factor(school_id),
-#          condition = factor(condition),
-#          parent_role = factor(parent_role),
-#          youth_gender = factor(youth_gender),
-#          grade_lev = factor(grade_lev),
-#          y_latino = factor(y_latino),
-#          y_indigenous_americas = factor(y_indigenous_americas),
-#          y_race_ethnicity_no_response = factor(y_race_ethnicity_no_response),
-#          adults_at_home = as.numeric(adults_at_home),
-#          minors_at_home = as.numeric(minors_at_home),
-#          parent_eng_comf = as.numeric(parent_eng_comf),
-#          youth_age = as.numeric(youth_age))
-```
-
-
-```{r}
-ggplot(full_par_you_w1, aes(parent_ed)) +
-geom_bar(alpha = 0.7)
-```
-
 
 # outputing primary caregiver parent wave 1 dataset 
+On 02.25.25 I made some variable additions to complete sample descriptive but decided not to rename the data file
 ```{r}
-# full_par_you_w1 %>%
+# compl_par_you_w1 %>%
 #   haven::write_sav(here("outcomes paper/data_outcomes", "p_y_w1_for_analysesjan25.sav"))
 ```
 

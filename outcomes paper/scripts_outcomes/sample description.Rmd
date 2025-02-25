@@ -1,0 +1,149 @@
+---
+title: "sample description"
+author: "Ale Garcia"
+date: "2025-02-25"
+output: html_document
+---
+This markdown is to run demographic analyses. 
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(rio)
+library(here)
+library(tidyverse)
+library(haven)
+library(janitor)
+library(knitr)
+library(surveytoolbox)
+library(sjPlot)
+library(kableExtra)
+library(psych)
+library(sjmisc)
+
+theme_set(theme_minimal())
+```
+
+
+### The dataset ###
+
+```{r}
+d <- read_sav(here("outcomes paper/data_outcomes", "p_y_w1_for_analysesjan25.sav")) # 94 rows
+
+# view_df(d)
+
+data.frame(table(d$family_id)) # no dupped rows
+```
+
+```{r}
+d1 <- d %>%
+  mutate(school_id = factor(school_id),
+         condition = factor(condition),
+         parent_role = factor(parent_role),
+         country_born = factor(country_born),
+         age_arrival_us = as.numeric(age_arrival_us),
+         parent_ed = factor(parent_ed),
+         youth_age = as.numeric(youth_age),
+         youth_country_born = factor(youth_country_born),
+         adults_at_home = as.numeric(adults_at_home),
+         minors_at_home = as.numeric(minors_at_home),
+         grade_lev = factor(grade_lev),
+         youth_gender = factor(youth_gender))
+```
+
+# descriptive stats function
+```{r include=FALSE}
+
+# function that takes a df and returns a df with only the numeric columns
+only_numeric <- function(df) {
+  select_numeric <- dplyr::select_if(df, is.numeric)
+  return(select_numeric)
+}
+
+# a list with the functions we want
+smry <- list(n = function(x) length(x),
+             n_valid = function(x) sum(!is.na(x)),
+             na = function(x) sum(is.na(x)),
+             M = function(x) round(mean(x, na.rm = TRUE), 2), 
+             SD = function(x) round(sd(x, na.rm = TRUE), 2),
+             Min = function(x) round(min(x, na.rm = TRUE), 2),
+             Max = function(x) round(max(x, na.rm = TRUE), 2))
+
+# wrapping solution in a function
+descriptives <- function(df) {
+  select_numeric <- only_numeric(df)
+  mean_sd <- map_df(select_numeric, function(col) map_df(smry, ~.x(col)),
+       .id = "column")
+  return(mean_sd)
+}
+```
+
+
+```{r}
+descrip_table <- descriptives(d1) %>%
+  rename(c("Scale" = "column"))
+
+descrip_table
+```
+
+# function to take proportions
+```{r}
+prop_fun <- function(df, var) {
+  df %>%
+    group_by({{var}}) %>%
+    summarize(n = n()) %>%
+    mutate(prop = round(n/sum(n), 2))
+}
+```
+
+# various
+```{r}
+# parents
+prop_fun(d1, parent_role)
+prop_fun(d1, country_born)
+prop_fun(d1, parent_ed)
+prop_fun(d1, white)
+prop_fun(d1, latino)
+prop_fun(d1, indigenous_lat_am)
+prop_fun(d1, parent_eng_comf)
+prop_fun(d1, h_lang_eng)
+prop_fun(d1, h_lang_spa)
+prop_fun(d1, h_lang_ind)
+```
+Educational level
+1 Nunca asistí a la escuela
+2 Asistí la escuela primaria/elementaría hasta el _____ grado
+3 Escuela primaria/elementaría (jardín de niños hasta el quinto grado)
+4 Escuela intermedia (6-8 grado)
+5 Asistí la secundaria hasta el ____ grado
+6 Escuela secundaria (grado 9 hasta 12)
+7 GED
+8 Recibí un curso de entrenamiento especializado en negocios, secretaria u otro entrenamiento técnico 
+9 Título de Asociado en Artes (dos años)
+10 Licenciatura
+11 Licenciatura avanzada: Maestría o un Doctorado # no participant had this level of ed
+
+re-categorized as:
+1 -> 1, 2, 3:  elementary or less
+2 -> 4, 5: middle school
+3 -> 6, 7, 8: high school and/or certificate
+4 -> 9, 10:  associate, bachelor, graduate degree - post-sec
+
+```{r}
+# Youth
+prop_fun(d1, youth_country_born)
+prop_fun(d1, y_latino)
+prop_fun(d1, y_indigenous_americas)
+prop_fun(d1, y_race_ethnicity_no_response)
+prop_fun(d1, grade_lev) 
+prop_fun(d1, youth_gender)
+prop_fun(d1, y_homel_eng)
+prop_fun(d1, y_homel_spa)
+```
+
+
+
+
+
+
