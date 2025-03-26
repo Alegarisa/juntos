@@ -249,7 +249,7 @@ summary(est1_st) # checkhwi_1  beta = 0.31, p < 0.01
 pool.r.squared(fit1_st) # 0.23
 ```
 
-# Multiple regression, outcome: grades (youth report)
+# Multipcall# Multiple regression, outcome: grades (youth report)
 ```{r}
 fit2 <- with(imputed_data, lm(grades ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1))
 

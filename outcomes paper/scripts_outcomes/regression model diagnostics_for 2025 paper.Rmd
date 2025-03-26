@@ -1,0 +1,425 @@
+---
+title: "regression model diagnostics"
+author: "Alejandra Garcia Isaza"
+date: '2022-07-19'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(rio)
+library(here)
+library(dplyr)
+library(haven)
+
+theme_set(theme_minimal())
+```
+
+```{r}
+d <- read_sav(here("outcomes paper/data_outcomes", "p_y_w1_for_analysesjan25.sav"))
+```
+
+
+
+**Model assumptions & diagnostics** 
+
+## Normality assumption: outcome - parent self-efficacy
+```{r, engage}
+d$selfeffic_1  
+
+ggplot(d, aes(selfeffic_1)) +
+geom_histogram(alpha = 0.7) # meets normality assumption? assumption may be tenable.
+```
+## Normality assumption: outcome - parent rep grades
+```{r, engage}
+d$gen_grades  
+
+ggplot(d, aes(gen_grades)) +
+geom_histogram(alpha = 0.7) # meets normality assumption? there's slight positive skew
+```
+
+## Normality assumption: outcome - youth rep grades
+```{r, engage}
+d$grades  
+
+ggplot(d, aes(grades)) +
+geom_histogram(alpha = 0.7) # meets normality assumption? there's positive skew
+```
+
+
+
+## Normality assumption: outcome - youth hw practices
+```{r, engage}
+d$y_hw  
+
+ggplot(d, aes(y_hw)) +
+geom_histogram(alpha = 0.7) # meets normality assumption? maybe an unusual value?
+```
+
+## Normality assumption: outcome - youth hw practices
+```{r, engage}
+d$y_parsupp  
+
+ggplot(d, aes(y_parsupp)) +
+geom_histogram(alpha = 0.7) # meets normality assumption?
+```
+
+## Normality assumption: outcome - school enagagement
+```{r, engage}
+d$y_sch_eng
+
+ggplot(d, aes(y_sch_eng)) +
+geom_histogram(alpha = 0.7) # meets normality assumption? assumption may be tenable, maybe presence of an outlier (score 2.33) participant row 81
+
+d_no81 <- d %>%
+  filter(participant_id != "608_1") # 93 rows now
+
+ggplot(d_no81, aes(y_sch_eng)) +
+  geom_histogram(alpha = 0.7)
+```
+
+ 
+HERE
+
+
+1. Academic approach (tutor)
+
+# linearity
+```{r}
+ggplot(d, aes(hwi_1, engage)) +
+geom_point() +
+geom_smooth() +
+geom_smooth(method = "lm",
+color = "magenta")
+
+ggplot(d_no81, aes(hwi_1, engage)) +
+geom_point() +
+geom_smooth() +
+geom_smooth(method = "lm",
+color = "magenta")
+```
+
+# plots - univariate
+```{r}
+m_hwi_1a <- lm(engage ~ hwi_1, d)
+plot(m_hwi_1a)
+
+m_hwi_1a_d_no81 <- lm(engage ~ hwi_1, d_no81)
+plot(m_hwi_1a_d_no81)
+```
+```{r}
+coef(m_hwi_1a)
+coef(m_hwi_1a_d_no81)
+```
+
+# outliers
+```{r}
+plot(m_hwi_1a, which = 4)
+
+plot(m_hwi_1a_d_no81, which = 4)
+```
+
+
+2. structuring/monitoring approach to HWI
+
+# linearity
+```{r}
+ggplot(d, aes(hwi_2, engage)) +
+geom_point() +
+geom_smooth() +
+geom_smooth(method = "lm",
+color = "magenta")
+
+ggplot(d_no81, aes(hwi_2, engage)) +
+geom_point() +
+geom_smooth() +
+geom_smooth(method = "lm",
+color = "magenta")
+```
+
+# plots
+```{r}
+m_hwi_2a <- lm(engage ~ hwi_2, d)
+plot(m_hwi_2a)
+
+m_hwi_2a_d_no81 <- lm(engage ~ hwi_2, d_no81)
+plot(m_hwi_2a_d_no81)
+```
+```{r}
+coef(m_hwi_2a)
+
+coef(m_hwi_2a_d_no81)
+```
+
+# outliers
+```{r}
+plot(m_hwi_2a, which = 4)
+
+plot(m_hwi_2a_d_no81, which = 4)
+```
+
+
+3. STRUCTURE
+
+# linearity
+```{r}
+ggplot(d, aes(str_home, engage)) +
+geom_point() +
+geom_smooth() +
+geom_smooth(method = "lm",
+color = "magenta")
+```
+# plots
+```{r}
+m_str_home_a <- lm(engage ~ str_home, d)
+plot(m_str_home_a)
+
+m_str_home_a_no81 <- lm(engage ~ str_home, d_no81)
+plot(m_str_home_a_no81)
+```
+
+```{r}
+coef(m_str_home_a)
+
+coef(m_str_home_a_no81)
+```
+
+# outliers
+```{r}
+plot(m_str_home_a, which = 4)
+
+plot(m_str_home_a_no81, which = 4)
+```
+
+
+
+8. convos: child's social involvement
+# linearity
+```{r}
+ggplot(d, aes(convos_3, engage)) +
+geom_point() +
+geom_smooth() +
+geom_smooth(method = "lm",
+color = "magenta")
+```
+
+# plots
+```{r}
+m_convos_3a <- lm(engage ~ convos_3, d)
+plot(m_convos_3a)
+
+m_convos_3a_no81 <- lm(engage ~ convos_3, d_no81)
+plot(m_convos_3a_no81)
+```
+
+```{r}
+coef(m_convos_3a)
+
+coef(m_convos_3a_no81)
+```
+
+# outliers
+```{r}
+plot(m_convos_3a, which = 4)
+
+plot(m_convos_3a_no81, which = 4)
+```
+
+9. Basic involvement
+# linearity
+```{r}
+ggplot(d, aes(sbi_1, engage)) +
+geom_point() +
+geom_smooth() +
+geom_smooth(method = "lm",
+color = "magenta")
+```
+
+# plots
+```{r}
+m_sbi_1a <- lm(engage ~ sbi_1, d)
+plot(m_sbi_1a) 
+
+m_sbi_1a_no81 <- lm(engage ~ sbi_1, d_no81)
+plot(m_sbi_1a_no81) 
+```
+```{r}
+coef(m_sbi_1a)
+
+coef(m_sbi_1a_no81)
+```
+
+
+# outliers
+```{r}
+plot(m_sbi_1a, which = 4)
+
+plot(m_sbi_1a_no81, which = 4)
+```
+10. Resource-intensive involvement
+# linearity
+```{r}
+ggplot(d, aes(sbi_2, engage)) +
+geom_point() +
+geom_smooth() +
+geom_smooth(method = "lm",
+color = "magenta")
+```
+
+# plots
+```{r}
+m_sbi_2a <- lm(engage ~ sbi_2, d)
+plot(m_sbi_2a) 
+
+m_sbi_2a_no81 <- lm(engage ~ sbi_2, d_no81)
+plot(m_sbi_2a_no81) 
+```
+```{r}
+coef(m_sbi_2a)
+
+coef(m_sbi_2a_no81)
+```
+
+
+# outliers
+```{r}
+plot(m_sbi_2a, which = 4)
+
+plot(m_sbi_2a_no81, which = 4)
+```
+11. Belongingness
+# linearity
+```{r}
+ggplot(d, aes(belong, engage)) +
+geom_point() +
+geom_smooth() +
+geom_smooth(method = "lm",
+color = "magenta")
+```
+# plots
+```{r}
+m_belong_a <- lm(engage ~ belong, d)
+plot(m_belong_a) 
+
+m_belong_a_no81 <- lm(engage ~ belong, d_no81)
+plot(m_belong_a_no81) 
+```
+```{r}
+coef(m_belong_a)
+
+coef(m_belong_a_no81)
+```
+
+# outliers
+```{r}
+plot(m_belong_a, which = 4)
+
+plot(m_belong_a_no81, which = 4)
+```
+
+12. Endorsemnt
+# linearity
+```{r}
+ggplot(d, aes(endorse, engage)) +
+geom_point() +
+geom_smooth() +
+geom_smooth(method = "lm",
+color = "magenta")
+```
+# plots
+```{r}
+m_endorse_a <- lm(engage ~ endorse, d)
+plot(m_endorse_a)
+
+m_endorse_a_no81 <- lm(engage ~ endorse, d_no81)
+plot(m_endorse_a_no81)
+```
+
+```{r}
+coef(m_endorse_a)
+
+coef(m_endorse_a_no81)
+```
+
+# outliers
+```{r}
+plot(m_endorse_a, which = 4)
+
+plot(m_endorse_a_no81, which = 4)
+```
+
+
+14. Rel with teachers: comfort, interest, and openness
+# linearity
+```{r}
+ggplot(d, aes(rel_1, engage)) +
+geom_point() +
+geom_smooth() +
+geom_smooth(method = "lm",
+color = "magenta")
+```
+# plots
+```{r}
+m_rel_1a <- lm(engage ~ rel_1, d)
+plot(m_rel_1a)
+
+m_rel_1a_no81 <- lm(engage ~ rel_1, d_no81)
+plot(m_rel_1a_no81)
+```
+
+```{r}
+coef(m_rel_1a)
+
+coef(m_rel_1a_no81)
+```
+
+# outliers
+```{r}
+plot(m_rel_1a, which = 4)
+
+plot(m_rel_1a_no81, which = 4)
+```
+
+
+15. Rel with school: parent self-efficacy to solve probs with school
+# linearity
+```{r}
+ggplot(d, aes(rel_2, engage)) +
+geom_point() +
+geom_smooth() +
+geom_smooth(method = "lm",
+color = "magenta")
+```
+
+# plots
+```{r}
+m_rel_2a <- lm(engage ~ rel_2, d)
+plot(m_rel_2a)
+
+m_rel_2a_no81 <- lm(engage ~ rel_2, d_no81)
+plot(m_rel_2a_no81)
+```
+
+```{r}
+coef(m_rel_2a)
+
+coef(m_rel_2a_no81)
+```
+
+# outliers
+```{r}
+plot(m_rel_2a, which = 4)
+
+plot(m_rel_2a_no81, which = 4)
+```
+
+```{r}
+d$q54_p1
+```
+
+```{r}
+d_no81$q54_p1
+```
+
