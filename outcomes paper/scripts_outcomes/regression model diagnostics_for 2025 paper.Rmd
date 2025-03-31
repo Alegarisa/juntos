@@ -13,413 +13,249 @@ library(rio)
 library(here)
 library(dplyr)
 library(haven)
+library(car)
+library(lmtest)
 
 theme_set(theme_minimal())
 ```
 
 ```{r}
 d <- read_sav(here("outcomes paper/data_outcomes", "p_y_w1_for_analysesjan25.sav"))
+
+d1 <- d %>%
+  mutate(parent_eng_comf = as.numeric(parent_eng_comf),
+         youth_gender = as.numeric(youth_gender),
+         youth_age = as.numeric(youth_age))
 ```
 
 
+# Model assumptions & diagnostics 
 
-**Model assumptions & diagnostics** 
+Multiple Regression models have the following assumptions:
+1. Linearity (rel between X and Y is linear)
+2. Independence of errors (residuals are not correlated)
+3. Homoscedasticity (constant variance of residuals)
+4. Normality of Residuals (residuals follow a normal distribution)
+5. No multicollinearity (predictors not too correlated)
+6. No ommited variable variable bias (all relevant variables are included)
 
-## Normality assumption: outcome - parent self-efficacy
+Note: The normality assumption in multiple regression applies to the residuals, not the observed variables (predictors or outcome).
+
+#### Select variables of interest
+```{r}
+vars_of_interest <- d1[, c("parent_eng_comf", "youth_gender", "youth_age", "acadhwi_1", "checkhwi_1", "struct_1", "convfut_1", "knowschool_1", "parnets_1", "welcome_1", "endorse_1", "supported_1", "ptrel_1", "y_sch_eng", "y_parsupp", "y_parinv", "y_hw", "grades", "gen_grades", "selfeffic_1")]  
+```
+
+
+#### Convert to long format for ggplot
+```{r}
+long_data <- pivot_longer(vars_of_interest, cols = everything(), names_to = "Variable", values_to = "Value")
+```
+
+
+#### Plot histograms
+```{r}
+ggplot(long_data, aes(x = Value)) + 
+  geom_histogram(bins = 30, fill = "skyblue", color = "black", alpha = 0.7) + 
+  facet_wrap(~ Variable, scales = "free") +  # One plot per variable
+  theme_minimal() + 
+  labs(title = "Distribution of Variables")
+```
+## linearity
+
+#### Fit the regression model
+#### Plot residuals vs. fitted values
+
+Result: with and without youth gender linearity is likely met for youth school engagement 
 ```{r, engage}
-d$selfeffic_1  
+model <- lm(y_sch_eng ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1, vars_of_interest)
 
-ggplot(d, aes(selfeffic_1)) +
-geom_histogram(alpha = 0.7) # meets normality assumption? assumption may be tenable.
-```
-## Normality assumption: outcome - parent rep grades
-```{r, engage}
-d$gen_grades  
+plot(fitted(model), residuals(model), 
+     main = "Residuals vs. Fitted Values",
+     xlab = "Fitted Values", ylab = "Residuals",
+     pch = 20, col = "blue")
+abline(h = 0, col = "red", lwd = 2)  # Add reference line at 0
 
-ggplot(d, aes(gen_grades)) +
-geom_histogram(alpha = 0.7) # meets normality assumption? there's slight positive skew
+lines(lowess(fitted(model), residuals(model)), col = "darkgreen", lwd = 2)
 ```
 
-## Normality assumption: outcome - youth rep grades
-```{r, engage}
-d$grades  
+Result: with and without youth gender linearity is likely met for youth hw practices 
+```{r, hw}
+model <- lm(y_hw ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1, vars_of_interest)
 
-ggplot(d, aes(grades)) +
-geom_histogram(alpha = 0.7) # meets normality assumption? there's positive skew
+plot(fitted(model), residuals(model), 
+     main = "Residuals vs. Fitted Values",
+     xlab = "Fitted Values", ylab = "Residuals",
+     pch = 20, col = "blue")
+abline(h = 0, col = "red", lwd = 2)  # Add reference line at 0
+
+lines(lowess(fitted(model), residuals(model)), col = "darkgreen", lwd = 2)
 ```
 
+Result: with and without youth gender linearity is likely met for youth-reported parent support
+```{r, parentsupp}
+model <- lm(y_parsupp ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1, vars_of_interest)
 
+plot(fitted(model), residuals(model), 
+     main = "Residuals vs. Fitted Values",
+     xlab = "Fitted Values", ylab = "Residuals",
+     pch = 20, col = "blue")
+abline(h = 0, col = "red", lwd = 2)  # Add reference line at 0
 
-## Normality assumption: outcome - youth hw practices
-```{r, engage}
-d$y_hw  
+lines(lowess(fitted(model), residuals(model)), col = "darkgreen", lwd = 2)
+```
+Result: with and without youth gender linearity is likely met for youth-reported parent involvement
+```{r, parentinv}
+model <- lm(y_parinv ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1, vars_of_interest)
 
-ggplot(d, aes(y_hw)) +
-geom_histogram(alpha = 0.7) # meets normality assumption? maybe an unusual value?
+plot(fitted(model), residuals(model), 
+     main = "Residuals vs. Fitted Values",
+     xlab = "Fitted Values", ylab = "Residuals",
+     pch = 20, col = "blue")
+abline(h = 0, col = "red", lwd = 2)  # Add reference line at 0
+
+lines(lowess(fitted(model), residuals(model)), col = "darkgreen", lwd = 2)
 ```
 
-## Normality assumption: outcome - youth hw practices
-```{r, engage}
-d$y_parsupp  
+Youth reported grades
+Result: with and without youth gender the point look similar. Not sure if linearity is met because it has kind of a pattern, but it's not a curved one.
+```{r, grades}
+model <- lm(grades ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1, vars_of_interest)
 
-ggplot(d, aes(y_parsupp)) +
-geom_histogram(alpha = 0.7) # meets normality assumption?
+plot(fitted(model), residuals(model), 
+     main = "Residuals vs. Fitted Values",
+     xlab = "Fitted Values", ylab = "Residuals",
+     pch = 20, col = "blue")
+abline(h = 0, col = "red", lwd = 2)  # Add reference line at 0
+
+lines(lowess(fitted(model), residuals(model)), col = "darkgreen", lwd = 2)
 ```
+Parent reported grades
+Result: with and without youth gender the point look similar. Not sure if linearity is met because it has kind of a pattern, but it's not a curved one.
+```{r, gen_grades}
+model <- lm(gen_grades ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1, vars_of_interest)
 
-## Normality assumption: outcome - school enagagement
-```{r, engage}
-d$y_sch_eng
+plot(fitted(model), residuals(model), 
+     main = "Residuals vs. Fitted Values",
+     xlab = "Fitted Values", ylab = "Residuals",
+     pch = 20, col = "blue")
+abline(h = 0, col = "red", lwd = 2)  # Add reference line at 0
 
-ggplot(d, aes(y_sch_eng)) +
-geom_histogram(alpha = 0.7) # meets normality assumption? assumption may be tenable, maybe presence of an outlier (score 2.33) participant row 81
-
-d_no81 <- d %>%
-  filter(participant_id != "608_1") # 93 rows now
-
-ggplot(d_no81, aes(y_sch_eng)) +
-  geom_histogram(alpha = 0.7)
+lines(lowess(fitted(model), residuals(model)), col = "darkgreen", lwd = 2)
 ```
+Parent self-efficacy
+Result: with and without youth gender the point look similar. Not sure if linearity is met because it has kind of a pattern, but it's not a curved one.
+```{r, self-eff}
+model <- lm(selfeffic_1  ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1, vars_of_interest)
 
- 
-HERE
+plot(fitted(model), residuals(model), 
+     main = "Residuals vs. Fitted Values",
+     xlab = "Fitted Values", ylab = "Residuals",
+     pch = 20, col = "blue")
+abline(h = 0, col = "red", lwd = 2)  # Add reference line at 0
 
+lines(lowess(fitted(model), residuals(model)), col = "darkgreen", lwd = 2)
+```
+## Independence of errors 
 
-1. Academic approach (tutor)
+#### Fit regression model
+#### Durbin-Watson test
 
-# linearity
+* ~2.0 → No autocorrelation (Good)
+* < 1.5 → Positive autocorrelation (Bad)
+* > 2.5 → Negative autocorrelation (Less common but also bad)
+
+Results: lowest is 1.83 and highest is 2.3; hence residuals are reasonably independent across models. 
+
+## Homoscedasticity 
+
+None of the residual vs. fitted values plots above show a funnel shape
+#### Fit regression model
+#### Breusch-Pagan Test (Statistical Test)
+p > 0.05 → Homoscedasticity (Good)
+p < 0.05 → Heteroscedasticity (Bad)
+
+Results: p-values in each of the 7 models are p > 0.05 → Homoscedasticity 
 ```{r}
-ggplot(d, aes(hwi_1, engage)) +
-geom_point() +
-geom_smooth() +
-geom_smooth(method = "lm",
-color = "magenta")
-
-ggplot(d_no81, aes(hwi_1, engage)) +
-geom_point() +
-geom_smooth() +
-geom_smooth(method = "lm",
-color = "magenta")
-```
-
-# plots - univariate
-```{r}
-m_hwi_1a <- lm(engage ~ hwi_1, d)
-plot(m_hwi_1a)
-
-m_hwi_1a_d_no81 <- lm(engage ~ hwi_1, d_no81)
-plot(m_hwi_1a_d_no81)
-```
-```{r}
-coef(m_hwi_1a)
-coef(m_hwi_1a_d_no81)
-```
-
-# outliers
-```{r}
-plot(m_hwi_1a, which = 4)
-
-plot(m_hwi_1a_d_no81, which = 4)
-```
-
-
-2. structuring/monitoring approach to HWI
-
-# linearity
-```{r}
-ggplot(d, aes(hwi_2, engage)) +
-geom_point() +
-geom_smooth() +
-geom_smooth(method = "lm",
-color = "magenta")
-
-ggplot(d_no81, aes(hwi_2, engage)) +
-geom_point() +
-geom_smooth() +
-geom_smooth(method = "lm",
-color = "magenta")
-```
-
-# plots
-```{r}
-m_hwi_2a <- lm(engage ~ hwi_2, d)
-plot(m_hwi_2a)
-
-m_hwi_2a_d_no81 <- lm(engage ~ hwi_2, d_no81)
-plot(m_hwi_2a_d_no81)
-```
-```{r}
-coef(m_hwi_2a)
-
-coef(m_hwi_2a_d_no81)
-```
-
-# outliers
-```{r}
-plot(m_hwi_2a, which = 4)
-
-plot(m_hwi_2a_d_no81, which = 4)
-```
-
-
-3. STRUCTURE
-
-# linearity
-```{r}
-ggplot(d, aes(str_home, engage)) +
-geom_point() +
-geom_smooth() +
-geom_smooth(method = "lm",
-color = "magenta")
-```
-# plots
-```{r}
-m_str_home_a <- lm(engage ~ str_home, d)
-plot(m_str_home_a)
-
-m_str_home_a_no81 <- lm(engage ~ str_home, d_no81)
-plot(m_str_home_a_no81)
+model <- lm(y_sch_eng ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1, vars_of_interest)
+durbinWatsonTest(model) # for independence of errors
+bptest(model) # for homoscedasticity
 ```
 
 ```{r}
-coef(m_str_home_a)
-
-coef(m_str_home_a_no81)
+model <- lm(y_hw ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1, vars_of_interest)
+durbinWatsonTest(model) # for independence of errors
+bptest(model) # for homoscedasticity
 ```
-
-# outliers
 ```{r}
-plot(m_str_home_a, which = 4)
-
-plot(m_str_home_a_no81, which = 4)
-```
-
-
-
-8. convos: child's social involvement
-# linearity
-```{r}
-ggplot(d, aes(convos_3, engage)) +
-geom_point() +
-geom_smooth() +
-geom_smooth(method = "lm",
-color = "magenta")
-```
-
-# plots
-```{r}
-m_convos_3a <- lm(engage ~ convos_3, d)
-plot(m_convos_3a)
-
-m_convos_3a_no81 <- lm(engage ~ convos_3, d_no81)
-plot(m_convos_3a_no81)
+model <- lm(y_parsupp ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1, vars_of_interest)
+durbinWatsonTest(model) # for independence of errors
+bptest(model) # for homoscedasticity
 ```
 
 ```{r}
-coef(m_convos_3a)
-
-coef(m_convos_3a_no81)
-```
-
-# outliers
-```{r}
-plot(m_convos_3a, which = 4)
-
-plot(m_convos_3a_no81, which = 4)
-```
-
-9. Basic involvement
-# linearity
-```{r}
-ggplot(d, aes(sbi_1, engage)) +
-geom_point() +
-geom_smooth() +
-geom_smooth(method = "lm",
-color = "magenta")
-```
-
-# plots
-```{r}
-m_sbi_1a <- lm(engage ~ sbi_1, d)
-plot(m_sbi_1a) 
-
-m_sbi_1a_no81 <- lm(engage ~ sbi_1, d_no81)
-plot(m_sbi_1a_no81) 
-```
-```{r}
-coef(m_sbi_1a)
-
-coef(m_sbi_1a_no81)
-```
-
-
-# outliers
-```{r}
-plot(m_sbi_1a, which = 4)
-
-plot(m_sbi_1a_no81, which = 4)
-```
-10. Resource-intensive involvement
-# linearity
-```{r}
-ggplot(d, aes(sbi_2, engage)) +
-geom_point() +
-geom_smooth() +
-geom_smooth(method = "lm",
-color = "magenta")
-```
-
-# plots
-```{r}
-m_sbi_2a <- lm(engage ~ sbi_2, d)
-plot(m_sbi_2a) 
-
-m_sbi_2a_no81 <- lm(engage ~ sbi_2, d_no81)
-plot(m_sbi_2a_no81) 
-```
-```{r}
-coef(m_sbi_2a)
-
-coef(m_sbi_2a_no81)
-```
-
-
-# outliers
-```{r}
-plot(m_sbi_2a, which = 4)
-
-plot(m_sbi_2a_no81, which = 4)
-```
-11. Belongingness
-# linearity
-```{r}
-ggplot(d, aes(belong, engage)) +
-geom_point() +
-geom_smooth() +
-geom_smooth(method = "lm",
-color = "magenta")
-```
-# plots
-```{r}
-m_belong_a <- lm(engage ~ belong, d)
-plot(m_belong_a) 
-
-m_belong_a_no81 <- lm(engage ~ belong, d_no81)
-plot(m_belong_a_no81) 
-```
-```{r}
-coef(m_belong_a)
-
-coef(m_belong_a_no81)
-```
-
-# outliers
-```{r}
-plot(m_belong_a, which = 4)
-
-plot(m_belong_a_no81, which = 4)
-```
-
-12. Endorsemnt
-# linearity
-```{r}
-ggplot(d, aes(endorse, engage)) +
-geom_point() +
-geom_smooth() +
-geom_smooth(method = "lm",
-color = "magenta")
-```
-# plots
-```{r}
-m_endorse_a <- lm(engage ~ endorse, d)
-plot(m_endorse_a)
-
-m_endorse_a_no81 <- lm(engage ~ endorse, d_no81)
-plot(m_endorse_a_no81)
+model <- lm(y_parinv ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1, vars_of_interest)
+durbinWatsonTest(model) # for independence of errors
+bptest(model) # for homoscedasticity
 ```
 
 ```{r}
-coef(m_endorse_a)
-
-coef(m_endorse_a_no81)
-```
-
-# outliers
-```{r}
-plot(m_endorse_a, which = 4)
-
-plot(m_endorse_a_no81, which = 4)
-```
-
-
-14. Rel with teachers: comfort, interest, and openness
-# linearity
-```{r}
-ggplot(d, aes(rel_1, engage)) +
-geom_point() +
-geom_smooth() +
-geom_smooth(method = "lm",
-color = "magenta")
-```
-# plots
-```{r}
-m_rel_1a <- lm(engage ~ rel_1, d)
-plot(m_rel_1a)
-
-m_rel_1a_no81 <- lm(engage ~ rel_1, d_no81)
-plot(m_rel_1a_no81)
+model <- lm(grades ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1, vars_of_interest)
+durbinWatsonTest(model) # for independence of errors
+bptest(model) # for homoscedasticity
 ```
 
 ```{r}
-coef(m_rel_1a)
-
-coef(m_rel_1a_no81)
-```
-
-# outliers
-```{r}
-plot(m_rel_1a, which = 4)
-
-plot(m_rel_1a_no81, which = 4)
-```
-
-
-15. Rel with school: parent self-efficacy to solve probs with school
-# linearity
-```{r}
-ggplot(d, aes(rel_2, engage)) +
-geom_point() +
-geom_smooth() +
-geom_smooth(method = "lm",
-color = "magenta")
-```
-
-# plots
-```{r}
-m_rel_2a <- lm(engage ~ rel_2, d)
-plot(m_rel_2a)
-
-m_rel_2a_no81 <- lm(engage ~ rel_2, d_no81)
-plot(m_rel_2a_no81)
+model <- lm(gen_grades ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1, vars_of_interest)
+durbinWatsonTest(model) # for independence of errors
+bptest(model) # for homoscedasticity
 ```
 
 ```{r}
-coef(m_rel_2a)
-
-coef(m_rel_2a_no81)
+model <- lm(selfeffic_1 ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1, vars_of_interest)
+durbinWatsonTest(model) # for independence of errors
+bptest(model) # for homoscedasticity
 ```
 
-# outliers
+## Multicollinearity
+
+#### Variance Inflation Factor (VIF) (car::vif(model))
+
+VIF < 5 → Low multicollinearity (Good)
+VIF 5–10 → Moderate multicollinearity (Possible concern)
+VIF > 10 → High multicollinearity (Serious issue)
+
+Highest is "supported" with a VIF of 4.44
 ```{r}
-plot(m_rel_2a, which = 4)
-
-plot(m_rel_2a_no81, which = 4)
+vif(model) # all models have the same predictors 
 ```
 
+#### Highest pairwise corr are
+endorse and supported: 0.71, p = 0.000
+supported and p-t rel: 0.67, p = 0.000
+welcome and endorse: 0.65, p = 0.000
+struct and know_school: 0.61, p = 0.000
 ```{r}
-d$q54_p1
+predictors <- d1[, c("parent_eng_comf", "youth_gender", "youth_age", "acadhwi_1", "checkhwi_1", "struct_1", "convfut_1", "knowschool_1", "parnets_1", "welcome_1", "endorse_1", "supported_1", "ptrel_1")]  
+
+library(Hmisc)
+rcorr(as.matrix(predictors), type = "spearman") # because ordinal variables (vars change together but at the same rate), except gender that is binary
 ```
 
-```{r}
-d_no81$q54_p1
-```
+# Omitted Variable Bias (OVB) 
+happens when a relevant variable is left out of the model, leading to biased and inconsistent estimates. There is no direct statistical test for OVB, but you can detect it using the following approaches:
+
+compare model's R²:
+
+model1 <- lm(y ~ x1 + x2, data = mydata)  # Model without potential omitted variable
+model2 <- lm(y ~ x1 + x2 + x3, data = mydata)  # Model with additional predictor
+
+If coefficients change a lot after adding x3, it suggests OVB.
+If R² increases significantly, x3 was an important missing predictor.
+
+Conclusion: I don't have a theoretical reason to add any additional predictors. Also, don't want to add too many predictors given the large number already: 13 (10 vars of interests, 3 control).
+
+
+# Overall conclusion for all assumptions:
+The linearity, independence of errors, homoscedasticity, normality of residuals assumptions seem tenable. The multicollinearity seems tenable too, although the supported variable could present moderate multicollinearity and may be removed from analyses.   
 
