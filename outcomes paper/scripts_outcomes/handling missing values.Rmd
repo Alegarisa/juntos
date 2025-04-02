@@ -253,6 +253,7 @@ summary(est1) # checkhwi_1  beta = 0.24, p < 0.01
 
 pool.r.squared(fit1) # 0.23
 ```
+
 # Step 5: Run regression on standardized data
 # Step 6: Pool the results to get standardized betas
 
@@ -320,6 +321,7 @@ summary(est3) # no predictors were significantly related with the outcome
 
 pool.r.squared(fit3) # 0.15
 ```
+
 # Step 5: Run regression on standardized data
 # Step 6: Pool the results to get standardized betas
 # Multiple regression, outcome: hw best practices (standardized)
@@ -349,6 +351,7 @@ summary(est4) # knowschool_1  beta = 0.41 p = 0.02
 
 pool.r.squared(fit4) # 0.23
 ```
+
 # Step 5: Run regression on standardized data
 # Step 6: Pool the results to get standardized betas
 # Multiple regression, outcome: y_parsupp (youth report) (standardized)
@@ -445,6 +448,7 @@ summary(est6_st)
 
 pool.r.squared(fit6_st) # 0.67
 ```
+
 # Multiple regression, outcome: gen grades (parent report)
 ```{r}
 fit7 <- with(imputed_data, lm(gen_grades ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1))
@@ -490,6 +494,7 @@ summary(est7_st)
 
 pool.r.squared(fit7_st) # 0.28
 ```
+
 # trying to get the partial R sqrd for each predictor 
 ```{r}
 # predictors <- c("predictor1", "predictor2", "predictor3")
@@ -505,5 +510,93 @@ pool.r.squared(fit7_st) # 0.28
 ```
 
 
+
+#####################################################################################################
+
+
+### Analytic model fitting ###
+
+# Step 5: Run regression on standardized data
+# Step 6: Pool the results to get standardized betas
+
+# Multiple regression, outcome: y_sch_eng (standardized)
+```{r}
+# without support
+fit1_st <- with(imputed_data_std, lm(y_sch_eng ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 + checkhwi_1 + struct_1 + knowschool_1 + parnets_1 + welcome_1 + endorse_1 + ptrel_1))
+
+est1_st <- pool(fit1_st)
+summary(est1_st) # checkhwi_1  beta = 0.31, p < 0.01
+
+pool.r.squared(fit1_st) # 0.23
+```
+
+
+# Step 5: Run regression on standardized data
+# Step 6: Pool the results to get standardized betas
+# Multiple regression, outcome: grades (youth report) (standardized)
+```{r}
+# without support
+fit2_st <- with(imputed_data_std, lm(grades ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 + checkhwi_1 + struct_1 + knowschool_1 + parnets_1 + welcome_1 + endorse_1 +  ptrel_1))
+
+est2_st <- pool(fit2_st)
+summary(est2_st)
+# youth being female: beta = -0.46, p = 0.04
+# convfut_1: beta = -0.26, p = 0.04
+
+pool.r.squared(fit2_st) # 0.17
+```
+
+
+# Step 5: Run regression on standardized data
+# Step 6: Pool the results to get standardized betas
+# Multiple regression, outcome: hw best practices (standardized)
+```{r}
+# without support
+fit3_st <- with(imputed_data_std, lm(y_hw ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 + checkhwi_1 + struct_1 + knowschool_1 + parnets_1 + welcome_1 + endorse_1 +  ptrel_1))
+
+est3_st <- pool(fit3_st)
+summary(est3_st) # no predictors were significantly related with the outcome
+
+pool.r.squared(fit3_st) # 0.15
+```
+
+# Step 5: Run regression on standardized data
+# Step 6: Pool the results to get standardized betas
+# Multiple regression, outcome: self efficacy (parent report) (standardized)
+```{r}
+# without support
+fit6_st <- with(imputed_data_std, lm(selfeffic_1 ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 + checkhwi_1 + struct_1 + knowschool_1 + parnets_1 + welcome_1 + endorse_1 + ptrel_1))
+
+est6_st <- pool(fit6_st)
+summary(est6_st)
+# parent_eng_comf beta = 0.17, p = 0.02
+# welcome_1 beta = 0.22, p = 0.03
+# endorse_1  beta = 0.38, p < 0.001
+
+pool.r.squared(fit6_st) # 0.67
+```
+
+
+# Step 5: Run regression on standardized data
+# Step 6: Pool the results to get standardized betas
+# Multiple regression, outcome: gen grades (parent report) (standardized)
+```{r}
+# without support
+fit7_st <- with(imputed_data_std, lm(gen_grades ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 + checkhwi_1 + struct_1 + knowschool_1 + parnets_1 + welcome_1 + endorse_1 + ptrel_1))
+
+est7_st <- pool(fit7_st)
+summary(est7_st)
+
+# youth being female: beta = -0.61, p = 0.003
+# convfut_1 beta = -0.25, p = 0.03
+# knowschool_1 beta = 0.34, p = 0.02
+# parnets_1  beta = -0.24, p = 0.053 trending
+
+pool.r.squared(fit7_st) # 0.28
+```
+
+
+
+because we don't have an objective report of grades, we don't know who was more accurate. Parents sense their kids is in a way affected by their ties to the school. if parents know a lot of school, she is doing well, when in reality is not true. Kids may have info that parents don't have. students are more used to he grading system, more than immigrant parents. limitations - the scale is not great, imo, very highly used.
 
 

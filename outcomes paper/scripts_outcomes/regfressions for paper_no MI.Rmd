@@ -178,3 +178,77 @@ ggplot(long_data, aes(x = Value)) +
   theme_minimal() + 
   labs(title = "Distribution of Variables")
 ```
+
+
+### School engagement - 10 rows deleted
+
+With MI: checkhwi_1  beta = 0.24, p < 0.01
+```{r, warning=FALSE}
+fit_engage <- lm(y_sch_eng ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 + checkhwi_1 + struct_1 + knowschool_1 + parnets_1 + welcome_1 + endorse_1 + ptrel_1, d3)
+
+summary(fit_engage) 
+
+partial_r2 <- rsq.partial(fit_engage)
+print(partial_r2)
+```
+
+### Youth-rep grades - 11 rows deleted
+
+With MI:
+youth being female: beta = -0.48, p = 0.03
+convfut_1: beta = -0.26, p = 0.04
+```{r, warning=FALSE}
+fit_grades <- lm(grades ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 + checkhwi_1 + struct_1 + knowschool_1 + parnets_1 + welcome_1 + endorse_1 + ptrel_1, d3)
+
+summary(fit_grades) 
+
+partial_r2 <- rsq.partial(fit_grades)
+print(partial_r2)
+```
+
+### Youth-hw practices - 10 rows deleted
+
+With MI:
+no predictors were significantly related with the outcome
+```{r, warning=FALSE}
+fit_yhw <- lm(y_hw ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 + checkhwi_1 + struct_1 + knowschool_1 + parnets_1 + welcome_1 + endorse_1 + ptrel_1, d3)
+
+summary(fit_yhw) 
+
+partial_r2 <- rsq.partial(fit_yhw)
+print(partial_r2)
+```
+
+
+### Parent self-efficacy - 10 rows deleted
+
+With MI:
+parent_eng_comf beta = 0.16, p = 0.03
+welcome_1 beta = 0.26, p = 0.02
+endorse_1  beta = 0.46, p < 0.001
+```{r, warning=FALSE}
+fit_efficacy <- lm(selfeffic_1 ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 + checkhwi_1 + struct_1 + knowschool_1 + parnets_1 + welcome_1 + endorse_1 + ptrel_1, d3)
+
+summary(fit_efficacy) 
+
+partial_r2 <- rsq.partial(fit_efficacy)
+print(partial_r2)
+```
+
+### Parent-rep grades - 13 rows deleted
+
+With MI:
+youth being female: beta = -0.48, p = 0.03
+convfut_1: beta = -0.26, p = 0.04
+```{r, warning=FALSE}
+fit_pgrades <- lm(gen_grades ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 + checkhwi_1 + struct_1 + knowschool_1 + parnets_1 + welcome_1 + endorse_1 + ptrel_1, d3)
+
+summary(fit_pgrades) 
+
+format(summary(fit_pgrades)$coefficients, scientific = FALSE) 
+
+partial_r2 <- rsq.partial(fit_pgrades)
+print(partial_r2)
+```
+
+
