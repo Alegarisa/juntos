@@ -1,0 +1,180 @@
+---
+title: "Regressions for paper_no MI"
+author: "Ale Garcia"
+date: "2025-04-02"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(rio)
+library(here)
+library(tidyverse)
+library(haven)
+library(janitor)
+library(knitr)
+library(surveytoolbox)
+library(sjPlot)
+library(kableExtra)
+library(psych)
+library(sjmisc)
+library(MVN)
+library(stats)
+library(AICcmodavg)
+library(rsq)
+
+theme_set(theme_minimal())
+```
+
+
+### The dataset ###
+
+```{r}
+d <- read_sav(here("outcomes paper/data_outcomes", "p_y_w1_for_analysesjan25.sav")) # 94 rows
+
+# view_df(d)
+```
+
+
+```{r}
+d1 <- d %>%
+  select(school_id, family_id, participant_id, parent_eng_comf, youth_age, youth_gender, acadhwi_1, checkhwi_1, checkhwi_1, struct_1, convfut_1, knowschool_1, selfeffic_1, parnets_1, welcome_1, endorse_1, supported_1, ptrel_1, y_sch_eng, y_parsupp, y_parinv, y_hw, gen_grades, grades)
+
+# view_df(d1)
+```
+
+
+```{r}
+d2 <- d1 %>%
+  mutate(school_id = factor(school_id),
+         parent_eng_comf = as.numeric(parent_eng_comf),
+         youth_gender = factor(youth_gender),
+         youth_age = as.numeric(youth_age))
+
+```
+
+
+```{r}
+d3 <- d2 %>%
+  mutate(across(where(is.numeric), ~ scale(.)[,1]))
+d3
+```
+
+### School engagement - 10 rows deleted
+
+With MI: checkhwi_1  beta = 0.24, p < 0.01
+```{r, warning=FALSE}
+fit_engage <- lm(y_sch_eng ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1, d3)
+
+summary(fit_engage) 
+
+partial_r2 <- rsq.partial(fit_engage)
+print(partial_r2)
+```
+
+### Youth-rep grades - 11 rows deleted
+
+With MI:
+youth being female: beta = -0.48, p = 0.03
+convfut_1: beta = -0.26, p = 0.04
+```{r, warning=FALSE}
+fit_grades <- lm(grades ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1, d3)
+
+summary(fit_grades) 
+
+partial_r2 <- rsq.partial(fit_grades)
+print(partial_r2)
+```
+
+### Youth-hw practices - 10 rows deleted
+
+With MI:
+no predictors were significantly related with the outcome
+```{r, warning=FALSE}
+fit_yhw <- lm(y_hw ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1, d3)
+
+summary(fit_yhw) 
+
+partial_r2 <- rsq.partial(fit_yhw)
+print(partial_r2)
+```
+
+### Youth-parent support - 10 rows deleted
+
+With MI:
+knowschool_1  beta = 0.41 p = 0.02
+```{r, warning=FALSE}
+fit_psupp <- lm(y_parsupp ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1, d3)
+
+summary(fit_psupp) 
+
+partial_r2 <- rsq.partial(fit_psupp)
+print(partial_r2)
+```
+
+### Youth-parent involvement - 10 rows deleted
+
+With MI:
+parent_eng_comf beta = -0.29, p = 0.01
+knowschool_1  beta = 0.30, p = 0.05
+```{r, warning=FALSE}
+fit_pinv <- lm(y_parinv ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1, d3)
+
+summary(fit_pinv) 
+
+partial_r2 <- rsq.partial(fit_pinv)
+print(partial_r2)
+```
+
+### Parent self-efficacy - 10 rows deleted
+
+With MI:
+parent_eng_comf beta = 0.16, p = 0.03
+welcome_1 beta = 0.26, p = 0.02
+endorse_1  beta = 0.46, p < 0.001
+```{r, warning=FALSE}
+fit_efficacy <- lm(selfeffic_1 ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1, d3)
+
+summary(fit_efficacy) 
+
+partial_r2 <- rsq.partial(fit_efficacy)
+print(partial_r2)
+```
+
+### Parent-rep grades - 13 rows deleted
+
+With MI:
+youth being female: beta = -0.48, p = 0.03
+convfut_1: beta = -0.26, p = 0.04
+```{r, warning=FALSE}
+fit_pgrades <- lm(gen_grades ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 + checkhwi_1 + struct_1 + convfut_1 + knowschool_1 + parnets_1 + welcome_1 + endorse_1 + supported_1 + ptrel_1, d3)
+
+summary(fit_pgrades) 
+
+format(summary(fit_pgrades)$coefficients, scientific = FALSE) 
+
+partial_r2 <- rsq.partial(fit_pgrades)
+print(partial_r2)
+```
+
+#### Select variables of interest
+```{r}
+vars_of_interest <- d3[, c("parent_eng_comf", "youth_age", "acadhwi_1", "checkhwi_1", "struct_1", "convfut_1", "knowschool_1", "parnets_1", "welcome_1", "endorse_1", "supported_1", "ptrel_1", "y_sch_eng", "y_parsupp", "y_parinv", "y_hw", "grades", "gen_grades", "selfeffic_1")] # removed youth gender because is a factor
+```
+
+
+#### Convert to long format for ggplot
+```{r}
+long_data <- pivot_longer(vars_of_interest, cols = everything(), names_to = "Variable", values_to = "Value")
+```
+
+
+#### Plot histograms
+```{r}
+ggplot(long_data, aes(x = Value)) + 
+  geom_histogram(bins = 30, fill = "skyblue", color = "black", alpha = 0.7) + 
+  facet_wrap(~ Variable, scales = "free") +  # One plot per variable
+  theme_minimal() + 
+  labs(title = "Distribution of Variables")
+```
