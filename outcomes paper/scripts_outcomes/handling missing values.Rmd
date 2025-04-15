@@ -527,7 +527,7 @@ fit1_st <- with(imputed_data_std, lm(y_sch_eng ~ parent_eng_comf + youth_age + y
 est1_st <- pool(fit1_st)
 summary(est1_st) # checkhwi_1  beta = 0.31, p < 0.01
 
-pool.r.squared(fit1_st) # 0.23
+pool.r.squared(fit1_st) # 0.22
 ```
 
 
@@ -543,7 +543,7 @@ summary(est2_st)
 # youth being female: beta = -0.46, p = 0.04
 # convfut_1: beta = -0.26, p = 0.04
 
-pool.r.squared(fit2_st) # 0.17
+pool.r.squared(fit2_st) # 0.11
 ```
 
 
@@ -557,7 +557,7 @@ fit3_st <- with(imputed_data_std, lm(y_hw ~ parent_eng_comf + youth_age + youth_
 est3_st <- pool(fit3_st)
 summary(est3_st) # no predictors were significantly related with the outcome
 
-pool.r.squared(fit3_st) # 0.15
+pool.r.squared(fit3_st) # 0.13
 ```
 
 # Step 5: Run regression on standardized data
@@ -592,7 +592,7 @@ summary(est7_st)
 # knowschool_1 beta = 0.34, p = 0.02
 # parnets_1  beta = -0.24, p = 0.053 trending
 
-pool.r.squared(fit7_st) # 0.28
+pool.r.squared(fit7_st) # 0.24
 ```
 
 
