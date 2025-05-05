@@ -410,13 +410,15 @@ parent_scales <- parent_w1_demo_3 %>%
          futorient_1 = mean(c(q105, q107, q108, q109, q110), na.rm = TRUE),
          knowschool_1 = mean(c(q31, q32, q33, q34), na.rm = TRUE),
          parnets_1 = mean(c(q37, q38, q39), na.rm = TRUE),
+         stratsbi_1 = mean(c(q36, q37, q38, q39, q40), na.rm = TRUE),
          selfeffic_1 = mean(c(q42, q43, q44, q45, q46), na.rm = TRUE),
          welcome_1 = mean(c(q48, q49, q52, q53), na.rm = TRUE),
          included_1 = mean(c(q47, q50, q51), na.rm = TRUE),
          endorse_1 = mean(c(q54, q56, q57), na.rm = TRUE),
+         endorse2_1 = mean(c(q54, q55, q56, q57), na.rm = TRUE),
          supported_1 = mean(c(q58, q59, q62, q63), na.rm = TRUE),
          ptrel_1 = mean(c(q64, q65, q66, q67), na.rm = TRUE)) %>%
-  select(school_id, condition, wave, family_id, participant_id, parent_role, parent_role_text, parent_age, country_born, age_arrival_us, white, latino, indigenous_lat_am, parent_ed, parent_eng_comf, h_lang_eng, h_lang_spa, h_lang_ind, youth_age, youth_country_born, adults_at_home, minors_at_home, lang_arts, soc_stu, math, science, gen_grades, help_extra, attend_pta, sats_contact, 302:317) 
+  select(school_id, condition, wave, family_id, participant_id, parent_role, parent_role_text, parent_age, country_born, age_arrival_us, white, latino, indigenous_lat_am, parent_ed, parent_eng_comf, h_lang_eng, h_lang_spa, h_lang_ind, youth_age, youth_country_born, adults_at_home, minors_at_home, lang_arts, soc_stu, math, science, gen_grades, help_extra, attend_pta, sats_contact, 302:319) 
 
 data.frame(table(parent_scales$family_id)) # no dupped rows
 ```
@@ -562,6 +564,14 @@ youth_hw <- youth_w1_3 %>%
   select(hw_2, hw_3, hw_4, hw_5, hw_6, hw_7)
 
 alpha(youth_hw) # 0.83
+
+# youth_hw <- youth_w1_3 %>%
+#   select(hw_1, hw_2, hw_3, hw_6, hw_7) # removing dopng hw and doing weel is important to me
+# alpha(youth_hw) # 0.74
+# 
+# youth_hw <- youth_w1_3 %>%
+#   select(hw_2, hw_3, hw_4, hw_6, hw_7) # taking out doing well in school is important to me
+# alpha(youth_hw) # 0.78
 ```
 # youth's perception of parental support (in the last 3 months...) 
 q18 - find ways to take part in school activities (likert: 1-4)
@@ -621,9 +631,10 @@ view_df(compl_par_you_w1)
 
 # outputing primary caregiver parent wave 1 dataset 
 On 02.25.25 I made some variable additions to complete sample descriptive but decided not to rename the data file
+0n 05.05.25 I made changes to scales becase on EFA model assumptions and created a second dataset
 ```{r}
 # compl_par_you_w1 %>%
-#   haven::write_sav(here("outcomes paper/data_outcomes", "p_y_w1_for_analysesjan25.sav"))
+#   haven::write_sav(here("outcomes paper/data_outcomes", "p_y_w1_for_analysesjan25_2.sav"))
 ```
 
 

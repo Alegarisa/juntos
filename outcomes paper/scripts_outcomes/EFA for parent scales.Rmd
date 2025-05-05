@@ -5,6 +5,7 @@ date: "2025-02-11"
 output: html_document
 ---
 
+Note: on may 5, 2025: I made a few changes on some scales, based on more painstakingly reviewing model assumptions for EFA. These changes are reflected in paper I worked with Seth. 
 
 ## From Flora, LaBrish, & Chalmers (2012)
 
@@ -24,10 +25,12 @@ Since Juntos assessments variables targeted for EFA were ordinal (4- and 5-point
 
 ### Steps to identify # of factors
 1. Evaluate multicollinearity with matrix polychoric
-2. Check kmo
+2. Check sampling adequacy* with kmo and Bartlett’s test of sphericity 
 3. Observe scree plot and eigen values
 4. Conduct parallel analysis (ideally with no warning messages, but if there are, it's ok). If it shows more factors than sensible: look for communality above .4 (h2); factor loading above 0.4; 
 5. Run fa() with number of factors that seem reasonable. Warnings are UNacceptable and changes in the scale need to be done. 
+
+*Sampling adequacy evaluates whether your data have the right characteristics—enough sample size and inter-item correlations—to make factor analysis appropriate and meaningful.
 
 ```{r setup, include=FALSE}
 
@@ -44,6 +47,7 @@ library(psych)
 library(sjmisc)
 library(MVN)
 
+options(scipen = 999)
 knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 ```
 
@@ -83,7 +87,10 @@ hw_inv <- parent_w1 %>%
 ```{r}
 KMO(hw_inv) # 0.71 --> ok
 ```
-
+```{r}
+poly_corr <- polychoric(hw_inv)$rho
+cortest.bartlett(poly_corr, n = nrow(hw_inv))
+```
 ## Poly corr matrix
 ```{r}
 poly <- polychoric(hw_inv)
@@ -123,16 +130,29 @@ hw_inv_1 <- parent_w1 %>%
   select(q84, q85, q86, q87, q88, q89, q93, q94, q96, q97)
 ```
 
+
+```{r}
+KMO(hw_inv_1) # 0.73 --> ok
+
+poly_corr <- polychoric(hw_inv_1)$rho
+cortest.bartlett(poly_corr, n = nrow(hw_inv_1))
+```
+
 ## Poly corr matrix
 ```{r}
 poly <- polychoric(hw_inv_1)
 cor.plot(poly$rho, numbers = T, upper = F, main = "Polychoric", show.legend = F) # looks better, 84 and 85 show some neg corr with other items.
 ```
 
+```{r}
+scree(hw_inv_1, factors = TRUE, pc = FALSE, main = "Scree plot", hline = NULL, add = FALSE)
+# Scree plot shows 3 factor solution, but 1 eigenvalue would be less than 1.0
+```
+
 ## parallel test
 ```{r}
 fa.parallel(hw_inv_1, n.obs=NULL, fm="uls", fa="fa", main="Parallel Analysis Scree Plots", cor="poly", use="pairwise", plot=TRUE)
-# Parallel analysis suggests that the number of factors =  3, multiple warnings
+# Parallel analysis suggests that the number of factors =  2, multiple warnings
 ```
 
 ## EFA using ULS 2 factors
@@ -174,8 +194,7 @@ alpha(hw_inv_fa2) # 0.77
 omega(hw_inv_1, nfactors = 2, n.obs = 95, flip = T, plot = T) # alpha = 0.76
 ```
 
-# structure 
-
+## structure 
 Los últimos tres meses, he tomado medidas para apoyar a mi joven a...
 23.	… desarrollar un plan para estudiar y hacer la tarea
 24.	… encontrar formas de involucrarse en las actividades escolares
@@ -192,9 +211,12 @@ struct <- parent_w1 %>%
   select(q23, q24, q25, q26, q27, q28, q29, q30) 
 ```
 
-## kmo Kaiser-Meyer-Olkin
+## sampling adequacy
 ```{r}
 KMO(struct) # 0.76
+
+poly_corr <- polychoric(hw_inv_1)$rho
+cortest.bartlett(poly_corr, n = nrow(hw_inv_1))
 ```
 
 ## Poly corr matrix
@@ -262,6 +284,7 @@ convos <- parent_w1 %>%
 ```{r}
 KMO(convos) # 0.86
 ```
+
 ## Poly corr matrix
 ```{r}
 poly <- polychoric(convos)
@@ -280,6 +303,7 @@ fa.parallel(convos, n.obs=NULL, fm="uls", fa="fa", main="Parallel Analysis Scree
 # Parallel analysis suggests that the number of factors =  3
 # warnings.
 ```
+
 ## EFA using ULS 
 ```{r}
 factor_test_uls <- fa(convos, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 3) 
@@ -328,6 +352,7 @@ convos_social <- parent_w1 %>%
 # alpha
 alpha(convos_social) # 0.79
 ```
+
 ## factor 3: future, prepping
 75.	… sus futuros objetivos de carrera y educación (incluso los objetivos a corto plazo). ____
 80.	… la importancia de prepararse para futuras trayectorias educativas o de carrera, como la planificación universitaria y / o pensando acerca de la escuela técnica o comercial, etc. _____
@@ -343,6 +368,7 @@ alpha(convos_college) # 0.77, removing item 81 would increase alpha, but scale w
 ```{r}
 omega(convos, nfactors = 3, n.obs = 95, flip = T, plot = T) # .86 looks really beautiful.
 ```
+
 # school involvement & others 
 En general, hago un esfuerzo para...
 31.	… conocer el personal y la administración de la escuela  ___
@@ -363,10 +389,14 @@ scho_inv <- parent_w1 %>%
   select(q31, q32, q33, q34, q35, q36, q37, q38, q39, q40, q41)
 ```
 
-## kmo Kaiser-Meyer-Olkin factor
+## sampling adequacy
 ```{r}
 KMO(scho_inv) # 0.83
+
+poly_corr <- polychoric(scho_inv)$rho
+cortest.bartlett(poly_corr, n = nrow(scho_inv))
 ```
+
 ## Poly corr matrix
 ```{r}
 poly <- polychoric(scho_inv)
@@ -379,6 +409,26 @@ scree(scho_inv, factors = TRUE, pc = FALSE, main = "Scree plot", hline = NULL, a
 # Scree plot  shows 2 factor solution
 ```
 
+## The scale to factor analyze
+```{r}
+scho_inv <- parent_w1 %>%
+  select(q31, q32, q33, q34, q35, q36, q37, q38, q39, q40) # removed 41
+```
+
+## sampling adequacy
+```{r}
+KMO(scho_inv) # 0.84
+
+poly_corr <- polychoric(scho_inv)$rho
+cortest.bartlett(poly_corr, n = nrow(scho_inv))
+```
+
+## Poly corr matrix
+```{r}
+poly <- polychoric(scho_inv)
+cor.plot(poly$rho, numbers = T, upper = F, main = "Polychoric", show.legend = F) 
+```
+
 ## parallel test
 ```{r}
 fa.parallel(scho_inv, n.obs=NULL, fm="uls", fa="fa", main="Parallel Analysis Scree Plots", cor="poly", use="pairwise", plot=TRUE)
@@ -389,24 +439,29 @@ fa.parallel(scho_inv, n.obs=NULL, fm="uls", fa="fa", main="Parallel Analysis Scr
 ```{r}
 factor_test_uls <- fa(scho_inv, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 2) 
 factor_test_uls
+fa.diagram(factor_test_uls)
 # warnings
-# items 35, 40, 41 crossload
+# crossloading items:
+# 35 = 0.58	0.34 (flagged for removal) diff. betw. primary and secondary loadings is .24
+# 36 = 0.23	0.58 (not too problematic) diff. betw. primary and secondary loadings is .35
+# 40 = 0.22	0.66 (not too problematic) diff. betw. primary and secondary loadings is .44
 ```
+-------------------------------------- removing 35 --------------------------------
 
-## Removing crossloading items 35, 40, 41
+## Removing crossloading item 35
+35.	… aprender sobre el sistema educativo en este estado (to be removed)
 ```{r}
 scho_inv <- parent_w1 %>%
-  select(q31, q32, q33, q34, q36, q37, q38, q39)
+  select(q31, q32, q33, q34, q36, q37, q38, q39, q40) # removed 35
 ```
 
 ## new EFA iteration 
 ```{r}
 factor_test_uls <- fa(scho_inv, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 2) 
 factor_test_uls
+fa.diagram(factor_test_uls)
 # no warnings
 ```
-
-
 
 ## Factor 1: knowing school personnel and rules
 31.	… conocer el personal y la administración de la escuela  ___
@@ -418,7 +473,7 @@ scho_inv_fa1 <- parent_w1 %>%
   select(q31, q32, q33, q34)
 
 # alpha
-alpha(scho_inv_fa1) # 0.85
+alpha(scho_inv_fa1) # 0.85 (familiarizing with school)
 ```
 
 ## Factor 2: networking and...
@@ -426,29 +481,66 @@ alpha(scho_inv_fa1) # 0.85
 37.	… involucrarse en las actividades escolares, en el salón de clase, y/u otras maneras (por ejemplo, organizaciones de padres, trabajo voluntario, etc.)
 38.	… tener conversaciones con los otros padres para obtener información o aprender acerca de los recursos en la escuela. ____
 39.	…contactar los otros padres para obtener apoyo. ____
+40.	…entender la trayectoria hacia la preparación a la universidad y para una carrera ____
 ```{r}
 scho_inv_fa2 <- parent_w1 %>%
-  select(q36, q37, q38, q39)
+  select(q36, q37, q38, q39, q40)
 
 # alpha
-alpha(scho_inv_fa2) # .78 (efforts to know school rules & personnel)
+alpha(scho_inv_fa2) # .81 (strategic sbi)
 ```
-## removing 36 because it doesn't jive as well with other items conceptually
+
+-------------------------------------- removing 35, 36, 40 --------------------------------
+
+## Removing crossloading item 35
+35.	… aprender sobre el sistema educativo en este estado (to be removed)
+36.	… entender la diferencia entre obtener un GED, graduarse con un diploma estándar de la escuela secundaria, o con un diploma de una secundaria internacional o con un diploma de Bachillerato Internacional.
+40.	…entender la trayectoria hacia la preparación a la universidad y para una carrera
 ```{r}
-scho_inv_fa2 <- parent_w1 %>%
-  select(q37, q38, q39)
-
-# alpha
-alpha(scho_inv_fa2) # .79 (networking with other parents)
+# scho_inv <- parent_w1 %>%
+#   select(q31, q32, q33, q34, q37, q38, q39)
 ```
 
+## new EFA iteration 
+```{r}
+# factor_test_uls <- fa(scho_inv, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 2) 
+# factor_test_uls
+# fa.diagram(factor_test_uls)
+# # no warnings
+```
+
+## Factor 1: knowing school personnel and rules
+31.	… conocer el personal y la administración de la escuela  ___
+32.	… conocer al menos uno de los maestros de mi joven ____
+33.	… entender las reglas y pólizas de la escuela  ____
+34.	… informarme sobre mis derechos como padre ____
+```{r}
+# scho_inv_fa1 <- parent_w1 %>%
+#   select(q31, q32, q33, q34)
+# 
+# # alpha
+# alpha(scho_inv_fa1) # 0.85 (familiarizing with school)
+```
+
+## Factor 2: volunteering and networking
+37.	… involucrarse en las actividades escolares, en el salón de clase, y/u otras maneras (por ejemplo, organizaciones de padres, trabajo voluntario, etc.)
+38.	… tener conversaciones con los otros padres para obtener información o aprender acerca de los recursos en la escuela. ____
+39.	…contactar los otros padres para obtener apoyo. ____
+
+```{r}
+# scho_inv_fa2 <- parent_w1 %>%
+#   select(q37, q38, q39)
+# 
+# # alpha
+# alpha(scho_inv_fa2) # .79
+```
 
 ## Omega 
 ```{r}
-scho_inv <- parent_w1 %>%
-  select(q31, q32, q33, q34, q37, q38, q39)
-omega(scho_inv, nfactors = 2, n.obs = 95, flip = T, plot = T) # alpha 0.82
-# warning : 3 factors are required fo identification
+# scho_inv <- parent_w1 %>%
+#   select(q31, q32, q33, q34, q37, q38, q39)
+# omega(scho_inv, nfactors = 2, n.obs = 95, flip = T, plot = T) # alpha 0.82
+# # warning : 3 factors are required fo identification
 ```
 
 # comfort 
@@ -469,10 +561,12 @@ comfort <- parent_w1 %>%
   select(q47, q48, q49, q50, q51, q52, q53)
 ```
 
-
-## kmo Kaiser-Meyer-Olkin factor
+## sampling adequacy
 ```{r}
 KMO(comfort) # 0.83
+
+poly_corr <- polychoric(comfort)$rho
+cortest.bartlett(poly_corr, n = nrow(comfort))
 ```
 ## Poly corr matrix
 ```{r}
@@ -492,6 +586,13 @@ fa.parallel(comfort, n.obs=NULL, fm="uls", fa="fa", main="Parallel Analysis Scre
 # Parallel analysis suggests that the number of factors =  3
 # warnings
 ```
+## EFA using ULS - 1 factor
+```{r}
+factor_test_uls <- fa(comfort, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 1) 
+factor_test_uls
+#going for 2 factors, because at least one factor would have 2 items
+# no warnings
+```
 
 ## EFA using ULS 
 ```{r}
@@ -501,7 +602,7 @@ factor_test_uls
 # no warnings
 ```
 
-## Factor 1: welcome
+## Factor 1: belong
 48.	…tratado/a con respeto, sabiendo que mis opiniones son importantes. ____
 49.	…cómoda/o preguntando por un traductor y por materiales en español si los necesito. ____
 52.	 …feliz de que mi joven asista a esta escuela. ___
@@ -517,6 +618,7 @@ alpha(comfort_fa1) # 0.86
 47.	…parte de una comunidad con el personal de la escuela y los otros padres. ____
 50.	… capaz de hablar con maestros o administradores sobre grandes preocupaciones relacionados con mi joven. ___
 51.	…dedicada/o en creando un ambiente exitoso para todos los jóvenes. ____
+
 ```{r}
 comfort_fa2 <- parent_w1 %>%
   select(q47, q50, q51)
@@ -525,8 +627,23 @@ alpha(comfort_fa2) # 0.70
 ```
 
 ## Omega 
+### says 3 factors required for identification, just to test it, it would be:
+
+49.	…cómoda/o preguntando por un traductor y por materiales en español si los necesito. ____
+52.	…feliz de que mi joven asista a esta escuela. ___
+53.	…bienvenido/a en la escuela de mi joven. ____
+
+47.	…parte de una comunidad con el personal de la escuela y los otros padres. ____
+50.	… capaz de hablar con maestros o administradores sobre grandes preocupaciones relacionados con mi joven. ___
+51.	…dedicada/o en creando un ambiente exitoso para todos los jóvenes. ____
+
+Crossloading 
+47
+48.	…tratado/a con respeto, sabiendo que mis opiniones son importantes. ____
+53
+
 ```{r}
-omega(comfort, nfactors = 2, n.obs = 95, flip = T, plot = T) # 0.84
+omega(comfort, nfactors = 3, n.obs = 95, flip = T, plot = T) # 0.84
 ```
 
 # endorse & rels 
@@ -549,7 +666,6 @@ rels <- parent_w1 %>%
   select(q54, q55, q56, q57, q58, q59, q60, q61, q62, q63)
 ```
 
-
 ## kmo Kaiser-Meyer-Olkin factor
 ```{r}
 KMO(rels) # 0.88
@@ -561,13 +677,11 @@ poly <- polychoric(rels)
 cor.plot(poly$rho, numbers = T, upper = F, main = "Polychoric", show.legend = F) # all healthy corrs
 ```
 
-
 ## scree plot
 ```{r}
 scree(rels, factors = TRUE, pc = FALSE, main = "Scree plot", hline = NULL, add = FALSE)
 # Scree plot clearly shows 1 factor solution
 ```
-
 
 ## parallel test
 ```{r}
@@ -576,14 +690,12 @@ fa.parallel(rels, n.obs=NULL, fm="uls", fa="fa", main="Parallel Analysis Scree P
 # warnings
 ```
 
-
 ## EFA using ULS 
 ```{r}
 factor_test_uls <- fa(rels, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 2) 
 factor_test_uls
 # matrix nonpositive definite, items 58, 60 and 63 
 ```
-
 
 ## removing items 58, 60 and 63 
 ```{r}
@@ -602,35 +714,58 @@ factor_test_uls
 # matrix nonpositive definite
 ```
 
-## trying only a couple of items that tap more closely on school endorsemnet
+## trying only PTIQ endorsement scale items
+23. Your child's school is a good place for your child to be
+24. The staff at your child's school is doing good things for your child
+25. You have confidence in the people at your child's school
+26. Your child's school is doing a good job of preparing children for their futures.
+
+
 54.	… esta escuela es un buen lugar para mi joven. _____
 55.	… el personal de la escuela de mi joven está haciendo cosas buenas por ella / el. _____
 56.	… la gente en la escuela de mi joven es confiable. _____
 57.	… la escuela de mi joven hace un buen trabajo preparando a los jóvenes para sus futuros. _____
+
 ```{r}
 endorse <- parent_w1 %>%
   select(q54, q55, q56, q57)
-
-factor_test_uls <- fa(endorse, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 1) 
-factor_test_uls
-# no warnings but items 55 with a loading of 1
+alpha(endorse) # 0.87
 ```
 
-## removing 55 bec was redundant with 57
+## sampling adequacy
 ```{r}
-endorse <- parent_w1 %>%
-  select(q54, q56, q57)
+KMO(endorse) # 0.81
 
+poly_corr <- polychoric(endorse)$rho
+cortest.bartlett(poly_corr, n = nrow(endorse))
+
+poly <- polychoric(endorse)
+cor.plot(poly$rho, numbers = T, upper = F, main = "Polychoric", show.legend = F) # corrs above .90 potentially multicolleniearity
+```
+
+```{r}
 factor_test_uls <- fa(endorse, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 1) 
 factor_test_uls
 fa.diagram(factor_test_uls)
 # no warnings
 ```
 
+## removing 55 bec too similar to 57
 
-## alpha
+54.	… esta escuela es un buen lugar para mi joven. _____
+56.	… la gente en la escuela de mi joven es confiable. _____
+57.	… la escuela de mi joven hace un buen trabajo preparando a los jóvenes para sus futuros. _____
 ```{r}
-alpha(endorse) # 0.79
+endorse <- parent_w1 %>%
+  select(q54, q56, q57)
+alpha(endorse)
+```
+
+```{r}
+factor_test_uls <- fa(endorse, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 1) 
+factor_test_uls
+fa.diagram(factor_test_uls)
+# no warnings, but there is a factor loading of 1 (item 57)
 ```
 
 # teacher support 
@@ -652,6 +787,7 @@ support <- parent_w1 %>%
 ```{r}
 KMO(support) # 0.81
 ```
+
 ## Poly corr matrix
 ```{r}
 poly <- polychoric(support)
@@ -706,7 +842,18 @@ alpha(support) # 0.88
 ```
 
 
-# p-t rel 
+# p-t rel from PTIQ
+
+Not included in battery:
+11. You feel welcome to visit about your child's school
+12. you enjoy talking with your child's teacher 
+16. you feel your child's teacher pays attention to your suggestions
+
+Included in battery
+13. you feel your child teacher cares about your child
+14. you think your child's teacher is interested in getting to know you
+15. you feel comfortable talking with your child's teacher about your child
+17. you ask your child's teacher questions or make suggestions about your child
 
 En esta escuela, siento que hay por lo menos un maestro…
 64.	… que se preocupa por mi joven. _____
@@ -720,17 +867,17 @@ pt_rel <- parent_w1 %>%
   select(q64, q65, q66, q67)
 ```
 
-## kmo Kaiser-Meyer-Olkin
+## sampling adequacy
 ```{r}
 KMO(pt_rel) # 0.77
-```
 
+poly_corr <- polychoric(pt_rel)$rho
+cortest.bartlett(poly_corr, n = nrow(pt_rel)) # Matrix was not positive definitive.
 
-## Poly corr matrix
-```{r}
 poly <- polychoric(pt_rel)
-cor.plot(poly$rho, numbers = T, upper = F, main = "Polychoric", show.legend = F) # very high corrs - prob multicollinearity
+cor.plot(poly$rho, numbers = T, upper = F, main = "Polychoric", show.legend = F) # potentially multicolleniearity
 ```
+
 
 ## scree plot
 ```{r}
@@ -744,6 +891,7 @@ fa.parallel(pt_rel, n.obs=NULL, fm="uls", fa="fa", main="Parallel Analysis Scree
 # Parallel analysis suggests that the number of factors =  1
 # warnings: matrix not positive definitive
 ```
+
 ## EFA using ULS 
 ```{r}
 factor_test_uls <- fa(pt_rel, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 1) 
@@ -765,7 +913,7 @@ fa.diagram(factor_test_uls)
 # Warnings: ultra heywood case, item 67 loading = 1
 ```
 
-Conclusion: EFA not possible with this scale. However, the scale was included in multiple regression due to importance to assess parent-teacher re;ationship. Alpha is good. 
+Conclusion: EFA not possible with this scale. However, the scale was included in multiple regression due to importance to assess parent-teacher relationship. Alpha is good. 
 
 ```{r}
 pt_rel <- parent_w1 %>%
@@ -812,6 +960,7 @@ fa.parallel(s_efficacy, n.obs=NULL, fm="uls", fa="fa", main="Parallel Analysis S
 # Parallel analysis suggests that the number of factors =  1
 # warnings
 ```
+
 ## EFA using ULS 
 ```{r}
 factor_test_uls <- fa(s_efficacy, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 1) 
