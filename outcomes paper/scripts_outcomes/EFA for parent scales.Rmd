@@ -690,9 +690,9 @@ fa.parallel(rels, n.obs=NULL, fm="uls", fa="fa", main="Parallel Analysis Scree P
 # warnings
 ```
 
-## EFA using ULS 
+## EFA using ULS with 1 factor - iteration 1
 ```{r}
-factor_test_uls <- fa(rels, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 2) 
+factor_test_uls <- fa(rels, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 1) 
 factor_test_uls
 # matrix nonpositive definite, items 58, 60 and 63 
 ```
@@ -713,6 +713,70 @@ factor_test_uls <- fa(rels, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "p
 factor_test_uls
 # matrix nonpositive definite
 ```
+######################### re-testing again on 06/11/25, removing problematic items ############################### START ###############################
+
+## removing item 55
+```{r}
+rels <- parent_w1 %>%
+  select(q54, q56, q57, q59, q61, q62)
+```
+
+## EFA using ULS - iteration 3 (with 1 and 2 factors)
+```{r}
+factor_test_uls <- fa(rels, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 2) 
+factor_test_uls
+# ultraheywood case, items 61 crossloading
+
+factor_test_uls <- fa(rels, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 1) 
+factor_test_uls
+# error message indicating to use another estimation method
+```
+
+## removing item 59
+```{r}
+rels <- parent_w1 %>%
+  select(q54, q56, q57, q61, q62)
+```
+
+## EFA using ULS - iteration 4 (with 1 factor)
+```{r}
+factor_test_uls <- fa(rels, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 1) 
+factor_test_uls
+# error message indicating to use another estimation method
+```
+54.	… esta escuela es un buen lugar para mi joven. _____
+56.	… la gente en la escuela de mi joven es confiable. _____
+57.	… la escuela de mi joven hace un buen trabajo preparando a los jóvenes para sus futuros. _____
+61.	… hay muchas oportunidades para la involucración de los padres. ____
+62.	… puedo tener una conversación honesta y respetuosa sobre mi joven con su maestro. ___
+
+note: 61 and 62 don't hang well with the other items
+
+## removing items 61 and 62 --- this is PTIQ minus items 55
+```{r}
+rels <- parent_w1 %>%
+  select(q54, q56, q57)
+```
+
+## EFA using ULS - iteration 5 (with 1 factor)
+```{r}
+factor_test_uls <- fa(rels, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 1) 
+factor_test_uls
+# no error message, although loading for 57 is 1.00  
+```
+## kmo Kaiser-Meyer-Olkin factor
+```{r}
+KMO(rels) # 0.65 # okay but close (0.5)
+```
+
+## Poly corr matrix
+```{r}
+poly <- polychoric(rels)
+cor.plot(poly$rho, numbers = T, upper = F, main = "Polychoric", show.legend = F) # very high corrs between 56 and 57
+```
+The EFA did run without error messages for the scale without 55, that is the scale I originally ran: endorse_1
+
+######################### re-testing again on 06/11/25, removing problematic items ############################### END ###############################
 
 ## trying only PTIQ endorsement scale items
 23. Your child's school is a good place for your child to be
@@ -747,7 +811,7 @@ cor.plot(poly$rho, numbers = T, upper = F, main = "Polychoric", show.legend = F)
 factor_test_uls <- fa(endorse, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 1) 
 factor_test_uls
 fa.diagram(factor_test_uls)
-# no warnings
+# ultraheywood case
 ```
 
 ## removing 55 bec too similar to 57
@@ -758,15 +822,30 @@ fa.diagram(factor_test_uls)
 ```{r}
 endorse <- parent_w1 %>%
   select(q54, q56, q57)
-alpha(endorse)
+alpha(endorse) # 0.79
+```
+## sampling adequacy
+```{r}
+KMO(endorse) # 0.65
+
+poly_corr <- polychoric(endorse)$rho
+cortest.bartlett(poly_corr, n = nrow(endorse))
+
+poly <- polychoric(endorse)
+cor.plot(poly$rho, numbers = T, upper = F, main = "Polychoric", show.legend = F)
 ```
 
+
+iteration 2: no negative error variance
 ```{r}
 factor_test_uls <- fa(endorse, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 1) 
 factor_test_uls
 fa.diagram(factor_test_uls)
 # no warnings, but there is a factor loading of 1 (item 57)
 ```
+conclusion for paper: going with this one. 
+
+
 
 # teacher support 
 Como madre/padre en esta escuela, estoy segura/o de que…
@@ -896,10 +975,12 @@ fa.parallel(pt_rel, n.obs=NULL, fm="uls", fa="fa", main="Parallel Analysis Scree
 ```{r}
 factor_test_uls <- fa(pt_rel, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 1) 
 factor_test_uls
-# Matrix was not positive definite
+# Matrix was not positive definite, ultraheywood case
 ```
 
-## removing item 66 loading > 1
+## removing item 66 loading > 1 and negative error variance
+
+66.	… con quien me siento/a cómodo/a hablando sobre mi joven.  
 ```{r}
 pt_rel <- parent_w1 %>%
   select(q64, q65, q67)
@@ -920,6 +1001,11 @@ pt_rel <- parent_w1 %>%
   select(q64, q65, q66, q67)
 
 alpha(pt_rel) # 0.87
+
+pt_rel_2 <- parent_w1 %>%
+  select(q64, q65, q67)
+
+alpha(pt_rel_2) # 0.79
 ```
 
 # self-efficacy (this is an outcome in multiple regression analyses)

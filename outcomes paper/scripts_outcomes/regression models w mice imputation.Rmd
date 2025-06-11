@@ -43,7 +43,7 @@ view_df(d)
 
 ```{r}
 d1 <- d %>%
-  select(school_id, family_id, participant_id, parent_eng_comf, youth_age, youth_gender, acadhwi_1, checkhwi_1, checkhwi_1, struct_1, convfut_1, knowschool_1, selfeffic_1, stratsbi_1, welcome_1, endorse2_1, supported_1, ptrel_1, y_sch_eng, y_parsupp, y_parinv, y_hw, gen_grades, grades)
+  select(school_id, family_id, participant_id, parent_eng_comf, youth_age, youth_gender, acadhwi_1, checkhwi_1, checkhwi_1, struct_1, convfut_1, knowschool_1, selfeffic_1, stratsbi_1, welcome_1, endorse_1, supported_1, ptrel_1, y_sch_eng, y_parsupp, y_parinv, y_hw, gen_grades, grades)
 
 view_df(d1)
 ```
@@ -109,7 +109,7 @@ convfut_1
 knowschool_1
 stratsbi_1
 welcome_1
-endorse2_1      
+endorse_1      
 supported_1      
 ptrel_1
 
@@ -247,7 +247,7 @@ colnames(imputed_long)
 ```{r}
 standardize <- function(df) {
   df <- df %>%
-    mutate(across(c(selfeffic_1, y_sch_eng, y_parsupp, y_parinv, y_hw, gen_grades, grades, parent_eng_comf, youth_age, acadhwi_1, checkhwi_1, struct_1, convfut_1, knowschool_1, stratsbi_1, welcome_1, endorse2_1, supported_1, ptrel_1), ~ scale(.)[,1]))  # Standardizing variables
+    mutate(across(c(selfeffic_1, y_sch_eng, y_parsupp, y_parinv, y_hw, gen_grades, grades, parent_eng_comf, youth_age, acadhwi_1, checkhwi_1, struct_1, convfut_1, knowschool_1, stratsbi_1, welcome_1, endorse_1, supported_1, ptrel_1), ~ scale(.)[,1]))  # Standardizing variables
   return(df)
 } # STANDARDIZING ALL EXCEPT GENDER THAT IS A FACTOR
 ```
@@ -286,7 +286,7 @@ welcome is belonging
 # Multiple regression, outcome: y_sch_eng (standardized)
 ```{r}
 # without support
-fit1_st <- with(imputed_data_std, lm(y_sch_eng ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 + checkhwi_1 + struct_1 + knowschool_1 + stratsbi_1 + welcome_1 + endorse2_1 + ptrel_1))
+fit1_st <- with(imputed_data_std, lm(y_sch_eng ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 + checkhwi_1 + struct_1 + knowschool_1 + stratsbi_1 + welcome_1 + endorse_1 + ptrel_1))
 
 est1_st <- pool(fit1_st)
 summary(est1_st) 
@@ -300,7 +300,7 @@ pool.r.squared(fit1_st) # 0.22
 # Multiple regression, outcome: grades (youth report) (standardized)
 ```{r}
 # without support
-fit2_st <- with(imputed_data_std, lm(grades ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 + checkhwi_1 + struct_1 + knowschool_1 + stratsbi_1 + welcome_1 + endorse2_1 +  ptrel_1))
+fit2_st <- with(imputed_data_std, lm(grades ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 + checkhwi_1 + struct_1 + knowschool_1 + stratsbi_1 + welcome_1 + endorse_1 +  ptrel_1))
 
 est2_st <- pool(fit2_st)
 summary(est2_st)
@@ -314,7 +314,7 @@ pool.r.squared(fit2_st) # 0.11
 # Multiple regression, outcome: hw best practices (standardized)
 ```{r}
 # without support
-fit3_st <- with(imputed_data_std, lm(y_hw ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 + checkhwi_1 + struct_1 + knowschool_1 + stratsbi_1 + welcome_1 + endorse2_1 +  ptrel_1))
+fit3_st <- with(imputed_data_std, lm(y_hw ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 + checkhwi_1 + struct_1 + knowschool_1 + stratsbi_1 + welcome_1 + endorse_1 +  ptrel_1))
 
 est3_st <- pool(fit3_st)
 summary(est3_st) # no predictors were significantly related with the outcome
@@ -327,7 +327,7 @@ pool.r.squared(fit3_st) # 0.13
 # Multiple regression, outcome: self efficacy (parent report) (standardized)
 ```{r}
 # without support
-fit6_st <- with(imputed_data_std, lm(selfeffic_1 ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 + checkhwi_1 + struct_1 + knowschool_1 + stratsbi_1 + welcome_1 + endorse2_1 + ptrel_1))
+fit6_st <- with(imputed_data_std, lm(selfeffic_1 ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 + checkhwi_1 + struct_1 + knowschool_1 + stratsbi_1 + welcome_1 + endorse_1 + ptrel_1))
 
 est6_st <- pool(fit6_st)
 summary(est6_st)
@@ -341,7 +341,7 @@ pool.r.squared(fit6_st) # 0.68
 # Multiple regression, outcome: gen grades (parent report) (standardized)
 ```{r}
 # without support
-fit7_st <- with(imputed_data_std, lm(gen_grades ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 + checkhwi_1 + struct_1 + knowschool_1 + stratsbi_1 + welcome_1 + endorse2_1 + ptrel_1))
+fit7_st <- with(imputed_data_std, lm(gen_grades ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 + checkhwi_1 + struct_1 + knowschool_1 + stratsbi_1 + welcome_1 + endorse_1 + ptrel_1))
 
 est7_st <- pool(fit7_st)
 summary(est7_st)
