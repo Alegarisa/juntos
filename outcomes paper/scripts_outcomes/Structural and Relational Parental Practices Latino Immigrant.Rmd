@@ -23,22 +23,38 @@ parent_w1 <- read_sav(here("outcomes paper/data_outcomes", "primary_parent_w1.sa
 ```
 
 ## Homework Involvement (15 items)
-Conteste la frecuencia con la que ha hecho lo siguiente para ayudarle a su hija/o con la tarea en los últimos tres meses…  
-84	Me aseguré de que tenga un cierto tiempo para hacer la tarea.  
-85	Me aseguré de que él / ella tenga un cierto lugar para hacer la tarea.  
-86	Me senté con mi joven mientras él / ella hacía su tarea.  
-87	Me hice disponible para mi joven cuando tenía preguntas sobre su tarea.  
-88	Ayudé a mi joven cuando estaba atascado/a en una tarea.  
-89	Ayudé a mi joven a prepararse para los exámenes haciéndole preguntas sobre el tema, etc.  
-90	Le di a mi joven incentivos como privilegios especiales, regalos especiales, etc.  
-91	Utilicé consecuencias, castigos, acciones disciplinarias.  
-92	Le recordé a mi joven que hiciera su tarea.  
-93	Comprobé con mi joven para asegurarme de que él / ella hiciera su tarea.  
-94	Comprobé y corregí la tarea de mi hija/o.   
-95	Comprobé con la maestra/o para asegurarme que mi joven terminó su tarea.   
-96	Le ayudé a mi joven acceder a otros recursos (biblioteca, materiales de arte, laboratorio de computación, etc.).  
-97	Le ayudé a mi joven practicar habilidades (lectura, revisión, problemas de práctica, etc.).  
-98	Limité el ruido y/o las distracciones mientras hacia su tarea.  
+
+Please indicate how often you have done the following to help your child with homework in the past three months...
+
+84 I made sure they had a set time to do their homework.
+
+85 I made sure they had a set place to do their homework.
+
+86 I sat with my child while they did their homework.
+
+87 I made myself available when my child had questions about their homework.
+
+88 I helped my child when they were stuck on an assignment.
+
+89 I helped my child prepare for exams by asking questions about the topic, etc.
+
+90 I gave my child incentives like special privileges or gifts.
+
+91 I used consequences, punishment, or disciplinary actions.
+
+92 I reminded my child to do their homework.
+
+93 I checked in with my child to make sure they did their homework.
+
+94 I checked and corrected my child’s homework.
+
+95 I checked with the teacher to make sure my child completed their homework.
+
+96 I helped my child access other resources (library, art materials, computer lab, etc.).
+
+97 I helped my child practice skills (reading, reviewing, practice problems, etc.).
+
+98 I limited noise and/or distractions while they did their homework.
 
 ```{r}
 hw_inv <- parent_w1 %>%
@@ -63,6 +79,93 @@ cor.plot(poly, numbers = T, upper = F, main = "Polychoric", show.legend = F)
 ```{r}
 scree(hw_inv, factors = TRUE, pc = FALSE, main = "Scree plot", hline = NULL, add = FALSE)
 ```
+
+########### testing ###########
+
+
+```{r}
+hw_inv_test <- parent_w1 %>%
+  select(q86, q87, q88, q89, q90, q93, q94, q95, q96, q97, q98)
+
+alpha(hw_inv_test) # .79
+```
+
+### Kaiser-Meyer-Olkin factor sampling adequacy (> 0.5)
+```{r}
+KMO(hw_inv_test)
+```
+### Bartlett’s Test of Sphericity (p < .05)
+```{r}
+poly <- polychoric(hw_inv_test)$rho
+cortest.bartlett(poly, n = nrow(hw_inv_test))
+```
+### Poly corr matrix
+```{r}
+cor.plot(poly, numbers = T, upper = F, main = "Polychoric", show.legend = F)
+```
+
+### Scree plot
+```{r}
+scree(hw_inv_test, factors = TRUE, pc = FALSE, main = "Scree plot", hline = NULL, add = FALSE)
+```
+
+### EFA using ULS 2 factors
+```{r}
+factor_test_uls <- fa(hw_inv_test, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 2) 
+factor_test_uls
+```
+
+fa 1
+
+87. Me hice disponible para mi joven cuando tenía preguntas sobre su tarea. ___
+88. Ayudé a mi joven cuando estaba atascado/a en una tarea ___
+89. Ayudé a mi joven a prepararse para los exámenes haciéndole preguntas sobre el tema, etc. ___
+86. Me senté con mi joven mientras él / ella hacía su tarea ___ SEMI
+96. Le ayudé a mi joven acceder a otros recursos (biblioteca, materiales de arte, laboratorio de computación, etc.) ___ SEMI
+97. Le ayudé a mi joven practicar habilidades (lectura, revisión, problemas de práctica, etc.) ___ SEMI
+98. Limité el ruido y/o las distracciones mientras hacia su tarea ___
+
+90. Le di a mi joven incentivos como privilegios especiales, regalos especiales, etc. ____ CROSS
+
+
+
+fa 2
+
+93. Comprobé con mi joven para asegurarme de que él / ella hiciera su tarea ___
+95. Comprobé con la maestra/o para asegurarme que mi joven terminó su tarea ___
+94. Comprobé y corregí la tarea de mi hija/o ___ SEMI
+
+
+
+90. Le di a mi joven incentivos como privilegios especiales, regalos especiales, etc. ____ CROSS
+
+
+ONE FACTOR: q86, q87, q88, q89, q90, q93, q94, q95, q96, q97, q98
+
+
+86. Me senté con mi joven mientras él / ella hacía su tarea ___ SEMI
+87. Me hice disponible para mi joven cuando tenía preguntas sobre su tarea. ___
+88. Ayudé a mi joven cuando estaba atascado/a en una tarea ___
+89. Ayudé a mi joven a prepararse para los exámenes haciéndole preguntas sobre el tema, etc. ___
+90. Le di a mi joven incentivos como privilegios especiales, regalos especiales, etc. ____ CROSS
+93. Comprobé con mi joven para asegurarme de que él / ella hiciera su tarea ___
+94. Comprobé y corregí la tarea de mi hija/o ___ SEMI
+95. Comprobé con la maestra/o para asegurarme que mi joven terminó su tarea ___
+96. Le ayudé a mi joven acceder a otros recursos (biblioteca, materiales de arte, laboratorio de computación, etc.) ___ SEMI
+97. Le ayudé a mi joven practicar habilidades (lectura, revisión, problemas de práctica, etc.) ___ SEMI
+98. Limité el ruido y/o las distracciones mientras hacia su tarea ___
+
+
+stil TBD
+
+
+########### testing ###########
+
+
+
+
+
+
 
 ### EFA using ULS 2 factors
 ```{r}
@@ -140,15 +243,24 @@ alpha(hw_inv_fa2)
 
 
 ## Home Structure 
-Los últimos tres meses, he tomado medidas para apoyar a mi joven a...  
-23.	… desarrollar un plan para estudiar y hacer la tarea.  
-24.	… encontrar formas de involucrarse en las actividades escolares.  
-25.	… encontrar maneras de involucrarse en actividades de voluntario/a en la comunidad.  
-26.	… hacer metas para el año escolar.  
-27.	… cumplir fechas de limite.  
-28.	… participar en papeles de liderazgo en la escuela o comunidad.  
-29.	… enfocarse en hacer lo mejor posible.  
-30.	… desarrollar un horario para completar la tarea y los proyectos escolares a tiempo.  
+
+In the past three months, I have taken steps to support my child to...
+
+23 ... develop a plan for studying and doing homework.
+
+24 ... find ways to get involved in school activities.
+
+25 ... find ways to get involved in volunteer activities in the community.
+
+26 ... set goals for the school year.
+
+27 ... meet deadlines.
+
+28 ... take on leadership roles in school or the community.
+
+29 ... focus on doing their best.
+
+30 ... develop a schedule to complete homework and school projects on time.
 
 ```{r}
 struct <- parent_w1 %>%
@@ -193,18 +305,32 @@ alpha(struct)
 
 
 ## School Involvement
-En general, hago un esfuerzo para...
-31.	… conocer el personal y la administración de la escuela.  
-32.	… conocer al menos uno de los maestros de mi joven.  
-33.	… entender las reglas y pólizas de la escuela.  
-34.	… informarme sobre mis derechos como padre.  
-35.	… aprender sobre el sistema educativo en este estado.  
-36.	… entender la diferencia entre obtener un GED, graduarse con un diploma estándar de la escuela secundaria, o con un diploma de una secundaria internacional o con un diploma de Bachillerato Internacional.  
-37.	… involucrarse en las actividades escolares, en el salón de clase, y/u otras maneras (por ejemplo, organizaciones de padres, trabajo voluntario, etc.).  
-38.	… tener conversaciones con los otros padres para obtener información o aprender acerca de los recursos en la escuela.  
-39.	…contactar los otros padres para obtener apoyo.  
-40.	…entender la trayectoria hacia la preparación a la universidad y para una carrera.  
-41.	… asistir a la conferencia de padres y maestros cuando esté disponible.  
+
+In general, I make an effort to...
+
+31 ... get to know school staff and administrators.
+
+32 ... get to know at least one of my child’s teachers.
+
+33 ... understand school rules and policies.
+
+34 ... inform myself about my rights as a parent.
+
+35 ... learn about the educational system in this state.
+
+36 ... understand the difference between earning a GED, graduating with a standard high school diploma, an international high school diploma, or an International Baccalaureate (IB) diploma.
+
+37 ... get involved in school activities, in the classroom, and/or in other ways (e.g., parent organizations, volunteer work, etc.).
+
+38 ... have conversations with other parents to gather information or learn about school resources.
+
+39 ... reach out to other parents for support.
+
+40 ... understand the pathway to college and career readiness.
+
+41 ... attend parent-teacher conferences when available.
+
+
 
 ```{r}
 scho_inv <- parent_w1 %>%
@@ -330,14 +456,22 @@ alpha(scho_inv_fa2)
 
 
 ## School belonging
-Como madre/padre de esta escuela, siento que soy…  
-47.	…parte de una comunidad con el personal de la escuela y los otros padres.  
-48.	…tratado/a con respeto, sabiendo que mis opiniones son importantes.  
-49.	…cómoda/o preguntando por un traductor y por materiales en español si los necesito.  
-50.	… capaz de hablar con maestros o administradores sobre grandes preocupaciones relacionados con mi joven.  
-51.	…dedicada/o en creando un ambiente exitoso para todos los jóvenes.  
-52.	 …feliz de que mi joven asista a esta escuela.  
-53.	…bienvenido/a en la escuela de mi joven.  
+
+As a parent at this school, I feel...
+
+47 ... like part of a community with school staff and other parents.
+
+48 ... treated with respect, knowing that my opinions matter.
+
+49 ... comfortable asking for a translator and for materials in Spanish if I need them.
+
+50 ... able to talk to teachers or administrators about major concerns related to my child.
+
+51 ... committed to creating a successful environment for all children.
+
+52 ... happy that my child attends this school.
+
+53 ... welcomed at my child’s school.
 
 
 ```{r}
@@ -407,10 +541,16 @@ School involvement: given that I took out parallel analysis, I no longer have a 
 
 
 ## School endorsement
-54.	… esta escuela es un buen lugar para mi joven.  
-55.	… el personal de la escuela de mi joven está haciendo cosas buenas por ella / el.  
-56.	… la gente en la escuela de mi joven es confiable.  
-57.	… la escuela de mi joven hace un buen trabajo preparando a los jóvenes para sus futuros.  
+
+As a parent at this school, I am confident that...
+
+54 ... this school is a good place for my child.
+
+55 ... my child’s school staff are doing good things for them.
+
+56 ... people at my child’s school are trustworthy.
+
+57 ... my child’s school does a good job preparing students for their futures.
 
 ```{r}
 endorse <- parent_w1 %>%
@@ -485,12 +625,18 @@ fa.diagram(factor_test_uls)
 
 
 
-## parent-teacher relationship
-En esta escuela, siento que hay por lo menos un maestro…  
-64.	… que se preocupa por mi joven.  
-65.	… quien está interesado en conocerme.  
-66.	… con quien me siento/a cómodo/a hablando sobre mi joven.  
-67.	… de quien puedo hacer preguntas o hacer sugerencias sobre mi joven.  
+## Parent-teacher relationship
+
+At this school, I feel there is at least one teacher...
+
+64 ... who cares about my child.
+
+65 ... who is interested in getting to know me.
+
+66 ... with whom I feel comfortable talking about my child.
+
+67 ... from whom I can ask questions or make suggestions about my child.
+
 
 ```{r}
 pt_rel <- parent_w1 %>%

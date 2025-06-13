@@ -359,31 +359,30 @@ Practices Among Latino Immigran
 </h2>
 <div id="homework-involvement-15-items" class="section level2">
 <h2>Homework Involvement (15 items)</h2>
-<p>Conteste la frecuencia con la que ha hecho lo siguiente para ayudarle
-a su hija/o con la tarea en los últimos tres meses…<br />
-84 Me aseguré de que tenga un cierto tiempo para hacer la tarea.<br />
-85 Me aseguré de que él / ella tenga un cierto lugar para hacer la
-tarea.<br />
-86 Me senté con mi joven mientras él / ella hacía su tarea.<br />
-87 Me hice disponible para mi joven cuando tenía preguntas sobre su
-tarea.<br />
-88 Ayudé a mi joven cuando estaba atascado/a en una tarea.<br />
-89 Ayudé a mi joven a prepararse para los exámenes haciéndole preguntas
-sobre el tema, etc.<br />
-90 Le di a mi joven incentivos como privilegios especiales, regalos
-especiales, etc.<br />
-91 Utilicé consecuencias, castigos, acciones disciplinarias.<br />
-92 Le recordé a mi joven que hiciera su tarea.<br />
-93 Comprobé con mi joven para asegurarme de que él / ella hiciera su
-tarea.<br />
-94 Comprobé y corregí la tarea de mi hija/o.<br />
-95 Comprobé con la maestra/o para asegurarme que mi joven terminó su
-tarea.<br />
-96 Le ayudé a mi joven acceder a otros recursos (biblioteca, materiales
-de arte, laboratorio de computación, etc.).<br />
-97 Le ayudé a mi joven practicar habilidades (lectura, revisión,
-problemas de práctica, etc.).<br />
-98 Limité el ruido y/o las distracciones mientras hacia su tarea.</p>
+<p>Please indicate how often you have done the following to help your
+child with homework in the past three months…</p>
+<p>84 I made sure they had a set time to do their homework.</p>
+<p>85 I made sure they had a set place to do their homework.</p>
+<p>86 I sat with my child while they did their homework.</p>
+<p>87 I made myself available when my child had questions about their
+homework.</p>
+<p>88 I helped my child when they were stuck on an assignment.</p>
+<p>89 I helped my child prepare for exams by asking questions about the
+topic, etc.</p>
+<p>90 I gave my child incentives like special privileges or gifts.</p>
+<p>91 I used consequences, punishment, or disciplinary actions.</p>
+<p>92 I reminded my child to do their homework.</p>
+<p>93 I checked in with my child to make sure they did their
+homework.</p>
+<p>94 I checked and corrected my child’s homework.</p>
+<p>95 I checked with the teacher to make sure my child completed their
+homework.</p>
+<p>96 I helped my child access other resources (library, art materials,
+computer lab, etc.).</p>
+<p>97 I helped my child practice skills (reading, reviewing, practice
+problems, etc.).</p>
+<p>98 I limited noise and/or distractions while they did their
+homework.</p>
 <pre class="r"><code>hw_inv &lt;- parent_w1 %&gt;%
   select(q84, q85, q86, q87, q88, q89, q90, q91, q92, q93, q94, q95, q96, q97, q98)</code></pre>
 <div id="kaiser-meyer-olkin-factor-sampling-adequacy-0.5" class="section level3">
@@ -679,20 +678,18 @@ alpha(hw_inv_fa2)</code></pre>
 </div>
 <div id="home-structure" class="section level2">
 <h2>Home Structure</h2>
-<p>Los últimos tres meses, he tomado medidas para apoyar a mi joven
-a…<br />
-23. … desarrollar un plan para estudiar y hacer la tarea.<br />
-24. … encontrar formas de involucrarse en las actividades
-escolares.<br />
-25. … encontrar maneras de involucrarse en actividades de voluntario/a
-en la comunidad.<br />
-26. … hacer metas para el año escolar.<br />
-27. … cumplir fechas de limite.<br />
-28. … participar en papeles de liderazgo en la escuela o
-comunidad.<br />
-29. … enfocarse en hacer lo mejor posible.<br />
-30. … desarrollar un horario para completar la tarea y los proyectos
-escolares a tiempo.</p>
+<p>In the past three months, I have taken steps to support my child
+to…</p>
+<p>23 … develop a plan for studying and doing homework.</p>
+<p>24 … find ways to get involved in school activities.</p>
+<p>25 … find ways to get involved in volunteer activities in the
+community.</p>
+<p>26 … set goals for the school year.</p>
+<p>27 … meet deadlines.</p>
+<p>28 … take on leadership roles in school or the community.</p>
+<p>29 … focus on doing their best.</p>
+<p>30 … develop a schedule to complete homework and school projects on
+time.</p>
 <pre class="r"><code>struct &lt;- parent_w1 %&gt;%
   select(q23, q24, q25, q26, q27, q28, q29, q30) </code></pre>
 <div id="kaiser-meyer-olkin-factor-sampling-adequacy-0.5-1" class="section level3">
@@ -825,26 +822,22 @@ factor_test_uls</code></pre>
 </div>
 <div id="school-involvement" class="section level2">
 <h2>School Involvement</h2>
-<p>En general, hago un esfuerzo para… 31. … conocer el personal y la
-administración de la escuela.<br />
-32. … conocer al menos uno de los maestros de mi joven.<br />
-33. … entender las reglas y pólizas de la escuela.<br />
-34. … informarme sobre mis derechos como padre.<br />
-35. … aprender sobre el sistema educativo en este estado.<br />
-36. … entender la diferencia entre obtener un GED, graduarse con un
-diploma estándar de la escuela secundaria, o con un diploma de una
-secundaria internacional o con un diploma de Bachillerato
-Internacional.<br />
-37. … involucrarse en las actividades escolares, en el salón de clase,
-y/u otras maneras (por ejemplo, organizaciones de padres, trabajo
-voluntario, etc.).<br />
-38. … tener conversaciones con los otros padres para obtener información
-o aprender acerca de los recursos en la escuela.<br />
-39. …contactar los otros padres para obtener apoyo.<br />
-40. …entender la trayectoria hacia la preparación a la universidad y
-para una carrera.<br />
-41. … asistir a la conferencia de padres y maestros cuando esté
-disponible.</p>
+<p>In general, I make an effort to…</p>
+<p>31 … get to know school staff and administrators.</p>
+<p>32 … get to know at least one of my child’s teachers.</p>
+<p>33 … understand school rules and policies.</p>
+<p>34 … inform myself about my rights as a parent.</p>
+<p>35 … learn about the educational system in this state.</p>
+<p>36 … understand the difference between earning a GED, graduating with
+a standard high school diploma, an international high school diploma, or
+an International Baccalaureate (IB) diploma.</p>
+<p>37 … get involved in school activities, in the classroom, and/or in
+other ways (e.g., parent organizations, volunteer work, etc.).</p>
+<p>38 … have conversations with other parents to gather information or
+learn about school resources.</p>
+<p>39 … reach out to other parents for support.</p>
+<p>40 … understand the pathway to college and career readiness.</p>
+<p>41 … attend parent-teacher conferences when available.</p>
 <pre class="r"><code>scho_inv &lt;- parent_w1 %&gt;%
   select(q31, q32, q33, q34, q35, q36, q37, q38, q39, q40, q41)</code></pre>
 <div id="kaiser-meyer-olkin-factor-sampling-adequacy-0.5-2" class="section level3">
@@ -1153,19 +1146,18 @@ alpha(scho_inv_fa2)</code></pre>
 </div>
 <div id="school-belonging" class="section level2">
 <h2>School belonging</h2>
-<p>Como madre/padre de esta escuela, siento que soy…<br />
-47. …parte de una comunidad con el personal de la escuela y los otros
-padres.<br />
-48. …tratado/a con respeto, sabiendo que mis opiniones son
-importantes.<br />
-49. …cómoda/o preguntando por un traductor y por materiales en español
-si los necesito.<br />
-50. … capaz de hablar con maestros o administradores sobre grandes
-preocupaciones relacionados con mi joven.<br />
-51. …dedicada/o en creando un ambiente exitoso para todos los
-jóvenes.<br />
-52. …feliz de que mi joven asista a esta escuela.<br />
-53. …bienvenido/a en la escuela de mi joven.</p>
+<p>As a parent at this school, I feel…</p>
+<p>47 … like part of a community with school staff and other
+parents.</p>
+<p>48 … treated with respect, knowing that my opinions matter.</p>
+<p>49 … comfortable asking for a translator and for materials in Spanish
+if I need them.</p>
+<p>50 … able to talk to teachers or administrators about major concerns
+related to my child.</p>
+<p>51 … committed to creating a successful environment for all
+children.</p>
+<p>52 … happy that my child attends this school.</p>
+<p>53 … welcomed at my child’s school.</p>
 <pre class="r"><code>comfort &lt;- parent_w1 %&gt;%
   select(q47, q48, q49, q50, q51, q52, q53)</code></pre>
 <div id="kaiser-meyer-olkin-factor-sampling-adequacy-0.5-5" class="section level3">
@@ -1344,17 +1336,12 @@ clearly show 1-factor.</p>
 </div>
 <div id="school-endorsement" class="section level2">
 <h2>School endorsement</h2>
-<ol start="54" style="list-style-type: decimal">
-<li>… esta escuela es un buen lugar para mi joven.<br />
-</li>
-<li>… el personal de la escuela de mi joven está haciendo cosas buenas
-por ella / el.<br />
-</li>
-<li>… la gente en la escuela de mi joven es confiable.<br />
-</li>
-<li>… la escuela de mi joven hace un buen trabajo preparando a los
-jóvenes para sus futuros.</li>
-</ol>
+<p>As a parent at this school, I am confident that…</p>
+<p>54 … this school is a good place for my child.</p>
+<p>55 … my child’s school staff are doing good things for them.</p>
+<p>56 … people at my child’s school are trustworthy.</p>
+<p>57 … my child’s school does a good job preparing students for their
+futures.</p>
 <pre class="r"><code>endorse &lt;- parent_w1 %&gt;%
   select(q54, q55, q56, q57)</code></pre>
 <div id="kaiser-meyer-olkin-factor-sampling-adequacy-0.5-6" class="section level3">
@@ -1508,12 +1495,12 @@ factor_test_uls</code></pre>
 </div>
 <div id="parent-teacher-relationship" class="section level2">
 <h2>parent-teacher relationship</h2>
-<p>En esta escuela, siento que hay por lo menos un maestro…<br />
-64. … que se preocupa por mi joven.<br />
-65. … quien está interesado en conocerme.<br />
-66. … con quien me siento/a cómodo/a hablando sobre mi joven.<br />
-67. … de quien puedo hacer preguntas o hacer sugerencias sobre mi
-joven.</p>
+<p>At this school, I feel there is at least one teacher…</p>
+<p>64 … who cares about my child.</p>
+<p>65 … who is interested in getting to know me.</p>
+<p>66 … with whom I feel comfortable talking about my child.</p>
+<p>67 … from whom I can ask questions or make suggestions about my
+child.</p>
 <pre class="r"><code>pt_rel &lt;- parent_w1 %&gt;%
   select(q64, q65, q66, q67)</code></pre>
 <div id="kaiser-meyer-olkin-factor-sampling-adequacy-0.5-8" class="section level3">

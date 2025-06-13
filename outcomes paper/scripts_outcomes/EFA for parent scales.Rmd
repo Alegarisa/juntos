@@ -785,65 +785,6 @@ The EFA did run without error messages for the scale without 55, that is the sca
 26. Your child's school is doing a good job of preparing children for their futures.
 
 
-54.	… esta escuela es un buen lugar para mi joven. _____
-55.	… el personal de la escuela de mi joven está haciendo cosas buenas por ella / el. _____
-56.	… la gente en la escuela de mi joven es confiable. _____
-57.	… la escuela de mi joven hace un buen trabajo preparando a los jóvenes para sus futuros. _____
-
-```{r}
-endorse <- parent_w1 %>%
-  select(q54, q55, q56, q57)
-alpha(endorse) # 0.87
-```
-
-## sampling adequacy
-```{r}
-KMO(endorse) # 0.81
-
-poly_corr <- polychoric(endorse)$rho
-cortest.bartlett(poly_corr, n = nrow(endorse))
-
-poly <- polychoric(endorse)
-cor.plot(poly$rho, numbers = T, upper = F, main = "Polychoric", show.legend = F) # corrs above .90 potentially multicolleniearity
-```
-
-```{r}
-factor_test_uls <- fa(endorse, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 1) 
-factor_test_uls
-fa.diagram(factor_test_uls)
-# ultraheywood case
-```
-
-## removing 55 bec too similar to 57
-
-54.	… esta escuela es un buen lugar para mi joven. _____
-56.	… la gente en la escuela de mi joven es confiable. _____
-57.	… la escuela de mi joven hace un buen trabajo preparando a los jóvenes para sus futuros. _____
-```{r}
-endorse <- parent_w1 %>%
-  select(q54, q56, q57)
-alpha(endorse) # 0.79
-```
-## sampling adequacy
-```{r}
-KMO(endorse) # 0.65
-
-poly_corr <- polychoric(endorse)$rho
-cortest.bartlett(poly_corr, n = nrow(endorse))
-
-poly <- polychoric(endorse)
-cor.plot(poly$rho, numbers = T, upper = F, main = "Polychoric", show.legend = F)
-```
-
-
-iteration 2: no negative error variance
-```{r}
-factor_test_uls <- fa(endorse, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 1) 
-factor_test_uls
-fa.diagram(factor_test_uls)
-# no warnings, but there is a factor loading of 1 (item 57)
-```
-conclusion for paper: going with this one. 
 
 
 
