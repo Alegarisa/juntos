@@ -80,24 +80,20 @@ cor.plot(poly, numbers = T, upper = F, main = "Polychoric", show.legend = F)
 scree(hw_inv, factors = TRUE, pc = FALSE, main = "Scree plot", hline = NULL, add = FALSE)
 ```
 
-########### testing ###########
-
-
+### Removing items with very low correlations
 ```{r}
-hw_inv_test <- parent_w1 %>%
-  select(q86, q87, q88, q89, q90, q93, q94, q95, q96, q97, q98)
-
-alpha(hw_inv_test) # .79
+hw_inv <- parent_w1 %>%
+  select(q84, q85, q86, q87, q88, q89, q90, q93, q94, q95, q96, q97, q98) # removing 91 and 92
 ```
 
 ### Kaiser-Meyer-Olkin factor sampling adequacy (> 0.5)
 ```{r}
-KMO(hw_inv_test)
+KMO(hw_inv)
 ```
 ### Bartlett’s Test of Sphericity (p < .05)
 ```{r}
-poly <- polychoric(hw_inv_test)$rho
-cortest.bartlett(poly, n = nrow(hw_inv_test))
+poly <- polychoric(hw_inv)$rho
+cortest.bartlett(poly, n = nrow(hw_inv))
 ```
 ### Poly corr matrix
 ```{r}
@@ -106,66 +102,8 @@ cor.plot(poly, numbers = T, upper = F, main = "Polychoric", show.legend = F)
 
 ### Scree plot
 ```{r}
-scree(hw_inv_test, factors = TRUE, pc = FALSE, main = "Scree plot", hline = NULL, add = FALSE)
+scree(hw_inv, factors = TRUE, pc = FALSE, main = "Scree plot", hline = NULL, add = FALSE)
 ```
-
-### EFA using ULS 2 factors
-```{r}
-factor_test_uls <- fa(hw_inv_test, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 2) 
-factor_test_uls
-```
-
-fa 1
-
-87. Me hice disponible para mi joven cuando tenía preguntas sobre su tarea. ___
-88. Ayudé a mi joven cuando estaba atascado/a en una tarea ___
-89. Ayudé a mi joven a prepararse para los exámenes haciéndole preguntas sobre el tema, etc. ___
-86. Me senté con mi joven mientras él / ella hacía su tarea ___ SEMI
-96. Le ayudé a mi joven acceder a otros recursos (biblioteca, materiales de arte, laboratorio de computación, etc.) ___ SEMI
-97. Le ayudé a mi joven practicar habilidades (lectura, revisión, problemas de práctica, etc.) ___ SEMI
-98. Limité el ruido y/o las distracciones mientras hacia su tarea ___
-
-90. Le di a mi joven incentivos como privilegios especiales, regalos especiales, etc. ____ CROSS
-
-
-
-fa 2
-
-93. Comprobé con mi joven para asegurarme de que él / ella hiciera su tarea ___
-95. Comprobé con la maestra/o para asegurarme que mi joven terminó su tarea ___
-94. Comprobé y corregí la tarea de mi hija/o ___ SEMI
-
-
-
-90. Le di a mi joven incentivos como privilegios especiales, regalos especiales, etc. ____ CROSS
-
-
-ONE FACTOR: q86, q87, q88, q89, q90, q93, q94, q95, q96, q97, q98
-
-
-86. Me senté con mi joven mientras él / ella hacía su tarea ___ SEMI
-87. Me hice disponible para mi joven cuando tenía preguntas sobre su tarea. ___
-88. Ayudé a mi joven cuando estaba atascado/a en una tarea ___
-89. Ayudé a mi joven a prepararse para los exámenes haciéndole preguntas sobre el tema, etc. ___
-90. Le di a mi joven incentivos como privilegios especiales, regalos especiales, etc. ____ CROSS
-93. Comprobé con mi joven para asegurarme de que él / ella hiciera su tarea ___
-94. Comprobé y corregí la tarea de mi hija/o ___ SEMI
-95. Comprobé con la maestra/o para asegurarme que mi joven terminó su tarea ___
-96. Le ayudé a mi joven acceder a otros recursos (biblioteca, materiales de arte, laboratorio de computación, etc.) ___ SEMI
-97. Le ayudé a mi joven practicar habilidades (lectura, revisión, problemas de práctica, etc.) ___ SEMI
-98. Limité el ruido y/o las distracciones mientras hacia su tarea ___
-
-
-stil TBD
-
-
-########### testing ###########
-
-
-
-
-
-
 
 ### EFA using ULS 2 factors
 ```{r}
@@ -173,25 +111,21 @@ factor_test_uls <- fa(hw_inv, n.obs = 95, rotate = "oblimin", fm = "uls", cor = 
 factor_test_uls
 ```
 
-
-### Removing items with loadings < 0.3  or cross-loading
+### Removing crossloading items  
 ```{r}
-hw_inv_1 <- parent_w1 %>%
-  select(q84, q85, q86, q87, q88, q89, q93, q94, q96, q97)
+hw_inv <- parent_w1 %>%
+  select(q84, q85, q86, q87, q88, q89, q93, q94, q96, q97) # removing 90, 95, and 98
 ```
 
-
-### kmo Kaiser-Meyer-Olkin factor sampling adequacy (> 0.5)
+### Kaiser-Meyer-Olkin factor sampling adequacy (> 0.5)
 ```{r}
-KMO(hw_inv_1)
+KMO(hw_inv)
 ```
-
-### Bartlett’s Test of Sphericity (P < .05)
+### Bartlett’s Test of Sphericity (p < .05)
 ```{r}
-poly <- polychoric(hw_inv_1)$rho
-cortest.bartlett(poly, n = nrow(hw_inv_1))
+poly <- polychoric(hw_inv)$rho
+cortest.bartlett(poly, n = nrow(hw_inv))
 ```
-
 ### Poly corr matrix
 ```{r}
 cor.plot(poly, numbers = T, upper = F, main = "Polychoric", show.legend = F)
@@ -199,27 +133,35 @@ cor.plot(poly, numbers = T, upper = F, main = "Polychoric", show.legend = F)
 
 ### Scree plot
 ```{r}
-scree(hw_inv_1, factors = TRUE, pc = FALSE, main = "Scree plot", hline = NULL, add = FALSE)
+scree(hw_inv, factors = TRUE, pc = FALSE, main = "Scree plot", hline = NULL, add = FALSE)
 ```
 
 
-### 2nd EFA iteration: 2 factors
+### 2nd EFA iteration
 ```{r}
-factor_test_uls <- fa(hw_inv_1, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 2) 
+factor_test_uls <- fa(hw_inv, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 2) 
 factor_test_uls
-
 fa.diagram(factor_test_uls)
 ```
 
 
 ### Factor 1: Tutoring homework
-86	Me senté con mi joven mientras él / ella hacía su tarea.  
-87	Me hice disponible para mi joven cuando tenía preguntas sobre su tarea.  
-88	Ayudé a mi joven cuando estaba atascado/a en una tarea.  
-89	Ayudé a mi joven a prepararse para los exámenes haciéndole preguntas sobre el tema, etc.  
-94	Comprobé y corregí la tarea de mi hija/o.   
-96	Le ayudé a mi joven acceder a otros recursos (biblioteca, materiales de arte, laboratorio de computación, etc.).  
-97	Le ayudé a mi joven practicar habilidades (lectura, revisión, problemas de práctica, etc.).  
+
+86 I sat with my child while they did their homework.
+
+87 I made myself available when my child had questions about their homework.
+
+88 I helped my child when they were stuck on an assignment.
+
+89 I helped my child prepare for exams by asking questions about the topic, etc.
+
+94 I checked and corrected my child’s homework.
+
+95 I checked with the teacher to make sure my child completed their homework.
+
+96 I helped my child access other resources (library, art materials, computer lab, etc.).
+
+97 I helped my child practice skills (reading, reviewing, practice problems, etc.).
 ```{r}
 hw_inv_fa1 <- parent_w1 %>%
   select(q86, q87, q88, q89, q94, q96, q97)
@@ -229,10 +171,13 @@ alpha(hw_inv_fa1)
 ```
 
 
-### Factor # 2: checking homework
-84	Me aseguré de que tenga un cierto tiempo para hacer la tarea.  
-85	Me aseguré de que él / ella tenga un cierto lugar para hacer la tarea.  
-93	Comprobé con mi joven para asegurarme de que él / ella hiciera su tarea.  
+### Factor 2: checking homework
+
+84 I made sure they had a set time to do their homework.
+
+85 I made sure they had a set place to do their homework.
+
+93 I checked in with my child to make sure they did their homework.
 ```{r}
 hw_inv_fa2 <- parent_w1 %>%
   select(q84, q85, q93)
@@ -291,14 +236,14 @@ cor.plot(poly, numbers = T, upper = F, main = "Polychoric", show.legend = F)
 scree(struct, factors = TRUE, pc = FALSE, main = "Scree plot", hline = NULL, add = FALSE)
 ```
 
-## EFA using ULS - 1 factor
+### EFA using ULS - 1 factor
 ```{r}
 factor_test_uls <- fa(struct, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 1) 
 factor_test_uls
 fa.diagram(factor_test_uls)
 ```
 
-## Factor: Home Structure
+### Factor: Home Structure
 ```{r}
 alpha(struct)
 ```
@@ -330,43 +275,10 @@ In general, I make an effort to...
 
 41 ... attend parent-teacher conferences when available.
 
-
-
 ```{r}
 scho_inv <- parent_w1 %>%
   select(q31, q32, q33, q34, q35, q36, q37, q38, q39, q40, q41)
 ```
-
-### Kaiser-Meyer-Olkin factor sampling adequacy (> 0.5)
-```{r}
-KMO(scho_inv)
-```
-
-
-### Bartlett’s Test of Sphericity (p < .05)
-```{r}
-poly <- polychoric(scho_inv)$rho
-cortest.bartlett(poly, n = nrow(scho_inv))
-```
-
-
-### Poly corr matrix
-```{r}
-cor.plot(poly, numbers = T, upper = F, main = "Polychoric", show.legend = F) # item 41 with 37-39 neg corrs.
-```
-
-### Scree plot
-```{r}
-scree(scho_inv, factors = TRUE, pc = FALSE, main = "Scree plot", hline = NULL, add = FALSE)
-```
-
-
-### Removing item with correlations < 0.3
-```{r}
-scho_inv <- parent_w1 %>%
-  select(q31, q32, q33, q34, q35, q36, q37, q38, q39, q40) # removed 41
-```
-
 
 ### Kaiser-Meyer-Olkin factor sampling adequacy (> 0.5)
 ```{r}
@@ -395,13 +307,13 @@ scree(scho_inv, factors = TRUE, pc = FALSE, main = "Scree plot", hline = NULL, a
 ```{r}
 factor_test_uls <- fa(scho_inv, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 2) 
 factor_test_uls
-fa.diagram(factor_test_uls)
 ```
 
-### Removing crossloading item  
+
+### Removing crossloading items
 ```{r}
 scho_inv <- parent_w1 %>%
-  select(q31, q32, q33, q34, q36, q37, q38, q39, q40) # removed 41
+  select(q31, q32, q33, q34, q36, q37, q38, q39) # removed 35, 40, 41
 ```
 
 
@@ -423,7 +335,6 @@ cortest.bartlett(poly, n = nrow(scho_inv))
 cor.plot(poly, numbers = T, upper = F, main = "Polychoric", show.legend = F)
 ```
 
-
 ### Scree plot
 ```{r}
 scree(scho_inv, factors = TRUE, pc = FALSE, main = "Scree plot", hline = NULL, add = FALSE)
@@ -436,7 +347,16 @@ factor_test_uls
 fa.diagram(factor_test_uls)
 ```
 
+
 ### Factor 1: School familiarity
+
+31 ... get to know school staff and administrators.
+
+32 ... get to know at least one of my child’s teachers.
+
+33 ... understand school rules and policies.
+
+34 ... inform myself about my rights as a parent.
 ```{r}
 scho_inv_fa1 <- parent_w1 %>%
   select(q31, q32, q33, q34)
@@ -446,9 +366,17 @@ alpha(scho_inv_fa1)
 ```
 
 ### Factor 2: Proactive school enagagement
+
+36 ... understand the difference between earning a GED, graduating with a standard high school diploma, an international high school diploma, or an International Baccalaureate (IB) diploma.
+
+37 ... get involved in school activities, in the classroom, and/or in other ways (e.g., parent organizations, volunteer work, etc.).
+
+38 ... have conversations with other parents to gather information or learn about school resources.
+
+39 ... reach out to other parents for support.
 ```{r}
 scho_inv_fa2 <- parent_w1 %>%
-  select(q36, q37, q38, q39, q40)
+  select(q36, q37, q38, q39)
 
 # alpha
 alpha(scho_inv_fa2)
@@ -475,70 +403,43 @@ As a parent at this school, I feel...
 
 
 ```{r}
-comfort <- parent_w1 %>%
+belong <- parent_w1 %>%
   select(q47, q48, q49, q50, q51, q52, q53)
 ```
 
 ### Kaiser-Meyer-Olkin factor sampling adequacy (> 0.5)
 ```{r}
-KMO(comfort)
+KMO(belong)
 ```
 
 
 ### Bartlett’s Test of Sphericity (p < .05)
 ```{r}
-poly <- polychoric(comfort)$rho
-cortest.bartlett(poly, n = nrow(comfort))
+poly <- polychoric(belong)$rho
+cortest.bartlett(poly, n = nrow(belong))
 ```
 
 ### Poly corr matrix
 ```{r}
-cor.plot(poly, numbers = T, upper = F, main = "Polychoric", show.legend = F) # all healthy corrs
+cor.plot(poly, numbers = T, upper = F, main = "Polychoric", show.legend = F)
 ```
 
 ### Scree plot
 ```{r}
-scree(comfort, factors = TRUE, pc = FALSE, main = "Scree plot", hline = NULL, add = FALSE)
+scree(belong, factors = TRUE, pc = FALSE, main = "Scree plot", hline = NULL, add = FALSE)
 ```
 
 
-### EFA using ULS 2 factors
+### EFA using ULS 1 factor
 ```{r}
-factor_test_uls <- fa(comfort, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 1) 
+factor_test_uls <- fa(belong, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 1) 
 factor_test_uls
+fa.diagram(factor_test_uls)
 ```
-
-## Factor 1: belong
-48.	…tratado/a con respeto, sabiendo que mis opiniones son importantes. ____
-49.	…cómoda/o preguntando por un traductor y por materiales en español si los necesito. ____
-52.	 …feliz de que mi joven asista a esta escuela. ___
-53.	…bienvenido/a en la escuela de mi joven. ____
+### Factor: school belonging
 ```{r}
-comfort_fa1 <- parent_w1 %>%
-  select(q48, q49, q52, q53)
-# alpha
-alpha(comfort_fa1) # 0.86
+alpha(belong)
 ```
-
-## Factor 2: included (not included in multiple regression analyses)
-47.	…parte de una comunidad con el personal de la escuela y los otros padres. ____
-50.	… capaz de hablar con maestros o administradores sobre grandes preocupaciones relacionados con mi joven. ___
-51.	…dedicada/o en creando un ambiente exitoso para todos los jóvenes. ____
-
-```{r}
-comfort_fa2 <- parent_w1 %>%
-  select(q47, q50, q51)
-# alpha
-alpha(comfort_fa2) # 0.70
-```
-
-
-
-Issues: 
-Homework involvement -- low correlations in the first matrix. 
-
-School involvement: given that I took out parallel analysis, I no longer have a reason to donducxt a 2-factor model because scree plot clearly show 1-factor. 
-
 
 ## School endorsement
 
@@ -572,7 +473,7 @@ cortest.bartlett(poly, n = nrow(endorse))
 
 ### Poly corr matrix
 ```{r}
-cor.plot(poly, numbers = T, upper = F, main = "Polychoric", show.legend = F) # corrs above .90 potentially multicolleniearity
+cor.plot(poly, numbers = T, upper = F, main = "Polychoric", show.legend = F)
 ```
 
 ### Scree plot
@@ -607,7 +508,7 @@ cortest.bartlett(poly, n = nrow(endorse))
 
 ### Poly corr matrix
 ```{r}
-cor.plot(poly, numbers = T, upper = F, main = "Polychoric", show.legend = F) # corrs above .90 potentially multicolleniearity
+cor.plot(poly, numbers = T, upper = F, main = "Polychoric", show.legend = F)
 ```
 
 ### Scree plot
@@ -621,9 +522,10 @@ factor_test_uls <- fa(endorse, n.obs = 95, rotate = "oblimin", fm = "uls", cor =
 factor_test_uls
 fa.diagram(factor_test_uls)
 ```
-
-
-
+### Factor: school endorsement
+```{r}
+alpha(endorse)
+```
 
 ## Parent-teacher relationship
 
@@ -675,16 +577,22 @@ factor_test_uls
 ### Removing item Ultra-Heywood case
 ```{r}
 pt_rel <- parent_w1 %>%
-  select(q64, q65, q67)# removed 66
+  select(q64, q65, q67) # removed 66
 ```
 
 
 ### 2nd EFA iteration 
+
 ```{r}
 factor_test_uls <- fa(pt_rel, n.obs = 95, rotate = "oblimin", fm = "uls", cor = "poly", nfactors = 1) 
-factor_test_uls
-fa.diagram(factor_test_uls)
+factor_test_uls # it only works with ml (jaime suggest removing the scale and adding it as a limitation and future directions)
 ```
 
-Conclusion: EFA not possible with this scale.
+Another Ultra-Heywood case. Removing the item would yield a factor with 2 items. Conclusion: EFA not possible with this scale.
+```{r}
+pt_rel <- parent_w1 %>%
+  select(q64, q65, q66, q67)
+
+alpha(pt_rel)
+```
 
