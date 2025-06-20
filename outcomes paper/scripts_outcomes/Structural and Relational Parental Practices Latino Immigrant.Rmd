@@ -157,8 +157,6 @@ fa.diagram(factor_test_uls)
 
 94 I checked and corrected my child’s homework.
 
-95 I checked with the teacher to make sure my child completed their homework.
-
 96 I helped my child access other resources (library, art materials, computer lab, etc.).
 
 97 I helped my child practice skills (reading, reviewing, practice problems, etc.).
