@@ -40,14 +40,14 @@ d <- read_sav(here("outcomes paper/data_outcomes", "p_y_w1_for_analysesjan25_2.s
 view_df(d)
 ```
 
-
+# 06/19/25 decided to reduce the number of models: no longer testing parent-reported grades and youth HW engagement
 ```{r}
 d1 <- d %>%
   select(all_of(c(
     "school_id", "family_id", "participant_id", "parent_eng_comf", "youth_age", "youth_gender",
     "acadhwi_1", "checkhwi_1", "struct_1", "knowschool_1", 
     "stratsbi_1", "belong_1", "endorse_1", "ptrel_1", "selfeffic_1",
-    "y_sch_eng", "y_hw", "gen_grades", "grades"
+    "y_sch_eng", "grades"
   )))
 
 view_df(d1)
@@ -248,7 +248,7 @@ colnames(imputed_long)
 ```{r}
 standardize <- function(df) {
   df <- df %>%
-    mutate(across(c(selfeffic_1, y_sch_eng, y_hw, gen_grades, grades, parent_eng_comf, youth_age, acadhwi_1, checkhwi_1, struct_1, knowschool_1, stratsbi_1, belong_1, endorse_1, ptrel_1), ~ scale(.)[,1]))  # Standardizing variables
+    mutate(across(c(selfeffic_1, y_sch_eng, grades, parent_eng_comf, youth_age, acadhwi_1, checkhwi_1, struct_1, knowschool_1, stratsbi_1, belong_1, endorse_1, ptrel_1), ~ scale(.)[,1]))  # Standardizing variables
   return(df)
 } # STANDARDIZING ALL EXCEPT GENDER THAT IS A FACTOR
 ```
@@ -273,8 +273,7 @@ imputed_data_std <- as.mids(as.data.frame(imputed_long))
 ############################################################# standarizing variables  - end ###############################################################
 
 
-These models responded to the changes after working on supplementary materials R markdown. 
-
+These models responded to the changes after working on supplementary materials R markdown, although I decided not to include the EFA analyses in the paper to reduce word count and compelxity. 
 
 
 ### Analytic model fitting ###
@@ -290,7 +289,7 @@ fit1_st <- with(imputed_data_std, lm(y_sch_eng ~ parent_eng_comf + youth_age + y
 est1_st <- pool(fit1_st)
 summary(est1_st) 
 
-pool.r.squared(fit1_st) # 0.22
+pool.r.squared(fit1_st) # 0.21
 ```
 
 
@@ -310,19 +309,6 @@ pool.r.squared(fit2_st) # 0.11
 
 # Step 5: Run regression on standardized data
 # Step 6: Pool the results to get standardized betas
-# Multiple regression, outcome: hw best practices (standardized)
-```{r}
-# without support
-fit3_st <- with(imputed_data_std, lm(y_hw ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 + checkhwi_1 + struct_1 + knowschool_1 + stratsbi_1 + belong_1 + endorse_1 + ptrel_1))
-
-est3_st <- pool(fit3_st)
-summary(est3_st) # no predictors were significantly related with the outcome
-
-pool.r.squared(fit3_st) # 0.13
-```
-
-# Step 5: Run regression on standardized data
-# Step 6: Pool the results to get standardized betas
 # Multiple regression, outcome: self efficacy (parent report) (standardized)
 ```{r}
 # without support
@@ -331,26 +317,8 @@ fit6_st <- with(imputed_data_std, lm(selfeffic_1 ~ parent_eng_comf + youth_age +
 est6_st <- pool(fit6_st)
 summary(est6_st)
 
-pool.r.squared(fit6_st) # 0.68
+pool.r.squared(fit6_st) # 0.70
 ```
-
-
-# Step 5: Run regression on standardized data
-# Step 6: Pool the results to get standardized betas
-# Multiple regression, outcome: gen grades (parent report) (standardized)
-```{r}
-# without support
-fit7_st <- with(imputed_data_std, lm(gen_grades ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 + checkhwi_1 + struct_1 + knowschool_1 + stratsbi_1 + belong_1 + endorse_1 + ptrel_1))
-
-est7_st <- pool(fit7_st)
-summary(est7_st)
-
-pool.r.squared(fit7_st) # 0.22
-```
-
-
-
-because we don't have an objective report of grades, we don't know who was more accurate. Parents sense their kids is in a way affected by their ties to the school. if parents know a lot of school, she is doing well, when in reality is not true. Kids may have info that parents don't have. students are more used to he grading system, more than immigrant parents. limitations - the scale is not great, imo, very highly used.
 
 
 ################################################# without p-t rel given it didn't work for EFA #################################################
@@ -368,7 +336,7 @@ fit1_st <- with(imputed_data_std, lm(y_sch_eng ~ parent_eng_comf + youth_age + y
 est1_st <- pool(fit1_st)
 summary(est1_st) 
 
-pool.r.squared(fit1_st) # 0.16
+pool.r.squared(fit1_st) # 0.17
 ```
 
 
@@ -388,19 +356,6 @@ pool.r.squared(fit2_st) # 0.11
 
 # Step 5: Run regression on standardized data
 # Step 6: Pool the results to get standardized betas
-# Multiple regression, outcome: hw best practices (standardized)
-```{r}
-# without support
-fit3_st <- with(imputed_data_std, lm(y_hw ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 + checkhwi_1 + struct_1 + knowschool_1 + stratsbi_1 + belong_1 + endorse_1))
-
-est3_st <- pool(fit3_st)
-summary(est3_st) # no predictors were significantly related with the outcome
-
-pool.r.squared(fit3_st) # 0.12
-```
-
-# Step 5: Run regression on standardized data
-# Step 6: Pool the results to get standardized betas
 # Multiple regression, outcome: self efficacy (parent report) (standardized)
 ```{r}
 # without support
@@ -413,15 +368,3 @@ pool.r.squared(fit6_st) # 0.69
 ```
 
 
-# Step 5: Run regression on standardized data
-# Step 6: Pool the results to get standardized betas
-# Multiple regression, outcome: gen grades (parent report) (standardized)
-```{r}
-# without support
-fit7_st <- with(imputed_data_std, lm(gen_grades ~ parent_eng_comf + youth_age + youth_gender + acadhwi_1 + checkhwi_1 + struct_1 + knowschool_1 + stratsbi_1 + belong_1 + endorse_1))
-
-est7_st <- pool(fit7_st)
-summary(est7_st)
-
-pool.r.squared(fit7_st) # 0.20
-```
