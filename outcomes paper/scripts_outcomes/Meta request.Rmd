@@ -1,0 +1,73 @@
+---
+title: "Meta request"
+author: "Alejandra Garcia Isaza"
+date: "2026-05-08"
+output: html_document
+---
+
+To cite this article: Alejandra Garcia Isaza, Seth J. Schwartz, Elma Lorenzo-Blanco, Jaime
+Fuentes-Balderrama, Doris Luft Baker, John Mark Eddy, Heather H. McClure & Charles R.
+Martinez (03 Jan 2026): Structural and Relational Parental Practices Among Latino Immigrant
+Families: Predicting Youth School Engagement and Parent Self-Efficacy to Navigate the School,
+Journal of Latinos and Education, DOI: 10.1080/15348431.2025.2611381
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(rio)
+library(here)
+library(tidyverse)
+library(haven)
+library(janitor)
+library(knitr)
+library(psych)
+
+theme_set(theme_minimal())
+```
+
+### The dataset ###
+```{r}
+d <- read_sav(here("outcomes paper/data_outcomes", "p_y_w1_for_analysesjan25_2.sav")) # 94 rows
+
+d1 <- d %>%
+  select(all_of(c(
+    "school_id", "family_id", "participant_id", "parent_eng_comf", "youth_age", "youth_gender",
+    "acadhwi_1", "checkhwi_1", "struct_1", "knowschool_1", 
+    "stratsbi_1", "belong_1", "endorse_1", "ptrel_1", "selfeffic_1",
+    "y_sch_eng", "grades"
+  )))
+
+d2 <- d1 %>%
+  mutate(parent_eng_comf = as.numeric(parent_eng_comf),
+         youth_gender = factor(youth_gender),
+         youth_age = as.numeric(youth_age))
+```
+
+### Select and rename requested variables for readability ###
+```{r}
+meta_vars <- d2[, c("selfeffic_1",
+                    "y_sch_eng",
+                    "grades",
+                    "stratsbi_1",
+                    "acadhwi_1",
+                    "checkhwi_1")]
+
+colnames(meta_vars) <- c(
+  "EFFICACY",
+  "ENGAGE",
+  "GRADES",
+  "PROA",
+  "HWI 1",
+  "HWI 2"
+) # following abbreviated name convention in paper Garcia Isaza et al. (2026)
+```
+
+### Pearson correlation matrix ###
+```{r}
+cor(meta_vars, use = "pairwise.complete.obs")
+```
+
+### Sample sizes for each pairwise correlation ###
+```{r}
+corr.test(meta_vars, use = "pairwise")$n
+```

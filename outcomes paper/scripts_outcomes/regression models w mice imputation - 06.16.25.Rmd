@@ -366,5 +366,3 @@ summary(est6_st)
 
 pool.r.squared(fit6_st) # 0.69
 ```
-
-
